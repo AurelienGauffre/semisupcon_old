@@ -1,17 +1,17 @@
 algorithm: fixmatch
 save_dir: ./saved_models/classic_cv
-save_name: exp2 BS=512
+save_name: exp2 BS=256, epochs = 512
 resume: False
 load_path: ./saved_models/classic_cv/fixmatch_cifar10_40_0/latest_model.pth
 overwrite: True
 use_tensorboard: True
 use_wandb: True
-epoch: 1024
+epoch: 512
 num_train_iter: 131072
 num_eval_iter: 5120
 num_log_iter: 256
 num_labels: 40
-batch_size: 512
+batch_size: 256
 eval_batch_size: 256
 hard_label: True
 T: 0.5
