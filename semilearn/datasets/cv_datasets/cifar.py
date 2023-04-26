@@ -109,3 +109,4 @@ def get_cifar(args, alg, name, num_labels, num_classes, data_dir='./data', inclu
     eval_dset = BasicDataset(alg, test_data, test_targets, num_classes, transform_val, False, None, False)
 
     return lb_dset, ulb_dset, eval_dset
+

@@ -58,7 +58,7 @@ class AlgorithmBase:
         self.resume = args.resume
         self.algorithm = args.algorithm
 
-        # commaon utils arguments
+        # common utils arguments
         self.tb_log = tb_log
         self.print_fn = print if logger is None else logger.info
         self.ngpus_per_node = torch.cuda.device_count()
@@ -291,6 +291,7 @@ class AlgorithmBase:
 
         for epoch in range(self.start_epoch, self.epochs):
             self.epoch = epoch
+            print(f"Epoch: {epoch}")
             
             # prevent the training iterations exceed args.num_train_iter
             if self.it >= self.num_train_iter:
