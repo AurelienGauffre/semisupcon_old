@@ -41,9 +41,9 @@ class BasicBlock(nn.Module):
         self.droprate = dropRate
         self.equalInOut = (in_planes == out_planes)
         self.convShortcut = (not self.equalInOut) and nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride,
-                               padding=0, bias=False) or None
+                                                                padding=0, bias=False) or None
         self.activate_before_residual = activate_before_residual
-        
+
     def forward(self, x):
         if not self.equalInOut and self.activate_before_residual == True:
             x = self.relu1(self.bn1(x))
@@ -100,6 +100,12 @@ class WideResNet(nn.Module):
         self.channels = channels[3]
         self.num_features = channels[3]
 
+        self.contrastive_head = self.head = nn.Sequential(
+            nn.Linear(channels[3], channels[3]),
+            nn.ReLU(inplace=True),
+            nn.Linear(channels[3], channels[3])
+        )
+
         # rot_classifier for Remix Match
         # self.is_remix = is_remix
         # if is_remix:
@@ -125,16 +131,16 @@ class WideResNet(nn.Module):
 
         if only_fc:
             return self.classifier(x)
-        
+
         out = self.extract(x)
         out = F.adaptive_avg_pool2d(out, 1)
         out = out.view(-1, self.channels)
 
         if only_feat:
             return out
-        
+
         output = self.classifier(out)
-        result_dict = {'logits':output, 'feat':out}
+        result_dict = {'logits': output, 'feat': out}
         return result_dict
 
     def extract(self, x):
@@ -146,7 +152,9 @@ class WideResNet(nn.Module):
         return out
 
     def group_matcher(self, coarse=False, prefix=''):
-        matcher = dict(stem=r'^{}conv1'.format(prefix), blocks=r'^{}block(\d+)'.format(prefix) if coarse else r'^{}block(\d+)\.layer.(\d+)'.format(prefix))
+        matcher = dict(stem=r'^{}conv1'.format(prefix),
+                       blocks=r'^{}block(\d+)'.format(prefix) if coarse else r'^{}block(\d+)\.layer.(\d+)'.format(
+                           prefix))
         return matcher
 
     def no_weight_decay(self):
