@@ -177,37 +177,35 @@ class SemiSupCon(AlgorithmBase):
                     logits_x_ulb_w, feats_x_ulb_w = outs_x_ulb_w['logits'], outs_x_ulb_w['feat']
             feat_dict = {'x_lb': feats_x_lb, 'x_ulb_w': feats_x_ulb_w, 'x_ulb_s': [feats_x_ulb_s_0, feats_x_ulb_s_1]}
 
-            # supervised loss
-            # sup_loss = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
-            # On change deja la partie supervisée de la loss en mettant du supcon
-            sup_loss = self.supcon_loss(embeddings=feats_x_lb, labels=y_lb)
 
-            # probs_x_ulb_w = torch.softmax(logits_x_ulb_w, dim=-1)
+
+            # Computation of mask/pseudo labels
             probs_x_ulb_w = self.compute_prob(logits_x_ulb_w.detach())
-
-            # if distribution alignment hook is registered, call it
-            # this is implemented for imbalanced algorithm - CReST
-            if self.registered_hook("DistAlignHook"):
-                print("There should be no dist align hook for semisupcon")
-                probs_x_ulb_w = self.call_hook("dist_align", "DistAlignHook", probs_x_ulb=probs_x_ulb_w.detach())
-
-            # compute mask
             mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=probs_x_ulb_w, softmax_x_ulb=False)
-
-            # generate unlabeled targets using pseudo label hook
+            maskbool = mask.bool()
             pseudo_label = self.call_hook("gen_ulb_targets", "PseudoLabelingHook",
                                           logits=probs_x_ulb_w,
                                           use_hard_label=self.use_hard_label,
                                           T=self.T,
                                           softmax=False)
 
-            # unsup_loss = losses.Supcon(pseudo_label, feats_x_ulb_s_0, mask)
             unsup_loss = self.consistency_loss(logits_x_ulb_s_0,
                                                 pseudo_label,
                                                 'ce',
                                                 mask=mask)
+            # supervised loss
+            # sup_loss = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
+            # On change deja la partie supervisée de la loss en mettant du supcon
 
-            total_loss = sup_loss + self.lambda_u * unsup_loss
+            feats_x_all = torch.cat((feats_x_lb, feats_x_ulb_s_0[maskbool], feats_x_ulb_s_1[maskbool]), dim=0)
+            y_all = torch.cat((y_lb, pseudo_label[maskbool],pseudo_label[maskbool]), dim=0)
+
+            sup_loss = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
+            ce_loss_unsup = self.ce_loss(logits_x_ulb_w[maskbool], pseudo_label[maskbool], reduction='mean')
+
+            ssl_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
+
+            total_loss = sup_loss + ce_loss_unsup+  self.lambda_u * ssl_loss
 
         out_dict = self.process_out_dict(loss=total_loss, feat=feat_dict)
         log_dict = self.process_log_dict(sup_loss=sup_loss.item(),
