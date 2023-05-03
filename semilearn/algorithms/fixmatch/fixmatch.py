@@ -92,7 +92,7 @@ class FixMatch(AlgorithmBase):
                                           T=self.T,
                                           softmax=False)
 
-            unsup_loss = self.consi.stency_loss(logits_x_ulb_s,
+            unsup_loss = self.consistency_loss(logits_x_ulb_s,
                                                pseudo_label,
                                                'ce',
                                                mask=mask)
@@ -201,7 +201,11 @@ class SemiSupCon(AlgorithmBase):
                                           T=self.T,
                                           softmax=False)
 
-            unsup_loss = losses.Supcon(pseudo_label, feats_x_ulb_s_0, mask)
+            # unsup_loss = losses.Supcon(pseudo_label, feats_x_ulb_s_0, mask)
+            unsup_loss = self.consistency_loss(logits_x_ulb_s_0,
+                                                pseudo_label,
+                                                'ce',
+                                                mask=mask)
 
             total_loss = sup_loss + self.lambda_u * unsup_loss
 
