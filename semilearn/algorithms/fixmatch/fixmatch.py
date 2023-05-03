@@ -205,7 +205,7 @@ class SemiSupCon(AlgorithmBase):
 
             ssl_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
 
-            total_loss = sup_loss + ce_loss_unsup+  self.lambda_u * ssl_loss
+            total_loss = sup_loss   +  self.lambda_u * ssl_loss
 
         out_dict = self.process_out_dict(loss=total_loss, feat=feat_dict)
         log_dict = self.process_log_dict(sup_loss=sup_loss.item(),
