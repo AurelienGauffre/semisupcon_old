@@ -92,7 +92,7 @@ class FixMatch(AlgorithmBase):
                                           T=self.T,
                                           softmax=False)
 
-            unsup_loss = self.consistency_loss(logits_x_ulb_s,
+            unsup_loss = self.consi.stency_loss(logits_x_ulb_s,
                                                pseudo_label,
                                                'ce',
                                                mask=mask)
