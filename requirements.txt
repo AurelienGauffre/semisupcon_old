@@ -59,3 +59,4 @@ zipp==3.8.0
 pynacl
 wandb
 aim
+pytorch-metric-learning
