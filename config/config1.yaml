@@ -1,6 +1,6 @@
-algorithm: fixmatch
+algorithm: semisupcon
 save_dir: ./saved_models/classic_cv
-save_name: fixmatch without torchnograd on ulb_w
+save_name: semisupcon 1.1
 resume: False
 load_path: ./saved_models/classic_cv/fixmatch_cifar10_40_0/latest_model.pth
 overwrite: True

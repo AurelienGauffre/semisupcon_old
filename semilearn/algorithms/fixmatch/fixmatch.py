@@ -66,10 +66,10 @@ class FixMatch(AlgorithmBase):
                 outs_x_ulb_s = self.model(x_ulb_s)
                 logits_x_ulb_s = outs_x_ulb_s['logits']
                 feats_x_ulb_s = outs_x_ulb_s['feat']
-                #with torch.no_grad():
-                outs_x_ulb_w = self.model(x_ulb_w)
-                logits_x_ulb_w = outs_x_ulb_w['logits']
-                feats_x_ulb_w = outs_x_ulb_w['feat']
+                with torch.no_grad():
+                    outs_x_ulb_w = self.model(x_ulb_w)
+                    logits_x_ulb_w = outs_x_ulb_w['logits']
+                    feats_x_ulb_w = outs_x_ulb_w['feat']
             feat_dict = {'x_lb': feats_x_lb, 'x_ulb_w': feats_x_ulb_w, 'x_ulb_s': feats_x_ulb_s}
 
             sup_loss = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
@@ -142,6 +142,7 @@ class SemiSupCon(AlgorithmBase):
         # fixmatch specified arguments
         self.init(T=args.T, p_cutoff=args.p_cutoff, hard_label=args.hard_label)
         self.supcon_loss = losses.SupConLoss()
+
     def init(self, T, p_cutoff, hard_label=True):
         self.T = T
         self.p_cutoff = p_cutoff
@@ -177,8 +178,6 @@ class SemiSupCon(AlgorithmBase):
                     logits_x_ulb_w, feats_x_ulb_w = outs_x_ulb_w['logits'], outs_x_ulb_w['feat']
             feat_dict = {'x_lb': feats_x_lb, 'x_ulb_w': feats_x_ulb_w, 'x_ulb_s': [feats_x_ulb_s_0, feats_x_ulb_s_1]}
 
-
-
             # Computation of mask/pseudo labels
             probs_x_ulb_w = self.compute_prob(logits_x_ulb_w.detach())
             mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=probs_x_ulb_w, softmax_x_ulb=False)
@@ -189,29 +188,34 @@ class SemiSupCon(AlgorithmBase):
                                           T=self.T,
                                           softmax=False)
 
-            unsup_loss = self.consistency_loss(logits_x_ulb_s_0,
-                                                pseudo_label,
-                                                'ce',
-                                                mask=mask)
-            # supervised loss
-            # sup_loss = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
-            # On change deja la partie supervisée de la loss en mettant du supcon
 
             feats_x_all = torch.cat((feats_x_lb, feats_x_ulb_s_0[maskbool], feats_x_ulb_s_1[maskbool]), dim=0)
-            y_all = torch.cat((y_lb, pseudo_label[maskbool],pseudo_label[maskbool]), dim=0)
+            y_all = torch.cat((y_lb, pseudo_label[maskbool], pseudo_label[maskbool]), dim=0)
 
-            sup_loss = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
-            ce_loss_unsup = self.ce_loss(logits_x_ulb_w[maskbool], pseudo_label[maskbool], reduction='mean')
+            ce_loss_sup = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
+            # ce_loss_unsup = self.ce_loss(logits_x_ulb_w[maskbool], pseudo_label[maskbool], reduction='mean')
+            ce_loss_unsup = self.consistency_loss(logits_x_ulb_s_0,
+                                                  pseudo_label,
+                                                  'ce',
+                                                  mask=mask) + self.consistency_loss(logits_x_ulb_s_1,
+                                                                                     pseudo_label,
+                                                                                     'ce',
+                                                                                     mask=mask)
+            ce_loss = ce_loss_sup + ce_loss_unsup
+            supcon_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
+            # simclr_loss = self.supcon_loss(
+            #     embeddings=torch.cat(feats_x_ulb_s_0[~maskbool], feats_x_ulb_s_1[~maskbool]),
+            #                          labels=torch.arange(sum(~maskbool)).repeat(2))
 
-            ssl_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
+            total_loss = supcon_loss + self.lambda_u * ce_loss
 
-            total_loss = sup_loss   +  self.lambda_u * ssl_loss
-
-        out_dict = self.process_out_dict(loss=total_loss, feat=feat_dict)
-        log_dict = self.process_log_dict(sup_loss=sup_loss.item(),
-                                         unsup_loss=unsup_loss.item(),
-                                         total_loss=total_loss.item(),
-                                         util_ratio=mask.float().mean().item())
+            out_dict = self.process_out_dict(loss=total_loss, feat=feat_dict)
+            log_dict = self.process_log_dict(ce_loss=ce_loss.item(),
+                                             ce_loss_sup=ce_loss_sup.item(),
+                                             ce_loss_unsup=ce_loss_unsup.item(),
+                                             supcon_loss=supcon_loss.item(),
+                                             total_loss=total_loss.item(),
+                                             util_ratio=mask.float().mean().item())
         return out_dict, log_dict
 
     @staticmethod
