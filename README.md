@@ -5,7 +5,11 @@ par un MLP : idée est de mettre moins de pression sur
 - [ ] ajouter le fait qu'on puisse choisir un facteur pour 
 prendre moins en compte la partie non supervisée de la loss supcon
 
+- [ ] question : la partie x_ulb_w est detachée, pour calculer la partie ce_unsuper 
+(qui entraine la projection lineaure), il faudrait en fait attacher le gradient )
+D; ailleur si c'est vriament détahé le fait de rajouter la loss ce_unsupervised ne devrait rien changer
 
+Comment ajouter la tete de projection contrastive de maniere clean ?
 
-I am using supcon loss (supervised contrastive learning) that takes simply two arguments : embeddings (BxD), labels (B). However I am in a semi-supervised setting. I have some embedings feats_x_lb for which I have labels y_lb. But I also have embeddings that come from unsupervised data
-feats_x_ulb, pseudo labels y_pseudo and a binary mask mask which says which unsupervised embedings and pseudo labels I want to add to my loss. How to make a pytorch code to make only one call to supcon loss with all my labels (supervised and unsupervised for which the mask is 1) in an effective manner ?
+- [ ] multi crop ?
+- [ ] cutmix ?

@@ -1,13 +1,13 @@
-algorithm: semisupcon
+algorithm: fixmatch
 save_dir: ./saved_models/classic_cv
-save_name: semisupcon v1.0 without ce_loss_unsup
+save_name: fixmatch without torchnograd on ulb_w
 resume: False
 load_path: ./saved_models/classic_cv/fixmatch_cifar10_40_0/latest_model.pth
 overwrite: True
 use_tensorboard: True
 use_wandb: True
-epoch: 1024
-num_train_iter: 1048576
+epoch: 256
+num_train_iter: 262144
 num_eval_iter: 5120
 num_log_iter: 256
 num_labels: 40
