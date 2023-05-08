@@ -194,13 +194,13 @@ class SemiSupCon(AlgorithmBase):
 
             ce_loss_sup = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
             # ce_loss_unsup = self.ce_loss(logits_x_ulb_w[maskbool], pseudo_label[maskbool], reduction='mean')
-            ce_loss_unsup = self.consistency_loss(logits_x_ulb_s_0,
-                                                  pseudo_label,
-                                                  'ce',
-                                                  mask=mask) + self.consistency_loss(logits_x_ulb_s_1,
-                                                                                     pseudo_label,
-                                                                                     'ce',
-                                                                                     mask=mask)
+            # ce_loss_unsup = self.consistency_loss(logits_x_ulb_s_0,
+            #                                       pseudo_label,
+            #                                       'ce',
+            #                                       mask=mask) + self.consistency_loss(logits_x_ulb_s_1,
+            #                                                                          pseudo_label,
+            #                                                                          'ce',
+            #                                                                          mask=mask)
             #BIG CHANGE : the ce_loss_unsuper is removed
             ce_loss = ce_loss_sup # + ce_loss_unsup
             supcon_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
@@ -213,7 +213,7 @@ class SemiSupCon(AlgorithmBase):
             out_dict = self.process_out_dict(loss=total_loss, feat=feat_dict)
             log_dict = self.process_log_dict(ce_loss=ce_loss.item(),
                                              ce_loss_sup=ce_loss_sup.item(),
-                                             ce_loss_unsup=ce_loss_unsup.item(),
+                                             # ce_loss_unsup=ce_loss_unsup.item(),
                                              supcon_loss=supcon_loss.item(),
                                              total_loss=total_loss.item(),
                                              util_ratio=mask.float().mean().item())
