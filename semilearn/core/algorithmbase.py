@@ -39,7 +39,8 @@ class AlgorithmBase:
         tb_log=None,
         logger=None,
         **kwargs):
-        
+
+
         # common arguments
         self.args = args
         self.num_classes = args.num_classes

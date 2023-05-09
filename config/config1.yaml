@@ -1,6 +1,6 @@
-algorithm: semisupcon
+algorithm: fixmatch
 save_dir: ./saved_models/classic_cv
-save_name: semisupcon 1.1 (WITHOUT TRULY ce_loss_unsup + 256 epochs)
+save_name: fixmatch cifar100-2500 baseline #semisupcon 1.1 (WITHOUT TRULY ce_loss_unsup + 256 epochs)
 resume: False
 load_path: ./saved_models/classic_cv/fixmatch_cifar10_40_0/latest_model.pth
 overwrite: True
@@ -10,7 +10,7 @@ epoch: 256
 num_train_iter: 262144
 num_eval_iter: 5120
 num_log_iter: 256
-num_labels: 40
+num_labels: 2500
 batch_size: 64
 eval_batch_size: 256
 hard_label: True
@@ -30,11 +30,11 @@ amp: False
 clip: 0.0
 use_cat: True
 net: wrn_28_2
-net_from_name: False
+net_from_name: False # If True, net_buidler takes models in torch.vision models.
 data_dir: ./data
-dataset: cifar10
+dataset: cifar100
 train_sampler: RandomSampler
-num_classes: 10
+num_classes: 100
 num_workers: 1
 seed: 0
 world_size: 1

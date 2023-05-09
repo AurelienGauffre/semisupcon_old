@@ -96,11 +96,12 @@ class WideResNet(nn.Module):
         # global average pooling and classifier
         self.bn1 = nn.BatchNorm2d(channels[3], momentum=0.001, eps=0.001)
         self.relu = nn.LeakyReLU(negative_slope=0.1, inplace=False)
-        self.classifier = nn.Linear(channels[3], num_classes)
         self.channels = channels[3]
         self.num_features = channels[3]
 
-        self.contrastive_head = self.head = nn.Sequential(
+        self.classifier = nn.Linear(channels[3], num_classes)  # proba for BCE
+
+        self.contrastive_head = nn.Sequential(  # projection for contrastive loss
             nn.Linear(channels[3], channels[3]),
             nn.ReLU(inplace=True),
             nn.Linear(channels[3], channels[3])
@@ -166,7 +167,7 @@ class WideResNet(nn.Module):
 
 
 def wrn_28_2(pretrained=False, pretrained_path=None, **kwargs):
-    model = WideResNet(first_stride=1, depth=28, widen_factor=2, **kwargs)
+    model = WideResNet(first_stride=1, depth=28, widen_factor=2, ** kwargs)
     if pretrained:
         model = load_checkpoint(model, pretrained_path)
     return model
