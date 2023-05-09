@@ -161,17 +161,17 @@ class SemiSupCon(AlgorithmBase):
         with self.amp_cm():
             if self.use_cat:
                 inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s_0, x_ulb_s_1))
-                outputs = self.model(inputs)
+                outputs = self.model(inputs,contrastive=True)
                 logits, feats = outputs['logits'], outputs['feat']
                 logits_x_lb, feats_x_lb = logits[:num_lb], feats[:num_lb]
                 logits_x_ulb_w, logits_x_ulb_s_0, logits_x_ulb_s_1 = logits[num_lb:].chunk(3)
                 feats_x_ulb_w, feats_x_ulb_s_0, feats_x_ulb_s_1 = feats[num_lb:].chunk(3)
             else:
-                outs_x_lb = self.model(x_lb)
+                outs_x_lb = self.model(x_lb,contrastive=True)
                 logits_x_lb, feats_x_lb = outs_x_lb['logits'], outs_x_lb['feat']
-                outs_x_ulb_s_0 = self.model(x_ulb_s_0)
+                outs_x_ulb_s_0 = self.model(x_ulb_s_0,contrastive=True)
                 logits_x_ulb_s_0, feats_x_ulb_s_0 = outs_x_ulb_s_0['logits'], outs_x_ulb_s_0['feat']
-                outs_x_ulb_s_1 = self.model(x_ulb_s_1)
+                outs_x_ulb_s_1 = self.model(x_ulb_s_1,contrastive=True)
                 logits_x_ulb_s_1, feats_x_ulb_s_1 = outs_x_ulb_s_1['logits'], outs_x_ulb_s_1['feat']
 
                 with torch.no_grad():
