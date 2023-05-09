@@ -122,12 +122,14 @@ class WideResNet(nn.Module):
                 nn.init.xavier_normal_(m.weight.data)
                 m.bias.data.zero_()
 
-    def forward(self, x, only_fc=False, only_feat=False,contrastive=False, **kwargs):
+    def forward(self, x, only_fc=False, only_feat=False, contrastive=False, **kwargs):
         """
         Args:
             x: input tensor, depends on only_fc and only_feat flag
             only_fc: only use classifier, input should be features before classifier
             only_feat: only return pooled features
+            contrastive: bool parameter, if True, return both logits and projected features
+                (instead of features)
         """
 
         if only_fc:
@@ -149,7 +151,6 @@ class WideResNet(nn.Module):
             feat = self.contrastive_head(feat)
             result_dict = {'logits': output, 'feat': feat}
             return result_dict
-
 
     def extract(self, x):
         out = self.conv1(x)
@@ -174,7 +175,7 @@ class WideResNet(nn.Module):
 
 
 def wrn_28_2(pretrained=False, pretrained_path=None, **kwargs):
-    model = WideResNet(first_stride=1, depth=28, widen_factor=2, ** kwargs)
+    model = WideResNet(first_stride=1, depth=28, widen_factor=2, **kwargs)
     if pretrained:
         model = load_checkpoint(model, pretrained_path)
     return model

@@ -195,15 +195,15 @@ class SemiSupCon(AlgorithmBase):
 
             ce_loss_sup = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
             # ce_loss_unsup = self.ce_loss(logits_x_ulb_w[maskbool], pseudo_label[maskbool], reduction='mean')
-            # ce_loss_unsup = self.consistency_loss(logits_x_ulb_s_0,
-            #                                       pseudo_label,
-            #                                       'ce',
-            #                                       mask=mask) + self.consistency_loss(logits_x_ulb_s_1,
-            #                                                                          pseudo_label,
-            #                                                                          'ce',
-            #                                                                          mask=mask)
+            ce_loss_unsup = self.consistency_loss(logits_x_ulb_s_0,
+                                                  pseudo_label,
+                                                  'ce',
+                                                  mask=mask) + self.consistency_loss(logits_x_ulb_s_1,
+                                                                                     pseudo_label,
+                                                                                     'ce',
+                                                                                     mask=mask)
             #BIG CHANGE : the ce_loss_unsuper is removed
-            ce_loss = ce_loss_sup # + ce_loss_unsup
+            ce_loss = ce_loss_sup + ce_loss_unsup
             supcon_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
             # simclr_loss = self.supcon_loss(
             #     embeddings=torch.cat(feats_x_ulb_s_0[~maskbool], feats_x_ulb_s_1[~maskbool]),
