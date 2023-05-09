@@ -122,7 +122,7 @@ class WideResNet(nn.Module):
                 nn.init.xavier_normal_(m.weight.data)
                 m.bias.data.zero_()
 
-    def forward(self, x, only_fc=False, only_feat=False, **kwargs):
+    def forward(self, x, only_fc=False, only_feat=False,contrastive=False, **kwargs):
         """
         Args:
             x: input tensor, depends on only_fc and only_feat flag
@@ -135,14 +135,21 @@ class WideResNet(nn.Module):
 
         out = self.extract(x)
         out = F.adaptive_avg_pool2d(out, 1)
-        out = out.view(-1, self.channels)
+        feat = out.view(-1, self.channels)
 
         if only_feat:
-            return out
+            return feat
 
-        output = self.classifier(out)
-        result_dict = {'logits': output, 'feat': out}
-        return result_dict
+        if not contrastive:
+            output = self.classifier(feat)
+            result_dict = {'logits': output, 'feat': feat}
+            return result_dict
+        else:
+            output = self.classifier(feat)
+            feat = self.contrastive_head(feat)
+            result_dict = {'logits': output, 'feat': feat}
+            return result_dict
+
 
     def extract(self, x):
         out = self.conv1(x)
