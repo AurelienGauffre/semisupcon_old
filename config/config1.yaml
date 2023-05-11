@@ -1,6 +1,6 @@
 algorithm: semisupcon
 save_dir: ./saved_models/classic_cv
-save_name: semisupcon 1.2 (with projhead) cifar100-2500  (WITH ce_loss_unsup)
+save_name: semisupcon 1.2 with simclr loss
 resume: False
 load_path: ./saved_models/classic_cv/fixmatch_cifar10_40_0/latest_model.pth
 overwrite: True
