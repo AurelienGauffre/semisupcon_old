@@ -206,7 +206,7 @@ class SemiSupCon(AlgorithmBase):
             ce_loss = ce_loss_sup + ce_loss_unsup
             supcon_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
             simclr_loss = self.supcon_loss(
-                embeddings=torch.cat(feats_x_ulb_s_0[~maskbool], feats_x_ulb_s_1[~maskbool]),
+                embeddings=torch.cat((feats_x_ulb_s_0[~maskbool], feats_x_ulb_s_1[~maskbool])),
                                      labels=torch.arange(sum(~maskbool)).repeat(2))
 
             total_loss = supcon_loss + self.lambda_u * ce_loss + simclr_loss
