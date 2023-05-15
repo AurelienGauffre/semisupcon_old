@@ -9,7 +9,7 @@ prendre moins en compte la partie non supervisée de la loss supcon
 (qui entraine la projection lineaure), il faudrait en fait attacher le gradient )
 D; ailleur si c'est vriament détahé le fait de rajouter la loss ce_unsupervised ne devrait rien changer
 
-Comment ajouter la tete de projection contrastive de maniere clean ?
+- [ ] adaptation a flexmatch ?
 
 - [ ] multi crop ?
 - [ ] cutmix ?
