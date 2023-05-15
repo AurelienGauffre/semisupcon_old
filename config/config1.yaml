@@ -1,6 +1,6 @@
-algorithm: fixmatch
+algorithm: semisupcon
 save_dir: ./saved_models/classic_cv
-save_name: fixmtach wrn_28_8 (without simclr)
+save_name: semisupcon 1.2 wrn_28_8 (without simclr)
 resume: False
 load_path: ./saved_models/classic_cv/fixmatch_cifar10_40_0/latest_model.pth
 overwrite: True
