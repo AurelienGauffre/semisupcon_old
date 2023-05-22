@@ -7,7 +7,7 @@ resume_only_weight: True # When resuming a model, only take the weight for finet
 load_path: ./saved_models/classic_cv/fixmatch_cifar10_40_0/latest_model.pth
 overwrite: True
 use_tensorboard: True
-use_wandb: False
+use_wandb: True
 epoch: 256
 num_train_iter: 262144
 num_eval_iter: 5120
