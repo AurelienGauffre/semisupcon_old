@@ -189,27 +189,35 @@ class SemiSupCon(AlgorithmBase):
                                           T=self.T,
                                           softmax=False)
 
-
             feats_x_all = torch.cat((feats_x_lb, feats_x_ulb_s_0[maskbool], feats_x_ulb_s_1[maskbool]), dim=0)
             y_all = torch.cat((y_lb, pseudo_label[maskbool], pseudo_label[maskbool]), dim=0)
+            if self.args.loss == "only_unsup":
+                simclr_loss = self.supcon_loss(
+                    embeddings=torch.cat((feats_x_ulb_s_0[~maskbool], feats_x_ulb_s_1[~maskbool])),
+                                         labels=torch.arange(sum(~maskbool)).repeat(2))
+                total_loss = simclr_loss
+                ce_loss_sup = torch.zeros(1)
+                ce_loss_unsup = torch.zeros(1)
+                ce_loss = ce_loss_sup + ce_loss_unsup
+                supcon_loss = torch.zeros(1)
+            elif self.args.loss == "all":
+                ce_loss_sup = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
+                # ce_loss_unsup = self.ce_loss(logits_x_ulb_w[maskbool], pseudo_label[maskbool], reduction='mean')
+                ce_loss_unsup = self.consistency_loss(logits_x_ulb_s_0,
+                                                      pseudo_label,
+                                                      'ce',
+                                                      mask=mask) + self.consistency_loss(logits_x_ulb_s_1,
+                                                                                         pseudo_label,
+                                                                                         'ce',
+                                                                                         mask=mask)
+                #BIG CHANGE : the ce_loss_unsuper is removed
+                ce_loss = ce_loss_sup + ce_loss_unsup
+                supcon_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
+                simclr_loss = self.supcon_loss(
+                    embeddings=torch.cat((feats_x_ulb_s_0[~maskbool], feats_x_ulb_s_1[~maskbool])),
+                                         labels=torch.arange(sum(~maskbool)).repeat(2))
 
-            ce_loss_sup = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
-            # ce_loss_unsup = self.ce_loss(logits_x_ulb_w[maskbool], pseudo_label[maskbool], reduction='mean')
-            ce_loss_unsup = self.consistency_loss(logits_x_ulb_s_0,
-                                                  pseudo_label,
-                                                  'ce',
-                                                  mask=mask) + self.consistency_loss(logits_x_ulb_s_1,
-                                                                                     pseudo_label,
-                                                                                     'ce',
-                                                                                     mask=mask)
-            #BIG CHANGE : the ce_loss_unsuper is removed
-            ce_loss = ce_loss_sup + ce_loss_unsup
-            supcon_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
-            # simclr_loss = self.supcon_loss(
-            #     embeddings=torch.cat((feats_x_ulb_s_0[~maskbool], feats_x_ulb_s_1[~maskbool])),
-            #                          labels=torch.arange(sum(~maskbool)).repeat(2))
-
-            total_loss = supcon_loss + self.lambda_u * ce_loss #+ simclr_loss
+                total_loss = supcon_loss + self.lambda_u * ce_loss + simclr_loss
 
             out_dict = self.process_out_dict(loss=total_loss, feat=feat_dict)
             log_dict = self.process_log_dict(ce_loss=ce_loss.item(),
