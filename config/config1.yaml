@@ -1,10 +1,10 @@
 algorithm: semisupcon
 loss: only_unsup # all
 save_dir: ./saved_models/pretrained
-save_name: pretrainedSimCLRcifar100wrn_28_2_epochs256 #(without simclr)
-resume: False
+save_name: semisupcon(pretrained) #(without simclr)
+resume: True
 resume_only_weight: True # When resuming a model, only take the weight for finetuning (make epochs,scheduler, optimizer start from scratch)
-load_path: ./saved_models/classic_cv/fixmatch_cifar10_40_0/latest_model.pth
+load_path: ./pretrained/pretrainedSimCLRcifar100wrn_28_2_epochs256/epoch124.pth
 overwrite: True
 use_tensorboard: True
 use_wandb: True

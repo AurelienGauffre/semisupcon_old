@@ -213,11 +213,11 @@ class SemiSupCon(AlgorithmBase):
                 #BIG CHANGE : the ce_loss_unsuper is removed
                 ce_loss = ce_loss_sup + ce_loss_unsup
                 supcon_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
-                simclr_loss = self.supcon_loss(
-                    embeddings=torch.cat((feats_x_ulb_s_0[~maskbool], feats_x_ulb_s_1[~maskbool])),
-                                         labels=torch.arange(sum(~maskbool)).repeat(2))
+                # simclr_loss = self.supcon_loss(
+                #     embeddings=torch.cat((feats_x_ulb_s_0[~maskbool], feats_x_ulb_s_1[~maskbool])),
+                #                          labels=torch.arange(sum(~maskbool)).repeat(2))
 
-                total_loss = supcon_loss + self.lambda_u * ce_loss + simclr_loss
+                total_loss = supcon_loss + self.lambda_u * ce_loss #+ simclr_loss
 
             out_dict = self.process_out_dict(loss=total_loss, feat=feat_dict)
             log_dict = self.process_log_dict(ce_loss=ce_loss.item(),
