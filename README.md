@@ -1,6 +1,7 @@
 To do/test :
 - [ ] Pseudo-Labels Accuracy display (as in simmatch)
-- [ ] Use pretrained weight for wideresnet ?
+- [x] Use pretrained weight for wideresnet (
+- [ ] checks that these pretrained works are loaded correctly : why the loss is not continous after loader
 - [ ] ajouter le fait qu'on puisse choisir un facteur pour 
 prendre moins en compte la partie non supervisée de la loss supcon
 - Loss supcon unifiée

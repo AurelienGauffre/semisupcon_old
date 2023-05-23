@@ -271,7 +271,7 @@ def main_worker(gpu, ngpus_per_node, args):
             logger.info("Fail to resume load path {}".format(args.load_path))    
             args.resume = False
     else:
-        logger.info("Resume load path {} does not exist".format(args.load_path))
+        logger.info("#### Resume load path {} does not exist ####".format(args.load_path))
 
     if hasattr(model, 'warmup'):
         logger.info(("Warmup stage"))

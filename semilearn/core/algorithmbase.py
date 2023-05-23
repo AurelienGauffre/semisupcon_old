@@ -421,7 +421,7 @@ class AlgorithmBase:
             self.optimizer.load_state_dict(checkpoint['optimizer'])
             if self.scheduler is not None and 'scheduler' in checkpoint:
                 self.scheduler.load_state_dict(checkpoint['scheduler'])
-        self.print_fn('Model loaded')
+        self.print_fn('########### Model loaded #############')
         return checkpoint
 
     def check_prefix_state_dict(self, state_dict):
