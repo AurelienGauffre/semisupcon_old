@@ -1,13 +1,14 @@
 algorithm: fixmatch
 loss: all # all
-save_dir: ./saved_models/semisupcon
-save_name: fixmatch (pretrained:simclr124epochs) # semisupcon1.2 (withoutsimclr) (pretrained:simclr124epochs) #(without simclr)
+save_dir: ./saved_models/classic_cv
+save_name: fixmatch (pretrained:simclr256epochs) # semisupcon1.2 (withoutsimclr) (pretrained:simclr124epochs) #(without simclr)
 resume: True
 resume_only_weight: True # When resuming a model, only take the weight for finetuning (make epochs,scheduler, optimizer start from scratch)
-load_path: ./saved_models/pretrained/pretrainedSimCLRcifar100wrn_28_2_epochs256/epoch124.pth
+load_path: ./saved_models/pretrained/pretrainedSimCLRcifar100wrn_28_2_epochs256/latest_model.pth
 overwrite: True
 use_tensorboard: True
 use_wandb: True
+wandb_project: cifar100wrn_28_2
 epoch: 256
 num_train_iter: 262144
 num_eval_iter: 5120
