@@ -1,7 +1,7 @@
-algorithm: semisupcon
+algorithm: fixmatch
 loss: all # all
 save_dir: ./saved_models/classic_cv
-save_name: semisupcon 1.2 (without simclr) # (with 0.5*Simclr) # (0.5*Simclr) # semisupcon1.2 (withoutsimclr) (pretrained:simclr124epochs) #(without simclr)
+save_name: fixmtach baseline #semisupcon 1.2 (without simclr) # (with 0.5*Simclr) # (0.5*Simclr) # semisupcon1.2 (withoutsimclr) (pretrained:simclr124epochs) #(without simclr)
 resume: False
 resume_only_weight: True # When resuming a model, only take the weight for finetuning (make epochs,scheduler, optimizer start from scratch)
 load_path: ./saved_models/pretrained/pretrainedSimCLRcifar100wrn_28_2_epochs256/latest_model.pth
