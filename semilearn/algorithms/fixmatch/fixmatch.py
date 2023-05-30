@@ -47,7 +47,7 @@ class FixMatch(AlgorithmBase):
         self.register_hook(FixedThresholdingHook(), "MaskingHook")
         super().set_hooks()
 
-    def train_step(self, x_lb, y_lb, x_ulb_w, x_ulb_s):
+    def train_step(self, x_lb, y_lb, x_ulb_w, x_ulb_s, y_ulb):
         num_lb = y_lb.shape[0]
 
         # inference and calculate sup/unsup losses
@@ -84,7 +84,7 @@ class FixMatch(AlgorithmBase):
 
             # compute mask
             mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=probs_x_ulb_w, softmax_x_ulb=False)
-
+            mask_sum = mask.bool().sum()
             # generate unlabeled targets using pseudo label hook
             pseudo_label = self.call_hook("gen_ulb_targets", "PseudoLabelingHook",
                                           logits=probs_x_ulb_w,
@@ -103,7 +103,11 @@ class FixMatch(AlgorithmBase):
         log_dict = self.process_log_dict(sup_loss=sup_loss.item(),
                                          unsup_loss=unsup_loss.item(),
                                          total_loss=total_loss.item(),
-                                         util_ratio=mask.float().mean().item())
+                                         util_ratio=mask.float().mean().item(),
+                                         pseudolabel_accuracy=((torch.argmax(logits_x_ulb_w,
+                                                                             dim=1) == y_ulb).float() * mask).sum() / mask_sum.item() if mask_sum > 0 else 0
+                                         # else float('nan')
+                                         )
         return out_dict, log_dict
 
     @staticmethod
@@ -227,9 +231,11 @@ class SemiSupCon(AlgorithmBase):
                                              supcon_loss=supcon_loss.item(),
                                              total_loss=total_loss.item(),
                                              util_ratio=mask.float().mean().item(),
-                                             pseudolabel_accuracy = ((torch.argmax(logits_x_ulb_w, dim=1) == y_ulb).float() * mask).sum() / mask_sum.item() if mask_sum > 0 else 0 #else float('nan')
+                                             pseudolabel_accuracy=((torch.argmax(logits_x_ulb_w,
+                                                                                 dim=1) == y_ulb).float() * mask).sum() / mask_sum.item() if mask_sum > 0 else 0
+                                             # else float('nan')
 
-            )
+                                             )
             # pseulabel_accuracy=)
 
             return out_dict, log_dict
