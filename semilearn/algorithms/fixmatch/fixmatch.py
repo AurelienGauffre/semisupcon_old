@@ -154,24 +154,24 @@ class SemiSupCon(AlgorithmBase):
         self.register_hook(FixedThresholdingHook(), "MaskingHook")
         super().set_hooks()
 
-    def train_step(self, x_lb, y_lb, x_ulb_w, x_ulb_s_0, x_ulb_s_1):
+    def train_step(self, x_lb, y_lb, x_ulb_w, x_ulb_s_0, x_ulb_s_1, y_ulb):
         num_lb = y_lb.shape[0]
 
         # inference and calculate sup/unsup losses
         with self.amp_cm():
             if self.use_cat:
                 inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s_0, x_ulb_s_1))
-                outputs = self.model(inputs,contrastive=True)
+                outputs = self.model(inputs, contrastive=True)
                 logits, feats = outputs['logits'], outputs['feat']
                 logits_x_lb, feats_x_lb = logits[:num_lb], feats[:num_lb]
                 logits_x_ulb_w, logits_x_ulb_s_0, logits_x_ulb_s_1 = logits[num_lb:].chunk(3)
                 feats_x_ulb_w, feats_x_ulb_s_0, feats_x_ulb_s_1 = feats[num_lb:].chunk(3)
             else:
-                outs_x_lb = self.model(x_lb,contrastive=True)
+                outs_x_lb = self.model(x_lb, contrastive=True)
                 logits_x_lb, feats_x_lb = outs_x_lb['logits'], outs_x_lb['feat']
-                outs_x_ulb_s_0 = self.model(x_ulb_s_0,contrastive=True)
+                outs_x_ulb_s_0 = self.model(x_ulb_s_0, contrastive=True)
                 logits_x_ulb_s_0, feats_x_ulb_s_0 = outs_x_ulb_s_0['logits'], outs_x_ulb_s_0['feat']
-                outs_x_ulb_s_1 = self.model(x_ulb_s_1,contrastive=True)
+                outs_x_ulb_s_1 = self.model(x_ulb_s_1, contrastive=True)
                 logits_x_ulb_s_1, feats_x_ulb_s_1 = outs_x_ulb_s_1['logits'], outs_x_ulb_s_1['feat']
 
                 with torch.no_grad():
@@ -183,6 +183,7 @@ class SemiSupCon(AlgorithmBase):
             probs_x_ulb_w = self.compute_prob(logits_x_ulb_w.detach())
             mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=probs_x_ulb_w, softmax_x_ulb=False)
             maskbool = mask.bool()
+            mask_sum = maskbool.sum()
             pseudo_label = self.call_hook("gen_ulb_targets", "PseudoLabelingHook",
                                           logits=probs_x_ulb_w,
                                           use_hard_label=self.use_hard_label,
@@ -194,7 +195,7 @@ class SemiSupCon(AlgorithmBase):
             if self.args.loss == "only_unsup":
                 simclr_loss = self.supcon_loss(
                     embeddings=torch.cat((feats_x_ulb_s_0[~maskbool], feats_x_ulb_s_1[~maskbool])),
-                                         labels=torch.arange(sum(~maskbool)).repeat(2))
+                    labels=torch.arange(sum(~maskbool)).repeat(2))
                 total_loss = simclr_loss
                 ce_loss_sup = torch.zeros(1)
                 ce_loss_unsup = torch.zeros(1)
@@ -210,14 +211,14 @@ class SemiSupCon(AlgorithmBase):
                                                                                          pseudo_label,
                                                                                          'ce',
                                                                                          mask=mask)
-                #BIG CHANGE : the ce_loss_unsuper is removed
+                # BIG CHANGE : the ce_loss_unsuper is removed
                 ce_loss = ce_loss_sup + ce_loss_unsup
                 supcon_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
                 # simclr_loss = self.supcon_loss(
                 #     embeddings=torch.cat((feats_x_ulb_s_0[~maskbool], feats_x_ulb_s_1[~maskbool])),
                 #                          labels=torch.arange(sum(~maskbool)).repeat(2))
 
-                total_loss = supcon_loss + self.lambda_u * ce_loss #+ 0.5*simclr_loss
+                total_loss = supcon_loss + self.lambda_u * ce_loss  # + 0.5*simclr_loss
 
             out_dict = self.process_out_dict(loss=total_loss, feat=feat_dict)
             log_dict = self.process_log_dict(ce_loss=ce_loss.item(),
@@ -226,13 +227,17 @@ class SemiSupCon(AlgorithmBase):
                                              supcon_loss=supcon_loss.item(),
                                              total_loss=total_loss.item(),
                                              util_ratio=mask.float().mean().item(),
-                                             pseulabel_accuracy=)
-        return out_dict, log_dict
+                                             pseudolabel_accuracy = ((torch.argmax(logits_x_ulb_w, dim=1) == y_ulb).float() * mask).sum() / mask_sum.item() if mask_sum > 0 else 0 #else float('nan')
 
-    @staticmethod
-    def get_argument():
-        return [
-            SSL_Argument('--hard_label', str2bool, True),
-            SSL_Argument('--T', float, 0.5),
-            SSL_Argument('--p_cutoff', float, 0.95),
-        ]
+            )
+            # pseulabel_accuracy=)
+
+            return out_dict, log_dict
+
+        @staticmethod
+        def get_argument():
+            return [
+                SSL_Argument('--hard_label', str2bool, True),
+                SSL_Argument('--T', float, 0.5),
+                SSL_Argument('--p_cutoff', float, 0.95),
+            ]

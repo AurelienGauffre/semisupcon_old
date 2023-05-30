@@ -15,12 +15,14 @@ class WANDBHook(Hook):
         super().__init__()
         self.log_key_list = ['train/sup_loss', 'train/unsup_loss', 'train/total_loss', 'train/util_ratio', 
                              'train/run_time', 'train/prefetch_time', 'lr',
-                             'eval/top-1-acc', 'eval/precision', 'eval/recall', 'eval/F1']
+                             'eval/top-1-acc', 'eval/precision', 'eval/recall', 'eval/F1',
+                             'train/pseudolabel_accuracy'
+                             ]
 
     def before_run(self, algorithm):
         # job_id = '_'.join(algorithm.args.save_name.split('_')[:-1])
         name = algorithm.save_name
-        project = algorithm.save_dir.split('/')[-1]
+        project = algorithm.args.wandb_project #algorithm.save_dir.split('/')[-1]
 
         # tags
         benchmark = f'benchmark: {project}'

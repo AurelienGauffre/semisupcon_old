@@ -227,6 +227,9 @@ class AlgorithmBase:
         process batch data, send data to cuda
         NOTE **kwargs should have the same arguments to train_step function as keys to work properly
         """
+
+        # il suffit de modifier la training step dans fixmatch et dans le dataloader pour que ça marche automatiquement
+        # grace a la fonction signature
         if input_args is None:
             input_args = signature(self.train_step).parameters
             input_args = list(input_args.keys())
