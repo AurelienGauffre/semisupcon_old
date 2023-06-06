@@ -52,9 +52,12 @@ class WANDBHook(Hook):
     def after_train_step(self, algorithm):
         if self.every_n_iters(algorithm, algorithm.num_log_iter):
             log_dict = {}
+            # for key, item in algorithm.log_dict.items():
+            #     if key in self.log_key_list:
+            #         log_dict[key] = item
             for key, item in algorithm.log_dict.items():
-                if key in self.log_key_list:
-                    log_dict[key] = item
+               #J'enleve la condition de logging d'appartenance a log_key_list ci dessus
+               log_dict[key] = item
             self.run.log(log_dict, step=algorithm.it)
     
         if self.every_n_iters(algorithm, algorithm.num_eval_iter):
