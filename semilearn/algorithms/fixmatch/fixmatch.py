@@ -229,9 +229,9 @@ class SemiSupCon(AlgorithmBase):
 
                 total_loss = supcon_loss + self.lambda_u * ce_loss  # + 0.5*simclr_loss
 
-            elif self.args.loss == "ponderate":
+            elif self.args.loss == "ponderate_ce_loss_unsup":
+                fraction = torch.mean(mask)
                 ce_loss_sup = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
-                # ce_loss_unsup = self.ce_loss(logits_x_ulb_w[maskbool], pseudo_label[maskbool], reduction='mean')
                 ce_loss_unsup = self.consistency_loss(logits_x_ulb_s_0,
                                                       pseudo_label,
                                                       'ce',
@@ -239,18 +239,63 @@ class SemiSupCon(AlgorithmBase):
                                                                                          pseudo_label,
                                                                                          'ce',
                                                                                          mask=mask)
-                # BIG CHANGE : the ce_loss_unsuper is removed
+
+                ce_loss = ce_loss_sup + ce_loss_unsup * fraction
+                supcon_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
+                total_loss = supcon_loss + self.lambda_u * ce_loss  # + 0.5*simclr_loss
+
+            elif self.args.loss == "ponderate_simclr_loss_light":
+                fraction_pseudo_labeled = torch.mean(mask)
+                ce_loss_sup = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
+                ce_loss_unsup = self.consistency_loss(logits_x_ulb_s_0,
+                                                      pseudo_label,
+                                                      'ce',
+                                                      mask=mask) + self.consistency_loss(logits_x_ulb_s_1,
+                                                                                         pseudo_label,
+                                                                                         'ce',
+                                                                                         mask=mask)
+
                 ce_loss = ce_loss_sup + ce_loss_unsup
                 supcon_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
-                # simclr_loss_light = self.supcon_loss(
-                #     embeddings=torch.cat((feats_x_ulb_s_0[~maskbool], feats_x_ulb_s_1[~maskbool])),
-                #                          labels=torch.arange(sum(~maskbool)).repeat(2))
+                simclr_loss_light = self.supcon_loss(
+                        embeddings=torch.cat((feats_x_ulb_s_0[~maskbool], feats_x_ulb_s_1[~maskbool])),
+                                             labels=torch.arange(sum(~maskbool)).repeat(2)) * (1-fraction_pseudo_labeled)
+                total_loss = supcon_loss + self.lambda_u * ce_loss  + simclr_loss_light
+            elif self.args.loss == "ponderate_simclr_loss_heavy":
+                fraction_pseudo_labeled = torch.mean(mask)
+                ce_loss_sup = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
+                ce_loss_unsup = self.consistency_loss(logits_x_ulb_s_0,
+                                                      pseudo_label,
+                                                      'ce',
+                                                      mask=mask) + self.consistency_loss(logits_x_ulb_s_1,
+                                                                                         pseudo_label,
+                                                                                         'ce',
+                                                                                         mask=mask)
 
-                # simclr_loss_heavy = self.supcon_loss(
-                #     embeddings=torch.cat((feats_x_ulb_s_0[~maskbool], feats_x_ulb_s_1[~maskbool])),
-                #                          labels=torch.arange(sum(~maskbool)).repeat(2))
+                ce_loss = ce_loss_sup + ce_loss_unsup
+                supcon_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
+                simclr_loss_light = self.supcon_loss(
+                        embeddings=torch.cat((feats_x_ulb_s_0, feats_x_ulb_s_1)),
+                                             labels=torch.arange(len(mask)).repeat(2)) * (1-fraction_pseudo_labeled)
+                total_loss = supcon_loss + self.lambda_u * ce_loss  + simclr_loss_light
 
-                total_loss = supcon_loss + self.lambda_u * ce_loss  # + 0.5*simclr_loss
+            elif self.args.loss == "simclr_loss_heavy":
+                fraction_pseudo_labeled = torch.mean(mask)
+                ce_loss_sup = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
+                ce_loss_unsup = self.consistency_loss(logits_x_ulb_s_0,
+                                                      pseudo_label,
+                                                      'ce',
+                                                      mask=mask) + self.consistency_loss(logits_x_ulb_s_1,
+                                                                                         pseudo_label,
+                                                                                         'ce',
+                                                                                         mask=mask)
+
+                ce_loss = ce_loss_sup + ce_loss_unsup
+                supcon_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
+                simclr_loss_light = self.supcon_loss(
+                        embeddings=torch.cat((feats_x_ulb_s_0, feats_x_ulb_s_1)),
+                                             labels=torch.arange(len(mask)).repeat(2))
+                total_loss = supcon_loss + self.lambda_u * ce_loss  + simclr_loss_light
 
             out_dict = self.process_out_dict(loss=total_loss, feat=feat_dict)
             log_dict = self.process_log_dict(ce_loss=ce_loss.item(),
