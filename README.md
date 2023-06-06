@@ -1,5 +1,5 @@
 To do/test :
-- [ ] Pseudo-Labels Accuracy display (as in simmatch)
+- [x] Pseudo-Labels Accuracy display (as in simmatch)
 - [x] Use pretrained weight for wideresnet (
 - [ ] checks that these pretrained works are loaded correctly : why the loss is not continous after loader
 - [ ] ajouter le fait qu'on puisse choisir un facteur pour 
