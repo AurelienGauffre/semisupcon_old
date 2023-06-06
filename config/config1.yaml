@@ -1,5 +1,5 @@
 algorithm: semisupcon
-loss: ponderate_simclr_loss_light # all #only_unsup (for pretraining, and resume = True)
+loss: ponderate_simclr_loss_heavy # all #only_unsup (for pretraining, and resume = True)
 save_dir: ./saved_models/classic_cv
 save_name: semisupcon1.2 (ponderate_simclr_loss_light) #(pretrained:simclr124epochs) #semisupcon 1.2 (without simclr) # (with 0.5*Simclr) # (0.5*Simclr) # semisupcon1.2 (withoutsimclr) (pretrained:simclr124epochs) #(without simclr)
 resume: False
