@@ -206,7 +206,7 @@ class SemiSupCon(AlgorithmBase):
                 ce_loss_unsup = torch.zeros(1)
                 ce_loss = ce_loss_sup + ce_loss_unsup
                 supcon_loss = torch.zeros(1)
-            elif self.args.loss == "all":
+            elif self.args.loss == "all_withoutsimclr":
                 ce_loss_sup = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
                 # ce_loss_unsup = self.ce_loss(logits_x_ulb_w[maskbool], pseudo_label[maskbool], reduction='mean')
                 ce_loss_unsup = self.consistency_loss(logits_x_ulb_s_0,
@@ -291,6 +291,26 @@ class SemiSupCon(AlgorithmBase):
                                                                                          mask=mask)
 
                 ce_loss = ce_loss_sup + ce_loss_unsup
+                contrastive = ce_loss + simclir * probs_x_ulb_w /
+                supcon_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
+                simclr_loss_light = self.supcon_loss(
+                        embeddings=torch.cat((feats_x_ulb_s_0, feats_x_ulb_s_1)),
+                                             labels=torch.arange(len(mask)).repeat(2))
+                total_loss = supcon_loss + self.lambda_u * ce_loss  + simclr_loss_light
+
+            elif self.args.loss == "knn":
+                fraction_pseudo_labeled = torch.mean(mask)
+                ce_loss_sup = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
+                ce_loss_unsup = self.consistency_loss(logits_x_ulb_s_0,
+                                                      pseudo_label,
+                                                      'ce',
+                                                      mask=mask) + self.consistency_loss(logits_x_ulb_s_1,
+                                                                                         pseudo_label,
+                                                                                         'ce',
+                                                                                         mask=mask)
+
+                ce_loss = ce_loss_sup + ce_loss_unsup
+                contrastive = ce_loss + simclir * probs_x_ulb_w /
                 supcon_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
                 simclr_loss_light = self.supcon_loss(
                         embeddings=torch.cat((feats_x_ulb_s_0, feats_x_ulb_s_1)),
