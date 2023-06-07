@@ -107,7 +107,7 @@ class BasicDataset(Dataset):
                     return {'idx_ulb': idx, 'x_ulb_w': img_w, 'x_ulb_s_0': self.strong_transform(img),
                             'x_ulb_s_1': self.strong_transform(img)}
                 ####### AJOUT DE y_ulb a en default et a semisupcon
-                elif self.alg == 'semisupcon':
+                elif self.alg == 'semisupcon' or self.alg == 'semisupconknn':
                     return {'idx_ulb': idx, 'x_ulb_w': img_w, 'x_ulb_s_0': self.strong_transform(img),
                             'x_ulb_s_1': self.strong_transform(img),'y_ulb': target}
                 else:
