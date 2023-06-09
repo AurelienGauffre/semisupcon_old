@@ -3,6 +3,7 @@ To do/test :
 - [x] Use pretrained weight for wideresnet (
 - [ ] checks that these pretrained works are loaded correctly : why the loss is not continous after loader
 - [ ] ajouter le fait qu'on puisse choisir un facteur pour 
+- [ ] pourquoi une plus grande BS overfit plus ? Faire un truc pour la bBS
 prendre moins en compte la partie non supervisée de la loss supcon
 - Loss supcon unifiée
 - Pour la CE pseudolabel, rajouter un deuxime threshold plus haut ! Et regarder le % de pseudo labelisé

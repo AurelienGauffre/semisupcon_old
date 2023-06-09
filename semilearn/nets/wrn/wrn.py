@@ -122,7 +122,7 @@ class WideResNet(nn.Module):
                 nn.init.xavier_normal_(m.weight.data)
                 m.bias.data.zero_()
 
-    def forward(self, x, only_fc=False, only_feat=False, contrastive=False, **kwargs):
+    def forward(self, x, only_fc=False, only_feat=False, contrastive=False, detach_logits=False, **kwargs):
         """
         Args:
             x: input tensor, depends on only_fc and only_feat flag
