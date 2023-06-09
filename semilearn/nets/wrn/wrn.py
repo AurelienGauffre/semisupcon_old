@@ -143,13 +143,13 @@ class WideResNet(nn.Module):
             return feat
 
         if not contrastive:
-            output = self.classifier(feat)
-            result_dict = {'logits': output, 'feat': feat}
+            logits = self.classifier(feat)
+            result_dict = {'logits': logits, 'feat': feat}
             return result_dict
         else:
-            output = self.classifier(feat)
+            logits = self.classifier(feat)
             feat = self.contrastive_head(feat)
-            result_dict = {'logits': output, 'feat': feat}
+            result_dict = {'logits': logits, 'feat': feat}
             return result_dict
 
     def extract(self, x):
