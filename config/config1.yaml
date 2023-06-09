@@ -13,7 +13,7 @@ epoch: 256
 num_train_iter: 262144
 num_eval_iter: 5120
 num_log_iter: 256
-num_labels: 2500 # 100 2500
+num_labels: 2500 # 100 2500f
 batch_size: 64 # TODO
 eval_batch_size: 256
 hard_label: True
