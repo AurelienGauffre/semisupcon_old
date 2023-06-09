@@ -256,6 +256,7 @@ class SemiSupCon(AlgorithmBase):
 
                 # BIG CHANGE : the ce_loss_unsuper is removed
                 ce_loss = ce_loss_sup
+                ce_loss_unsup = torch.tensor(float('nan'))
                 supcon_loss = self.supcon_loss(embeddings=feats_x_all, labels=y_all)
                 # simclr_loss_light = self.supcon_loss(
                 #     embeddings=torch.cat((feats_x_ulb_s_0[~maskbool], feats_x_ulb_s_1[~maskbool])),
