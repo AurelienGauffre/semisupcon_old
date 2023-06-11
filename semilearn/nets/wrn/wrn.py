@@ -122,7 +122,7 @@ class WideResNet(nn.Module):
                 nn.init.xavier_normal_(m.weight.data)
                 m.bias.data.zero_()
 
-    def forward(self, x, only_fc=False, only_feat=False, contrastive=False, detach_logits=False, **kwargs):
+    def forward(self, x, only_fc=False, only_feat=False, contrastive=False,detach_ce=False, **kwargs):
         """
         Args:
             x: input tensor, depends on only_fc and only_feat flag
@@ -142,14 +142,17 @@ class WideResNet(nn.Module):
         if only_feat:
             return feat
 
-        if not contrastive:
+        if not contrastive: #comme fait originalement
             logits = self.classifier(feat)
             result_dict = {'logits': logits, 'feat': feat}
             return result_dict
-        else:
-            logits = self.classifier(feat)
-            feat = self.contrastive_head(feat)
-            result_dict = {'logits': logits, 'feat': feat}
+        else:  # puisque qu'on a besoin de .detach dans le training, on retourne que les features et les logits/contrastive proj sont obtenus dans la training step
+
+            contrastive = self.contrastive_head(feat)
+
+            logits = self.classifier(feat) if not detach_ce else self.classifier(feat.detach())
+
+            result_dict = {'logits': logits, 'contrastive_feats': contrastive}
             return result_dict
 
     def extract(self, x):
