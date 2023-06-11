@@ -196,7 +196,7 @@ class SemiSupCon(AlgorithmBase):
                 contrastive_x_ulb_s_1 = self.model.module.contrastive_head(feats_x_ulb_s_1)
 
             else:
-                outs_x_lb = self.model(x_lb, contrastive=True,detach_ce=False)
+                outs_x_lb = self.model(x_lb, contrastive=True,detach_ce=True)
                 logits_x_lb, contrastive_x_lb = outs_x_lb['logits'], outs_x_lb['contrastive_feats']
                 outs_x_ulb_s_0 = self.model(x_ulb_s_0, contrastive=True,detach_ce=True)
                 logits_x_ulb_s_0, contrastive_x_ulb_s_0 = outs_x_ulb_s_0['logits'], outs_x_ulb_s_0['contrastive_feats']
