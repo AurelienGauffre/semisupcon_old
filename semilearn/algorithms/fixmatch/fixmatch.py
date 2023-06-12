@@ -172,11 +172,12 @@ class SemiSupCon(AlgorithmBase):
                 contrastive_x_ulb_w, contrastive_x_ulb_s_0, contrastive_x_ulb_s_1 = feats[num_lb:].chunk(3)
 
             else:
-                outs_x_lb = self.model(x_lb, contrastive=True,detach_ce=True)
+                DETACH = False
+                outs_x_lb = self.model(x_lb, contrastive=True,detach_ce=DETACH)
                 logits_x_lb, contrastive_x_lb = outs_x_lb['logits'], outs_x_lb['contrastive_feats']
-                outs_x_ulb_s_0 = self.model(x_ulb_s_0, contrastive=True,detach_ce=True)
+                outs_x_ulb_s_0 = self.model(x_ulb_s_0, contrastive=True,detach_ce=DETACH)
                 logits_x_ulb_s_0, contrastive_x_ulb_s_0 = outs_x_ulb_s_0['logits'], outs_x_ulb_s_0['contrastive_feats']
-                outs_x_ulb_s_1 = self.model(x_ulb_s_1, contrastive=True,detach_ce=True)
+                outs_x_ulb_s_1 = self.model(x_ulb_s_1, contrastive=True,detach_ce=DETACH)
                 logits_x_ulb_s_1, contrastive_x_ulb_s_1 = outs_x_ulb_s_1['logits'], outs_x_ulb_s_1['contrastive_feats']
 
                 with torch.no_grad():
