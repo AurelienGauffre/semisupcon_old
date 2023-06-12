@@ -166,10 +166,10 @@ class SemiSupCon(AlgorithmBase):
             if self.use_cat: # does not support detach of CE
                 inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s_0, x_ulb_s_1))
                 outputs = self.model(inputs, contrastive=True)
-                logits, feats = outputs['logits'], outputs['feat']
-                logits_x_lb, feats_x_lb = logits[:num_lb], feats[:num_lb]
+                logits, contrastive_x = outputs['logits'], outputs['contrastive_feats']
+                logits_x_lb, contrastive_x_lb = logits[:num_lb], contrastive_x[:num_lb]
                 logits_x_ulb_w, logits_x_ulb_s_0, logits_x_ulb_s_1 = logits[num_lb:].chunk(3)
-                contrastive_x_ulb_w, contrastive_x_ulb_s_0, contrastive_x_ulb_s_1 = feats[num_lb:].chunk(3)
+                contrastive_x_ulb_w, contrastive_x_ulb_s_0, contrastive_x_ulb_s_1 = contrastive_x[num_lb:].chunk(3)
 
             else:
                 DETACH = False
