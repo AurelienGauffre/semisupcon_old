@@ -194,7 +194,7 @@ class AlgorithmBase:
         initialize model
         """
         model = self.net_builder(num_classes=self.num_classes, pretrained=self.args.use_pretrain,
-                                 pretrained_path=self.args.pretrain_path)
+                                 pretrained_path=self.args.pretrain_path,args=self.args)
         return model
 
     def set_ema_model(self):

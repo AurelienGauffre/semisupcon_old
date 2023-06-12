@@ -122,7 +122,7 @@ class WideResNet(nn.Module):
                 nn.init.xavier_normal_(m.weight.data)
                 m.bias.data.zero_()
 
-    def forward(self, x, only_fc=False, only_feat=False, contrastive=False,detach_ce=False, **kwargs):
+    def forward(self, x, only_fc=False, only_feat=False, contrastive=False, detach_ce=False, **kwargs):
         """
         Args:
             x: input tensor, depends on only_fc and only_feat flag
@@ -142,7 +142,7 @@ class WideResNet(nn.Module):
         if only_feat:
             return feat
 
-        if not contrastive: #comme fait originalement
+        if not contrastive:  # comme fait originalement
             logits = self.classifier(feat)
             result_dict = {'logits': logits, 'feat': feat}
             return result_dict
@@ -176,14 +176,16 @@ class WideResNet(nn.Module):
                 nwd.append(n)
         return nwd
 
-def wrn_28_2(pretrained=False, pretrained_path=None, **kwargs):
-    model = WideResNet(first_stride=1, depth=28, widen_factor=2, **kwargs)
+
+def wrn_28_2(pretrained=False, pretrained_path=None, droprate=0.0, **kwargs):
+    model = WideResNet(first_stride=1, depth=28, widen_factor=2, droprate=droprate, **kwargs)
     if pretrained:
         model = load_checkpoint(model, pretrained_path)
     return model
 
-def wrn_28_8(pretrained=False, pretrained_path=None, **kwargs):
-    model = WideResNet(first_stride=1, depth=28, widen_factor=8, **kwargs)
+
+def wrn_28_8(pretrained=False, pretrained_path=None, droprate=0.0, **kwargs):
+    model = WideResNet(first_stride=1, depth=28, widen_factor=8, droprate=droprate, **kwargs)
     if pretrained:
         model = load_checkpoint(model, pretrained_path)
     return model

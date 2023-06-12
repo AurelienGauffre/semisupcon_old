@@ -163,37 +163,13 @@ class SemiSupCon(AlgorithmBase):
 
         # inference and calculate sup/unsup losses
         with self.amp_cm():
-            if self.use_cat:
-                # inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s_0, x_ulb_s_1))
-                # outputs = self.model(inputs, contrastive=True)
-                # logits, feats = outputs['logits'], outputs['feat']
-                # logits_x_lb, feats_x_lb = logits[:num_lb], feats[:num_lb]
-                # logits_x_ulb_w, logits_x_ulb_s_0, logits_x_ulb_s_1 = logits[num_lb:].chunk(3)
-                # feats_x_ulb_w, feats_x_ulb_s_0, feats_x_ulb_s_1 = feats[num_lb:].chunk(3)
-
+            if self.use_cat: # does not support detach of CE
                 inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s_0, x_ulb_s_1))
                 outputs = self.model(inputs, contrastive=True)
-                feats = outputs['feat']
-                feats_x_ulb_w, feats_x_ulb_s_0, feats_x_ulb_s_1 = feats[num_lb:].chunk(3)
-                feats_x_lb = feats[:num_lb]
-
-                contrastive_x_lb = outputs['contrastive_feats'][:num_lb]
-                contrastive_x_ulb_w, contrastive_x_ulb_s_0, contrastive_x_ulb_s_1 = outputs['contrastive_feats'][num_lb:].chunk(3)
-
-
-                logits_x_lb = self.model.module.classifier(feats_x_lb)
-                logits_x_ulb_w = self.model.module.classifier(feats_x_ulb_w)
-                if self.args.detach_ce_unlabeled:
-                    logits_x_ulb_s_0 = self.model.module.classifier(feats_x_ulb_s_0.detach())
-                    logits_x_ulb_s_1 = self.model.module.moduleclassifier(feats_x_ulb_s_1.detach())
-                else:
-                    logits_x_ulb_s_0 = self.model.module.classifier(feats_x_ulb_s_0)
-                    logits_x_ulb_s_1 = self.model.module.classifier(feats_x_ulb_s_1)
-
-                contrastive_x_lb = self.model.module.contrastive_head(feats_x_lb)
-                #contrastive_x_ulb_w = self.model.contrastive_head(feats_x_ulb_w) weak augmentation does not need contrastive loss
-                contrastive_x_ulb_s_0 = self.model.module.contrastive_head(feats_x_ulb_s_0)
-                contrastive_x_ulb_s_1 = self.model.module.contrastive_head(feats_x_ulb_s_1)
+                logits, feats = outputs['logits'], outputs['feat']
+                logits_x_lb, feats_x_lb = logits[:num_lb], feats[:num_lb]
+                logits_x_ulb_w, logits_x_ulb_s_0, logits_x_ulb_s_1 = logits[num_lb:].chunk(3)
+                contrastive_x_ulb_w, contrastive_x_ulb_s_0, contrastive_x_ulb_s_1 = feats[num_lb:].chunk(3)
 
             else:
                 outs_x_lb = self.model(x_lb, contrastive=True,detach_ce=True)
