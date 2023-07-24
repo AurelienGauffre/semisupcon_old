@@ -13,4 +13,4 @@ prendre moins en compte la partie non supervisée de la loss supcon
 D; ailleur si c'est vriament détahé le fait de rajouter la loss ce_unsupervised ne devrait rien changer
 - [ ] adaptation a flexmatch ?
 - [ ] multi crop ?
-- [ ] cutmix ?
+- [ ] cutmix ??
