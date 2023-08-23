@@ -445,7 +445,7 @@ class SemiSupConProto(AlgorithmBase):
 
                 total_loss = supcon_loss
 
-            elif self.args.loss == "supcon+simclr":
+            elif self.args.loss == "supcon_simclr":
 
                 supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
                 simclr = self.supcon_loss(
