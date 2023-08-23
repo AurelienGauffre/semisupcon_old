@@ -427,6 +427,8 @@ class SemiSupConProto(AlgorithmBase):
 
 
             similarity_to_proto = contrastive_x_ulb_w @ proto_proj.t() # (N, K) = (N, D) @ (D, K) equivalent des softmax
+            print(f"similarity to proto first line : {similarity_to_proto[0,:]} and first label {y_ulb[0]}")
+
             pseudo_label = torch.argmax(similarity_to_proto, dim=1)
             maskbool = torch.max(similarity_to_proto,dim=1)[0] > self.p_cutoff
             mask_sum = maskbool.sum() # number of samples with high confidence

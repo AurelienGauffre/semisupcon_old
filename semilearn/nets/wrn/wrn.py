@@ -219,6 +219,7 @@ class WideResNetProto(nn.Module):
         else:
             self.prototypes = nn.Parameter(
                 torch.randn(num_classes, channels[3]))  # self.channels corresponds to the dim_in for WideResNet
+
         ########
 
         # rot_classifier for Remix Match
