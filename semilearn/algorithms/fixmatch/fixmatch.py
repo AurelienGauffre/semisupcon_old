@@ -172,7 +172,7 @@ class SemiSupCon(AlgorithmBase):
                 contrastive_x_ulb_w, contrastive_x_ulb_s_0, contrastive_x_ulb_s_1 = contrastive_x[num_lb:].chunk(3)
 
             else:
-                DETACH = False
+                DETACH = True
                 outs_x_lb = self.model(x_lb, contrastive=True,detach_ce=DETACH)
                 logits_x_lb, contrastive_x_lb = outs_x_lb['logits'], outs_x_lb['contrastive_feats']
                 outs_x_ulb_s_0 = self.model(x_ulb_s_0, contrastive=True,detach_ce=DETACH)
@@ -365,3 +365,100 @@ class SemiSupCon(AlgorithmBase):
 
             return out_dict, log_dict
 
+
+
+@ALGORITHMS.register('semisupconproto')
+class SemiSupConProto(AlgorithmBase):
+    """
+
+
+        Args:
+            - args (`argparse`):
+                algorithm arguments
+            - net_builder (`callable`):
+                network loading function
+            - tb_log (`TBLog`):
+                tensorboard logger
+            - logger (`logging.Logger`):
+                logger to use
+            - T (`float`):
+                Temperature for pseudo-label sharpening
+            - p_cutoff(`float`):
+                Confidence threshold for generating pseudo-labels
+            - hard_label (`bool`, *optional*, default to `False`):
+                If True, targets have [Batch size] shape with int values. If False, the target is vector
+    """
+
+    def __init__(self, args, net_builder, tb_log=None, logger=None):
+        super().__init__(args, net_builder, tb_log, logger)
+        # fixmatch specified arguments
+
+        self.init(T=args.T, p_cutoff=args.p_cutoff, hard_label=args.hard_label)
+        self.supcon_loss = losses.SupConLoss()
+
+    def init(self, T, p_cutoff, hard_label=True):
+        self.T = T
+        self.p_cutoff = p_cutoff
+        self.use_hard_label = hard_label
+
+    def set_hooks(self):
+        self.register_hook(PseudoLabelingHook(), "PseudoLabelingHook")
+        self.register_hook(FixedThresholdingHook(), "MaskingHook")
+        super().set_hooks()
+
+    def train_step(self, x_lb, y_lb, x_ulb_w, x_ulb_s_0, x_ulb_s_1, y_ulb):
+        num_lb = y_lb.shape[0]
+
+        # inference and calculate sup/unsup losses
+        with self.amp_cm():
+            if self.use_cat: # does not support detach of CE
+                inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s_0, x_ulb_s_1))
+                outputs = self.model(inputs, contrastive=True)
+                contrastive_x = outputs['contrastive_feats']
+                contrastive_x_lb = contrastive_x[:num_lb]
+                contrastive_x_ulb_w, contrastive_x_ulb_s_0, contrastive_x_ulb_s_1 = contrastive_x[num_lb:].chunk(3)
+                proto_proj = outputs['proto_proj']
+            else:
+               raise ValueError("SemiSupConProto does not support non-cat mode currently")
+
+
+            feat_dict = {'x_lb': contrastive_x_lb, 'x_ulb_w': contrastive_x_ulb_w, 'x_ulb_s': [contrastive_x_ulb_s_0, contrastive_x_ulb_s_1]}
+
+
+
+            similarity_to_proto = contrastive_x_ulb_w @ proto_proj.t() # (N, K) = (N, D) @ (D, K) equivalent des softmax
+            pseudo_label = torch.argmax(similarity_to_proto, dim=1)
+            maskbool = torch.max(similarity_to_proto,dim=1) > self.p_cutoff
+            mask_sum = maskbool.sum() # number of samples with high confidence
+
+
+            contrastive_x_all = torch.cat((contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool],proto_proj), dim=0)
+            y_all = torch.cat((y_lb, pseudo_label[maskbool], pseudo_label[maskbool],torch.arange(100).cuda()), dim=0) #TODO Ne pas hardcoder le nombre de classes
+
+            if self.args.loss == "full_supcon":
+                contrastive_x_all = torch.cat((contrastive_x_all,contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool]), dim=0)
+                y_all = torch.cat((y_all, (torch.arange(sum(~maskbool)).cuda()+1000).repeat(2)), dim=0) #TODO Ne pas hardcoder le nombre de classes
+
+                supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
+
+                total_loss = supcon_loss
+
+            elif self.args.loss == "supcon+simclr":
+
+                supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
+                simclr = self.supcon_loss(
+                        embeddings=torch.cat((contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool])),
+                                             labels=torch.arange(sum(~maskbool)).repeat(2))
+                total_loss = supcon_loss + simclr
+
+            else:
+                raise ValueError("Unknown loss type")
+
+
+            out_dict = self.process_out_dict(loss=total_loss, feat=feat_dict)
+            log_dict = self.process_log_dict(supcon_loss=supcon_loss.item(),
+                                             total_loss=total_loss.item(),
+                                             util_ratio=maskbool.float().mean().item(),
+                                             pseudolabel_accuracy=((pseudo_label == y_ulb).float() * maskbool.float()).sum() / mask_sum.item() if mask_sum > 0 else 0)
+
+            return out_dict, log_dict

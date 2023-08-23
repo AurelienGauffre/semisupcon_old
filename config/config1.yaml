@@ -1,21 +1,21 @@
-algorithm: fixmatch
+algorithm: semisupconproto
 loss: all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
-use_cat: False # if false allows to detach
+use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
 save_name: Fixmatch cat = False #cat=True + droprate .5 #semisupcon1.2 (all_withoutsimclr_withoutunsupce) #(pretrained:simclr124epochs) #semisupcon 1.2 (without simclr) # (with 0.5*Simclr) # (0.5*Simclr) # semisupcon1.2 (withoutsimclr) (pretrained:simclr124epochs) #(without simclr)
 resume: False
-droprate: 0.5
+droprate: 0
 resume_only_weight: True # When resuming a model, only take the weight for finetuning (make epochs,scheduler, optimizer start from scratch)
 load_path: ./saved_models/pretrained/pretrainedSimCLRcifar100wrn_28_2_epochs256/epoch124.pth #latest_model.pth epoch124
 overwrite: True
 use_tensorboard: True
 use_wandb: True
 wandb_project: semisupcon_cifar100wrn_28_2
-epoch: 256
-num_train_iter: 262144
+epoch: 256 #1024
+num_train_iter: 262144 # 1048576
 num_eval_iter: 5120
 num_log_iter: 256
-num_labels: 2500 # 100 2500f
+num_labels: 2500 # 100 2500cifar100
 batch_size: 64 # TODO
 eval_batch_size: 256
 hard_label: True
@@ -33,8 +33,8 @@ weight_decay: 0.0005
 layer_decay: 1.0
 amp: False
 clip: 0.0
-net: wrn_28_2
-net_from_name: False # If True, net_buidler takes models in torch.vision models.
+net: wrn_28_2_proto
+net_from_name: False # If True, net_builder takes models in torch.vision models (False de base)
 data_dir: ./data
 dataset: cifar100
 train_sampler: RandomSampler

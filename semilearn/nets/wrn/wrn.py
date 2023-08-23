@@ -76,6 +76,7 @@ class NetworkBlock(nn.Module):
 class WideResNet(nn.Module):
     def __init__(self, first_stride, num_classes, depth=28, widen_factor=2, drop_rate=0.0, **kwargs):
         super(WideResNet, self).__init__()
+        self.num_classes = num_classes
         channels = [16, 16 * widen_factor, 32 * widen_factor, 64 * widen_factor]
         assert ((depth - 4) % 6 == 0)
         n = (depth - 4) / 6
@@ -134,11 +135,9 @@ class WideResNet(nn.Module):
 
         if only_fc:
             return self.classifier(x)
-
         out = self.extract(x)
         out = F.adaptive_avg_pool2d(out, 1)
         feat = out.view(-1, self.channels)
-
         if only_feat:
             return feat
 
@@ -147,13 +146,116 @@ class WideResNet(nn.Module):
             result_dict = {'logits': logits, 'feat': feat}
             return result_dict
         else:  # puisque qu'on a besoin de .detach dans le training, on retourne que les features et les logits/contrastive proj sont obtenus dans la training step
-
-            contrastive = self.contrastive_head(feat)
-
             logits = self.classifier(feat) if not detach_ce else self.classifier(feat.detach())
+            contrastive = self.contrastive_head(feat)
 
             result_dict = {'logits': logits, 'contrastive_feats': contrastive}
             return result_dict
+
+    def extract(self, x):
+        out = self.conv1(x)
+        out = self.block1(out)
+        out = self.block2(out)
+        out = self.block3(out)
+        out = self.relu(self.bn1(out))
+        return out
+
+    def group_matcher(self, coarse=False, prefix=''):
+        matcher = dict(stem=r'^{}conv1'.format(prefix),
+                       blocks=r'^{}block(\d+)'.format(prefix) if coarse else r'^{}block(\d+)\.layer.(\d+)'.format(
+                           prefix))
+        return matcher
+
+    def no_weight_decay(self):
+        nwd = []
+        for n, _ in self.named_parameters():
+            if 'bn' in n or 'bias' in n:
+                nwd.append(n)
+        return nwd
+
+
+class WideResNetProto(nn.Module):
+    def __init__(self, first_stride, num_classes, depth=28, widen_factor=2, drop_rate=0.0,
+                 proto_after_head=True, ** kwargs):
+        super(WideResNetProto, self).__init__()
+        ######## Prototypes part
+        self.proto_after_head = proto_after_head
+        # Ici la dimension avant et apres la tete de projection est la même donc pas trop d'importance pour l'init
+        if self.proto_after_head:
+            self.prototypes = nn.Parameter(torch.randn(num_classes, self.channels))
+        else:
+            self.prototypes = nn.Parameter(
+                torch.randn(num_classes, self.channels))  # self.channels corresponds to the dim_in for WideResNet
+        ########
+        self.num_classes = num_classes
+        channels = [16, 16 * widen_factor, 32 * widen_factor, 64 * widen_factor]
+        assert ((depth - 4) % 6 == 0)
+        n = (depth - 4) / 6
+        block = BasicBlock
+        # 1st conv before any network block
+        self.conv1 = nn.Conv2d(3, channels[0], kernel_size=3, stride=1,
+                               padding=1, bias=True)
+        # 1st block
+        self.block1 = NetworkBlock(
+            n, channels[0], channels[1], block, first_stride, drop_rate, activate_before_residual=True)
+        # 2nd block
+        self.block2 = NetworkBlock(
+            n, channels[1], channels[2], block, 2, drop_rate)
+        # 3rd block
+        self.block3 = NetworkBlock(
+            n, channels[2], channels[3], block, 2, drop_rate)
+
+        # global average pooling and classifier
+        self.bn1 = nn.BatchNorm2d(channels[3], momentum=0.001, eps=0.001)
+        self.relu = nn.LeakyReLU(negative_slope=0.1, inplace=False)
+        self.channels = channels[3]
+        self.num_features = channels[3]
+
+        # No classifier whem using prototypes
+        # self.classifier = nn.Linear(channels[3], num_classes)  # proba for BCE
+
+        self.contrastive_head = nn.Sequential(  # projection for contrastive loss
+            nn.Linear(channels[3], channels[3]),
+            nn.ReLU(inplace=True),
+            nn.Linear(channels[3], channels[3])
+        )
+
+        # rot_classifier for Remix Match
+        # self.is_remix = is_remix
+        # if is_remix:
+        #     self.rot_classifier = nn.Linear(self.channels, 4)
+
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='leaky_relu')
+            elif isinstance(m, nn.BatchNorm2d):
+                m.weight.data.fill_(1)
+                m.bias.data.zero_()
+            elif isinstance(m, nn.Linear):
+                nn.init.xavier_normal_(m.weight.data)
+                m.bias.data.zero_()
+
+    def forward(self, x, **kwargs):
+        """
+        Args:
+            x: input tensor, depends on only_fc and only_feat flag
+            only_fc: only use classifier, input should be features before classifier
+            only_feat: only return pooled features
+            contrastive: bool parameter, if True, return both logits and projected features
+                (instead of features)
+        """
+
+        out = self.extract(x)
+        out = F.adaptive_avg_pool2d(out, 1)
+        feat = out.view(-1, self.channels)
+        contrastive_feats = self.contrastive_head(feat)
+        if self.proto_after_head:
+            proto_proj = F.normalize(self.prototypes, dim=1)
+        else:
+            proto_proj = F.normalize(self.head(self.prototypes), dim=1)
+
+        result_dict = {'contrastive_feats': contrastive_feats, "proto_proj": proto_proj}
+        return result_dict
 
     def extract(self, x):
         out = self.conv1(x)
@@ -186,6 +288,20 @@ def wrn_28_2(pretrained=False, pretrained_path=None, droprate=0.0, **kwargs):
 
 def wrn_28_8(pretrained=False, pretrained_path=None, droprate=0.0, **kwargs):
     model = WideResNet(first_stride=1, depth=28, widen_factor=8, droprate=droprate, **kwargs)
+    if pretrained:
+        model = load_checkpoint(model, pretrained_path)
+    return model
+
+
+def wrn_28_2_proto(pretrained=False, pretrained_path=None, droprate=0.0, **kwargs):
+    model = WideResNetProto(first_stride=1, depth=28, widen_factor=2, droprate=droprate, **kwargs)
+    if pretrained:
+        model = load_checkpoint(model, pretrained_path)
+    return model
+
+
+def wrn_28_8_proto(pretrained=False, pretrained_path=None, droprate=0.0, **kwargs):
+    model = WideResNetProto(first_stride=1, depth=28, widen_factor=2, droprate=droprate, **kwargs)
     if pretrained:
         model = load_checkpoint(model, pretrained_path)
     return model
