@@ -178,15 +178,7 @@ class WideResNetProto(nn.Module):
     def __init__(self, first_stride, num_classes, depth=28, widen_factor=2, drop_rate=0.0,
                  proto_after_head=True, ** kwargs):
         super(WideResNetProto, self).__init__()
-        ######## Prototypes part
-        self.proto_after_head = proto_after_head
-        # Ici la dimension avant et apres la tete de projection est la même donc pas trop d'importance pour l'init
-        if self.proto_after_head:
-            self.prototypes = nn.Parameter(torch.randn(num_classes, self.channels))
-        else:
-            self.prototypes = nn.Parameter(
-                torch.randn(num_classes, self.channels))  # self.channels corresponds to the dim_in for WideResNet
-        ########
+
         self.num_classes = num_classes
         channels = [16, 16 * widen_factor, 32 * widen_factor, 64 * widen_factor]
         assert ((depth - 4) % 6 == 0)
@@ -219,6 +211,15 @@ class WideResNetProto(nn.Module):
             nn.ReLU(inplace=True),
             nn.Linear(channels[3], channels[3])
         )
+        ######## Prototypes part
+        self.proto_after_head = proto_after_head
+        # Ici la dimension avant et apres la tete de projection est la même donc pas trop d'importance pour l'init
+        if self.proto_after_head:
+            self.prototypes = nn.Parameter(torch.randn(num_classes, channels[3]))
+        else:
+            self.prototypes = nn.Parameter(
+                torch.randn(num_classes, channels[3]))  # self.channels corresponds to the dim_in for WideResNet
+        ########
 
         # rot_classifier for Remix Match
         # self.is_remix = is_remix
