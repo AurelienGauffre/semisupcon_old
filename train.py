@@ -17,7 +17,8 @@ import torch.multiprocessing as mp
 
 from semilearn.algorithms import get_algorithm, name2alg
 from semilearn.imb_algorithms import get_imb_algorithm, name2imbalg
-from semilearn.core.utils import get_net_builder, get_logger, get_port, send_model_cuda, count_parameters, over_write_args_from_file, TBLog
+from semilearn.core.utils import get_net_builder, get_logger, get_port, send_model_cuda, count_parameters, \
+    over_write_args_from_file, TBLog
 
 
 def get_config():
@@ -65,7 +66,8 @@ def get_config():
     parser.add_argument('--lr', type=float, default=3e-2)
     parser.add_argument('--momentum', type=float, default=0.9)
     parser.add_argument('--weight_decay', type=float, default=5e-4)
-    parser.add_argument('--layer_decay', type=float, default=1.0, help='layer-wise learning rate decay, default to 1.0 which means no layer decay')
+    parser.add_argument('--layer_decay', type=float, default=1.0,
+                        help='layer-wise learning rate decay, default to 1.0 which means no layer decay')
 
     '''
     Backbone Net Configurations
@@ -77,7 +79,7 @@ def get_config():
 
     '''
     Algorithms Configurations
-    '''  
+    '''
 
     ## core algorithm setting
     parser.add_argument('-alg', '--algorithm', type=str, default='fixmatch', help='ssl algorithm')
@@ -98,12 +100,14 @@ def get_config():
     parser.add_argument('-nc', '--num_classes', type=int, default=10)
     parser.add_argument('--train_sampler', type=str, default='RandomSampler')
     parser.add_argument('--num_workers', type=int, default=1)
-    parser.add_argument('--include_lb_to_ulb', type=str2bool, default='True', help='flag of including labeled data into unlabeled data, default to True')
+    parser.add_argument('--include_lb_to_ulb', type=str2bool, default='True',
+                        help='flag of including labeled data into unlabeled data, default to True')
 
     ## imbalanced setting arguments
     parser.add_argument('--lb_imb_ratio', type=int, default=1, help="imbalance ratio of labeled data, default to 1")
     parser.add_argument('--ulb_imb_ratio', type=int, default=1, help="imbalance ratio of unlabeled data, default to 1")
-    parser.add_argument('--ulb_num_labels', type=int, default=None, help="number of labels for unlabeled data, used for determining the maximum number of labels in imbalanced setting")
+    parser.add_argument('--ulb_num_labels', type=int, default=None,
+                        help="number of labels for unlabeled data, used for determining the maximum number of labels in imbalanced setting")
 
     ## cv dataset arguments
     parser.add_argument('--img_size', type=int, default=32)
@@ -158,7 +162,6 @@ def get_config():
     return args
 
 
-
 def main(args):
     '''
     For (Distributed)DataParallelism,
@@ -168,13 +171,11 @@ def main(args):
     assert args.num_train_iter % args.epoch == 0, \
         f"# total training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"
 
-
-
-    if args.algorithm in ['fixmatch','flexmatch']:
+    if args.algorithm in ['fixmatch', 'flexmatch']:
         loss_print = ''
-    elif args.algorithm in ["semisupcon","semisupconproto"]:
+    elif args.algorithm in ["semisupcon", "semisupconproto"]:
         loss_print = f'_{args.loss}_tau={args.p_cutoff}'
-    args.save_name =   args.save_name+ f'{args.algorithm}{loss_print}_bs{args.batch_size}_lr{args.lr}'
+    args.save_name = str(args.save_name) + f'{args.algorithm}{loss_print}_bs{args.batch_size}_lr{args.lr}'
 
     save_path = os.path.join(args.save_dir, args.save_name)
     if os.path.exists(save_path) and args.overwrite and args.resume == False:
@@ -195,7 +196,7 @@ def main(args):
                       'which can slow down your training considerably! '
                       'You may see unexpected behavior when restarting '
                       'from checkpoints.')
-    
+
     if args.gpu == 'None':
         args.gpu = None
     if args.gpu is not None:
@@ -276,7 +277,7 @@ def main_worker(gpu, ngpus_per_node, args):
         try:
             model.load_model(args.load_path)
         except:
-            logger.info("Fail to resume load path {}".format(args.load_path))    
+            logger.info("Fail to resume load path {}".format(args.load_path))
             args.resume = False
     else:
         logger.info("#### Resume load path {} does not exist ####".format(args.load_path))
