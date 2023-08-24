@@ -175,7 +175,7 @@ def main(args):
         loss_print = ''
     elif args.algorithm in ["semisupcon", "semisupconproto"]:
         loss_print = f'_{args.loss}_tau={args.p_cutoff}'
-    args.save_name = str(args.save_name) + f'{args.algorithm}{loss_print}_bs{args.batch_size}_lr{args.lr}'
+    args.save_name = str(args.save_name if args.save_name is not None else "") + f'{args.algorithm}{loss_print}_bs{args.batch_size}_lr{args.lr}'
 
     save_path = os.path.join(args.save_dir, args.save_name)
     if os.path.exists(save_path) and args.overwrite and args.resume == False:
