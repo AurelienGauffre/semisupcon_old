@@ -168,6 +168,14 @@ def main(args):
     assert args.num_train_iter % args.epoch == 0, \
         f"# total training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"
 
+
+
+    if args.algorithm in ['fixmatch','flexmatch']:
+        args.loss = ''
+    elif args.algorithm in ["semisupcon","semisupconproto"]:
+        args.loss = f'_{args.loss}_tau={args.p_cutoff}'
+    args.save_name =   f'{args.algorithm}{args.loss}_bs{args.batch_size}_{args.lr}'
+
     save_path = os.path.join(args.save_dir, args.save_name)
     if os.path.exists(save_path) and args.overwrite and args.resume == False:
         import shutil
