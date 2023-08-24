@@ -40,13 +40,19 @@ class WANDBHook(Hook):
         save_dir = os.path.join(algorithm.args.save_dir, 'wandb', algorithm.args.save_name)
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
+        if 'WANDB_MODE' in os.environ:
+            wandb_mode = os.environ['WANDB_MODE']
+        
+        else :
+            wandb_mode = "online"
 
         self.run = wandb.init(name=name, 
                               tags=tags, 
                               config=algorithm.args.__dict__, 
                               project=project, 
                               resume=resume,
-                              dir=save_dir)
+                              dir=save_dir,
+                              mode=wandb_mode) #PERSO Added support for offline mode
 
 
     def after_train_step(self, algorithm):
