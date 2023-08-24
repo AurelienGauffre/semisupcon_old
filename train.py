@@ -171,10 +171,10 @@ def main(args):
 
 
     if args.algorithm in ['fixmatch','flexmatch']:
-        args.loss = ''
+        loss_print = ''
     elif args.algorithm in ["semisupcon","semisupconproto"]:
-        args.loss = f'_{args.loss}_tau={args.p_cutoff}'
-    args.save_name =   f'{args.algorithm}{args.loss}_bs{args.batch_size}_{args.lr}'
+        loss_print = f'_{args.loss}_tau={args.p_cutoff}'
+    args.save_name =   f'{args.algorithm}{loss_print}_bs{args.batch_size}_lr{args.lr}'
 
     save_path = os.path.join(args.save_dir, args.save_name)
     if os.path.exists(save_path) and args.overwrite and args.resume == False:
