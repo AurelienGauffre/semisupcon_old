@@ -250,7 +250,9 @@ class WideResNetProto(nn.Module):
         out = self.extract(x)
         out = F.adaptive_avg_pool2d(out, 1)
         feat = out.view(-1, self.channels)
-        contrastive_feats = self.contrastive_head(feat)
+
+        contrastive_feats =  F.normalize(self.contrastive_head(feat), dim=1) # on normalise les la projection des embedings
+
         if self.proto_after_head:
             proto_proj = F.normalize(self.prototypes, dim=1)
         else:
