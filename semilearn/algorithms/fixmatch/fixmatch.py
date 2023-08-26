@@ -431,7 +431,7 @@ class SemiSupConProto(AlgorithmBase):
                          'x_ulb_s': [contrastive_x_ulb_s_0, contrastive_x_ulb_s_1]}
 
             similarity_to_proto = contrastive_x_ulb_w @ proto_proj.t()  # (N, K) = (N, D) @ (D, K) equivalent des softmax
-            print(f"similarity to proto first line : {similarity_to_proto[0, :]} and first label {y_ulb[0]}")
+            # print(f"similarity to proto first line : {similarity_to_proto[0, :]} and first label {y_ulb[0]}")
 
             pseudo_label = torch.argmax(similarity_to_proto, dim=1)
             maskbool = torch.max(similarity_to_proto, dim=1)[0] > self.p_cutoff
@@ -458,7 +458,8 @@ class SemiSupConProto(AlgorithmBase):
                 y_all = torch.cat((y_all, (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
                                   dim=0)  # TODO Ne pas hardcoder le nombre de classes
 
-                supcon_loss = self.supcon_loss_weights(embeddings=contrastive_x_all, labels=y_all,weighs=torch.ones(y_all.shape[0]))
+                supcon_loss = self.supcon_loss_weights(embeddings=contrastive_x_all, labels=y_all,
+                                                       weights=torch.ones(y_all.shape[0]))
 
                 total_loss = supcon_loss
 
@@ -487,7 +488,7 @@ class SemiSupConProto(AlgorithmBase):
                                              total_loss=total_loss.item(),
                                              util_ratio=maskbool.float().mean().item(),
                                              pseudolabel_accuracy=((
-                                                                               pseudo_label == y_ulb).float() * maskbool.float()).sum() / mask_sum.item() if mask_sum > 0 else 0)
+                                                                           pseudo_label == y_ulb).float() * maskbool.float()).sum() / mask_sum.item() if mask_sum > 0 else 0)
 
             return out_dict, log_dict
 
