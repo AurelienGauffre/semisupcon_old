@@ -179,7 +179,7 @@ def main(args):
     args.save_name = str(
         args.save_name if args.save_name is not None else "") + f'{args.algorithm}{loss_print}_bs{args.batch_size}_lr{args.lr}'
 
-    if '$OAR_JOB_ID' in os.environ:
+    if 'OAR_JOB_ID' in os.environ:
         args.save_name += f"_{os.environ['OAR_JOB_ID']}"
     save_path = os.path.join(args.save_dir, args.save_name)
     if os.path.exists(save_path) and args.overwrite and args.resume == False:

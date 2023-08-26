@@ -458,7 +458,7 @@ class SemiSupConProto(AlgorithmBase):
                 y_all = torch.cat((y_all, (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
                                   dim=0)  # TODO Ne pas hardcoder le nombre de classes
 
-                supcon_loss = self.supcon_loss_weights(embeddings=contrastive_x_all, labels=y_all)
+                supcon_loss = self.supcon_loss_weights(embeddings=contrastive_x_all, labels=y_all,weighs=torch.ones(y_all.shape[0]))
 
                 total_loss = supcon_loss
 
