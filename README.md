@@ -3,6 +3,7 @@ To do/test :
 - [x] Use pretrained weight for wideresnet A VOIR JE ME SOUVIENS PLUS
 - [ ] checks that these pretrained works are loaded correctly : why the loss is not continous after loader
 - [ ] weights
+- [ ] essayer avec préentrainement simclr : fixmatch vs notre method
 - [ ] ajouter
 
 
