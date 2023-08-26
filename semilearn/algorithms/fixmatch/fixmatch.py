@@ -438,9 +438,9 @@ class SemiSupConProto(AlgorithmBase):
             mask_sum = maskbool.sum()  # number of samples with high confidence
 
             contrastive_x_all = torch.cat(
-                (contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool], proto_proj), dim=0)
+                (proto_proj,contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool]), dim=0)
             y_all = torch.cat(
-                (y_lb, pseudo_label[maskbool], pseudo_label[maskbool], torch.arange(self.args.num_classes).cuda()),
+                (torch.arange(self.args.num_classes).cuda(),y_lb, pseudo_label[maskbool], pseudo_label[maskbool], ),
                 dim=0)  # TODO Ne pas hardcoder le nombre de classes
 
             if self.args.loss == "full_supcon":
@@ -458,8 +458,10 @@ class SemiSupConProto(AlgorithmBase):
                 y_all = torch.cat((y_all, (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
                                   dim=0)  # TODO Ne pas hardcoder le nombre de classes
 
+                weights = torch.ones(y_all.shape[0]).cuda()
+                # weights[]
                 supcon_loss = self.supcon_loss_weights(embeddings=contrastive_x_all, labels=y_all,
-                                                       weights=torch.ones(y_all.shape[0]).cuda())
+                                                       weights=weights)
 
                 total_loss = supcon_loss
 
