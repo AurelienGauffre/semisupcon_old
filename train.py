@@ -167,7 +167,8 @@ def main(args):
     For (Distributed)DataParallelism,
     main(args) spawn each process (main_worker) to each GPU.
     '''
-
+    nb_classes_dict = {'cifar10': 10, 'çifar100': 100}
+    args.num_classes = nb_classes_dict[args.dataset]
     assert args.num_train_iter % args.epoch == 0, \
         f"# total training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"
 
@@ -175,7 +176,8 @@ def main(args):
         loss_print = ''
     elif args.algorithm in ["semisupcon", "semisupconproto"]:
         loss_print = f'_{args.loss}_tau={args.p_cutoff}'
-    args.save_name = str(args.save_name if args.save_name is not None else "") + f'{args.algorithm}{loss_print}_bs{args.batch_size}_lr{args.lr}'
+    args.save_name = str(
+        args.save_name if args.save_name is not None else "") + f'{args.algorithm}{loss_print}_bs{args.batch_size}_lr{args.lr}'
 
     if '$OAR_JOB_ID' in os.environ:
         args.save_name += f"_{os.environ['OAR_JOB_ID']}"
