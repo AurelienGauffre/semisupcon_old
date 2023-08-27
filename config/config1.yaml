@@ -1,5 +1,5 @@
 algorithm: semisupconproto
-loss: full_supcon_weights # supcon_simclr #full_supcon   #full_supcon_weights                       #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
+loss: full_supcon # supcon_simclr #full_supcon   #full_supcon_weights                       #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
 lambda_proto: .5 #only for weighted supcon loss
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
