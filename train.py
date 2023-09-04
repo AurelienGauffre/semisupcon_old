@@ -173,11 +173,18 @@ def main(args):
         f"# total training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"
 
     if args.algorithm in ['fixmatch', 'flexmatch']:
+        algo_print = args.algorithm
         loss_print = ''
     elif args.algorithm in ["semisupcon", "semisupconproto"]:
         loss_print = f'_{args.loss}_tau={args.p_cutoff}'
+        if args.algorithm == "semisupconproto" and 'Weights' in  args.loss :
+            loss_print += f'_lambdaProto={args.lambda_proto}'
+        if args.algorithm == "semisupcon":
+            algo_print = args.algorithm
+        elif args.algorithm == "semisupconproto":
+            algo_print = "proto"
     args.save_name = str(
-        args.save_name if args.save_name is not None else "") + f'{args.algorithm}{loss_print}_bs{args.batch_size}_lr{args.lr}'
+        args.save_name if args.save_name is not None else "") + f'{algo_print}{loss_print}_bs{args.batch_size}_lr{args.lr}'
 
     if 'OAR_JOB_ID' in os.environ:
         args.save_name += f"_{os.environ['OAR_JOB_ID']}"

@@ -443,7 +443,7 @@ class SemiSupConProto(AlgorithmBase):
                 (torch.arange(self.args.num_classes).cuda(),y_lb, pseudo_label[maskbool], pseudo_label[maskbool], ),
                 dim=0)  # TODO Ne pas hardcoder le nombre de classes
 
-            if self.args.loss == "full_supcon":
+            if self.args.loss == "OnlySupcon":
                 contrastive_x_all = torch.cat(
                     (contrastive_x_all, contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool]), dim=0)
                 y_all = torch.cat((y_all, (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
@@ -452,7 +452,7 @@ class SemiSupConProto(AlgorithmBase):
                 supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
 
                 total_loss = supcon_loss
-            elif self.args.loss == "full_supcon_weights":
+            elif self.args.loss == "OnlySupconWeights":
                 contrastive_x_all = torch.cat(
                     (contrastive_x_all, contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool]), dim=0)
                 y_all = torch.cat((y_all, (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
@@ -465,7 +465,7 @@ class SemiSupConProto(AlgorithmBase):
 
                 total_loss = supcon_loss
 
-            elif self.args.loss == "supcon_simclr(remaining)":
+            elif self.args.loss == "Supcon&SimclrRemaining)":
                 "Supcon to labeled and pseudolabels + simclr only on non pseudo labeled examples"
 
                 supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
@@ -474,7 +474,7 @@ class SemiSupConProto(AlgorithmBase):
                     labels=torch.arange(sum(~maskbool)).repeat(2))
                 total_loss = supcon_loss + simclr
 
-            elif self.args.loss == "supcon_simclr(all)":
+            elif self.args.loss == "Supcon&SimclrAll":
                 "Supcon to labeled and pseudolabels + simclr on all unsupervised labels"
                 supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
                 simclr = self.supcon_loss(
