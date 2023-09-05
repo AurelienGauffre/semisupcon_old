@@ -20,6 +20,10 @@ from semilearn.core.utils import get_dataset, get_data_loader, get_optimizer, ge
 from semilearn.core.criterions import CELoss, ConsistencyLoss
 
 
+from pytorch_metric_learning.losses import SupConLoss
+from pytorch_metric_learning.utils import common_functions as c_f
+from pytorch_metric_learning.utils import loss_and_miner_utils as lmu
+
 class AlgorithmBase:
     """
         Base class for algorithms
@@ -533,3 +537,71 @@ class ImbAlgorithmBase(AlgorithmBase):
                                       self.args.weight_decay, self.args.layer_decay, bn_wd_skip=False)
             scheduler = None
             return optimizer, scheduler
+
+
+class SupConLossWeights(SupConLoss):
+    def _compute_loss(self, mat, pos_mask, neg_mask, weights=None):
+        if pos_mask.bool().any() and neg_mask.bool().any():
+            if not self.distance.is_inverted:
+                mat = -mat
+            mat = mat / self.temperature
+            mat_max, _ = mat.max(dim=1, keepdim=True)
+            mat = mat - mat_max.detach()
+            denominator = lmu.logsumexp(
+                mat, keep_mask=(pos_mask + neg_mask).bool(), add_one=False, dim=1
+            )
+            log_prob = mat - denominator
+            mean_log_prob_pos = (pos_mask * log_prob).sum(dim=1) / (
+                    pos_mask.sum(dim=1) + c_f.small_val(mat.dtype)
+            )
+
+            if weights is not None:
+                mean_log_prob_pos = mean_log_prob_pos * weights
+
+            return {
+                "loss": {
+                    "losses": -mean_log_prob_pos,
+                    "indices": c_f.torch_arange_from_size(mat),
+                    "reduction_type": "element",
+                }
+            }
+        return self.zero_losses()
+
+    def forward(
+            self, embeddings, labels=None, indices_tuple=None, ref_emb=None, ref_labels=None, weights=None
+    ):
+        self.reset_stats()
+        c_f.check_shapes(embeddings, labels)
+        if labels is not None:
+            labels = c_f.to_device(labels, embeddings)
+        ref_emb, ref_labels = c_f.set_ref_emb(embeddings, labels, ref_emb, ref_labels)
+        loss_dict = self.compute_loss(
+            embeddings, labels, indices_tuple, ref_emb, ref_labels, weights
+        )
+        self.add_embedding_regularization_to_loss_dict(loss_dict, embeddings)
+        return self.reducer(loss_dict, embeddings, labels)
+
+    def compute_loss(self, embeddings, labels, indices_tuple, ref_emb, ref_labels, weights=None):
+        c_f.labels_or_indices_tuple_required(labels, indices_tuple)
+        indices_tuple = lmu.convert_to_pairs(indices_tuple, labels, ref_labels)
+        if all(len(x) <= 1 for x in indices_tuple):
+            return self.zero_losses()
+        mat = self.distance(embeddings, ref_emb)
+        return self.loss_method(mat, indices_tuple, weights)
+
+    def mat_based_loss(self, mat, indices_tuple, weights=None):
+        a1, p, a2, n = indices_tuple
+        pos_mask, neg_mask = torch.zeros_like(mat), torch.zeros_like(mat)
+        pos_mask[a1, p] = 1
+        neg_mask[a2, n] = 1
+        return self._compute_loss(mat, pos_mask, neg_mask, weights)
+
+    def pair_based_loss(self, mat, indices_tuple, weights=None):
+        a1, p, a2, n = indices_tuple
+        pos_pair, neg_pair = [], []
+        if len(a1) > 0:
+            pos_pair = mat[a1, p]
+        if len(a2) > 0:
+            neg_pair = mat[a2, n]
+        return self._compute_loss(pos_pair, neg_pair, indices_tuple, weights)
+

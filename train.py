@@ -167,16 +167,27 @@ def main(args):
     For (Distributed)DataParallelism,
     main(args) spawn each process (main_worker) to each GPU.
     '''
-
+    nb_classes_dict = {'cifar10': 10, 'cifar100': 100}
+    args.num_classes = nb_classes_dict[args.dataset]
     assert args.num_train_iter % args.epoch == 0, \
         f"# total training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"
 
     if args.algorithm in ['fixmatch', 'flexmatch']:
+        algo_print = args.algorithm
         loss_print = ''
     elif args.algorithm in ["semisupcon", "semisupconproto"]:
         loss_print = f'_{args.loss}_tau={args.p_cutoff}'
-    args.save_name = str(args.save_name if args.save_name is not None else "") + f'{args.algorithm}{loss_print}_bs{args.batch_size}_lr{args.lr}'
+        if args.algorithm == "semisupconproto" and 'Weights' in  args.loss :
+            loss_print += f'_lambdaProto={args.lambda_proto}'
+        if args.algorithm == "semisupcon":
+            algo_print = args.algorithm
+        elif args.algorithm == "semisupconproto":
+            algo_print = "proto"
+    args.save_name = str(
+        args.save_name if args.save_name is not None else "") + f'{algo_print}{loss_print}_bs{args.batch_size}_lr{args.lr}'
 
+    if 'OAR_JOB_ID' in os.environ:
+        args.save_name += f"_{os.environ['OAR_JOB_ID']}"
     save_path = os.path.join(args.save_dir, args.save_name)
     if os.path.exists(save_path) and args.overwrite and args.resume == False:
         import shutil
