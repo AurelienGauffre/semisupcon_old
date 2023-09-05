@@ -433,8 +433,15 @@ class SemiSupConProto(AlgorithmBase):
             similarity_to_proto = contrastive_x_ulb_w @ proto_proj.t()  # (N, K) = (N, D) @ (D, K) equivalent des softmax
             # print(f"similarity to proto first line : {similarity_to_proto[0, :]} and first label {y_ulb[0]}")
 
-            pseudo_label = torch.argmax(similarity_to_proto, dim=1)
-            maskbool = torch.max(similarity_to_proto, dim=1)[0] > self.p_cutoff
+            if self.args.pl == "max":
+                pseudo_label = torch.argmax(similarity_to_proto, dim=1)
+                maskbool = torch.max(similarity_to_proto, dim=1)[0] > self.p_cutoff
+            elif self.args.pl == "softmax":
+                pseudo_label = torch.argmax(similarity_to_proto, dim=1)
+                maskbool =  torch.softmax(similarity_to_proto, dim=1)[torch.arange(similarity_to_proto.shape[0]), pseudo_label] > self.p_cutoff
+
+
+
             mask_sum = maskbool.sum()  # number of samples with high confidence
 
             contrastive_x_all = torch.cat(
@@ -464,6 +471,7 @@ class SemiSupConProto(AlgorithmBase):
                                                        weights=weights)
 
                 total_loss = supcon_loss
+
 
             elif self.args.loss == "Supcon&SimclrRemaining)":
                 "Supcon to labeled and pseudolabels + simclr only on non pseudo labeled examples"

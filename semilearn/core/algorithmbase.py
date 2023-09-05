@@ -544,6 +544,7 @@ class SupConLossWeights(SupConLoss):
         if pos_mask.bool().any() and neg_mask.bool().any():
             if not self.distance.is_inverted:
                 mat = -mat
+
             mat = mat / self.temperature
             mat_max, _ = mat.max(dim=1, keepdim=True)
             mat = mat - mat_max.detach()
@@ -551,12 +552,15 @@ class SupConLossWeights(SupConLoss):
                 mat, keep_mask=(pos_mask + neg_mask).bool(), add_one=False, dim=1
             )
             log_prob = mat - denominator
+            # On normalise comme il faut :
             mean_log_prob_pos = (pos_mask * log_prob).sum(dim=1) / (
-                    pos_mask.sum(dim=1) + c_f.small_val(mat.dtype)
+                (pos_mask).sum(dim=1) + c_f.small_val(mat.dtype)
             )
+            if weights is not None: #On multiplie par weights.shape[0] car le reducer divisera par cette meme quantité plus tard
+                mean_log_prob_pos = mean_log_prob_pos * weights / (weights.sum()/weights.shape[0])
 
-            if weights is not None:
-                mean_log_prob_pos = mean_log_prob_pos * weights
+            print(mean_log_prob_pos)
+
 
             return {
                 "loss": {
