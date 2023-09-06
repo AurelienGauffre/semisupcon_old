@@ -15,7 +15,8 @@
 #SBATCH --cpus-per-task=10           # number of cores per task (1/4 of the 4-GPUs node)
 
 #SBATCH --hint=nomultithread         # hyperthreading is deactivated
-#SBATCH --time=19:00:00              # maximum execution time requested (HH:MM:SS)
+#SBATCH –qos=qos_cpu-t4 #for jobs > 100h
+#SBATCH --time=45:00:00              # maximum execution time requested (HH:MM:SS)
 #SBATCH --output=OAR.%j.out    # name of output file
 
 module purge  
