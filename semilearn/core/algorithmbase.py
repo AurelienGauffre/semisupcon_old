@@ -19,10 +19,10 @@ from semilearn.core.utils import get_dataset, get_data_loader, get_optimizer, ge
     Bn_Controller
 from semilearn.core.criterions import CELoss, ConsistencyLoss
 
-
 from pytorch_metric_learning.losses import SupConLoss
 from pytorch_metric_learning.utils import common_functions as c_f
 from pytorch_metric_learning.utils import loss_and_miner_utils as lmu
+
 
 class AlgorithmBase:
     """
@@ -198,7 +198,7 @@ class AlgorithmBase:
         initialize model
         """
         model = self.net_builder(num_classes=self.num_classes, pretrained=self.args.use_pretrain,
-                                 pretrained_path=self.args.pretrain_path,args=self.args)
+                                 pretrained_path=self.args.pretrain_path, args=self.args)
         return model
 
     def set_ema_model(self):
@@ -554,13 +554,12 @@ class SupConLossWeights(SupConLoss):
             log_prob = mat - denominator
             # On normalise comme il faut :
             mean_log_prob_pos = (pos_mask * log_prob).sum(dim=1) / (
-                (pos_mask).sum(dim=1) + c_f.small_val(mat.dtype)
+                    (pos_mask).sum(dim=1) + c_f.small_val(mat.dtype)
             )
-            if weights is not None: #On multiplie par weights.shape[0] car le reducer divisera par cette meme quantité plus tard
-                mean_log_prob_pos = mean_log_prob_pos * weights / (weights.sum()/weights.shape[0])
+            if weights is not None:  # On multiplie par weights.shape[0] car le reducer divisera par cette meme quantité plus tard
+                mean_log_prob_pos = mean_log_prob_pos * weights / (weights.sum() / weights.shape[0])
 
-            print(mean_log_prob_pos)
-
+            # print(mean_log_prob_pos)
 
             return {
                 "loss": {
@@ -608,4 +607,3 @@ class SupConLossWeights(SupConLoss):
         if len(a2) > 0:
             neg_pair = mat[a2, n]
         return self._compute_loss(pos_pair, neg_pair, indices_tuple, weights)
-
