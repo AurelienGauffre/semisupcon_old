@@ -183,8 +183,12 @@ def main(args):
             algo_print = args.algorithm
         elif args.algorithm == "semisupconproto":
             algo_print = "proto"
+        if args.pl == 'pl=max':
+            pl_print = 'max'
+        elif args.pl == 'softmax':
+            pl_print = f'pl=softmaxT={args.pl_temp}'
     args.save_name = str(
-        args.save_name if args.save_name is not None else "") + f'{algo_print}{loss_print}_bs{args.batch_size}_lr{args.lr}'
+        args.save_name if args.save_name is not None else "") + f'{algo_print}{loss_print}_{pl_print}_bs{args.batch_size}_lr{args.lr}'
 
     if 'OAR_JOB_ID' in os.environ:
         args.save_name += f"_{os.environ['OAR_JOB_ID']}"

@@ -438,16 +438,14 @@ class SemiSupConProto(AlgorithmBase):
                 maskbool = torch.max(similarity_to_proto, dim=1)[0] > self.p_cutoff
             elif self.args.pl == "softmax":
                 pseudo_label = torch.argmax(similarity_to_proto, dim=1)
-                maskbool =  torch.softmax(similarity_to_proto, dim=1)[torch.arange(similarity_to_proto.shape[0]), pseudo_label] > self.p_cutoff
-
-
+                maskbool = torch.softmax((similarity_to_proto+1)/2/self.args.temp_pl, dim=1) > self.p_cutoff # +1 is useless
 
             mask_sum = maskbool.sum()  # number of samples with high confidence
 
             contrastive_x_all = torch.cat(
-                (proto_proj,contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool]), dim=0)
+                (proto_proj, contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool]), dim=0)
             y_all = torch.cat(
-                (torch.arange(self.args.num_classes).cuda(),y_lb, pseudo_label[maskbool], pseudo_label[maskbool], ),
+                (torch.arange(self.args.num_classes).cuda(), y_lb, pseudo_label[maskbool], pseudo_label[maskbool],),
                 dim=0)  # TODO Ne pas hardcoder le nombre de classes
 
             if self.args.loss == "OnlySupcon":
@@ -466,7 +464,7 @@ class SemiSupConProto(AlgorithmBase):
                                   dim=0)  # TODO Ne pas hardcoder le nombre de classes
 
                 weights = torch.ones(y_all.shape[0]).cuda()
-                weights[:self.args.num_classes]*= self.args.lambda_proto
+                weights[:self.args.num_classes] *= self.args.lambda_proto
                 supcon_loss = self.supcon_loss_weights(embeddings=contrastive_x_all, labels=y_all,
                                                        weights=weights)
 
