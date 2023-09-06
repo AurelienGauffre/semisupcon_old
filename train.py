@@ -192,6 +192,9 @@ def main(args):
 
     if 'OAR_JOB_ID' in os.environ:
         args.save_name += f"_{os.environ['OAR_JOB_ID']}"
+    if 'SLURM_JOB_ID' in os.environ:
+        args.save_name += f"_{os.environ['SLURM_JOB_ID']}"
+
     save_path = os.path.join(args.save_dir, args.save_name)
     if os.path.exists(save_path) and args.overwrite and args.resume == False:
         import shutil
