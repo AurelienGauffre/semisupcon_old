@@ -21,6 +21,6 @@
 module purge  
 module load pytorch-gpu/py3/1.12.1
 
-cd /linkhome/rech/genlig01/ued97kp/semisupcon/
+cd /gpfsscratch/rech/cgs/ued97kp/semisupcon
 
 python3 train.py --c ./config/config1.yaml
