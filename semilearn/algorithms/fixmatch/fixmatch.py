@@ -437,7 +437,10 @@ class SemiSupConProto(AlgorithmBase):
                 pseudo_label = torch.argmax(similarity_to_proto, dim=1)
             elif self.args.pl == "softmax":
                 pseudo_label = torch.argmax(similarity_to_proto, dim=1)
+                print(
+                    f"before soft{similarity_to_proto.max(dim=1)[0].max(dim=0)[0].item()} {similarity_to_proto.max(dim=1)[0].mean(dim=0).item()}")
                 similarity_to_proto = torch.softmax((similarity_to_proto+1)/2/self.args.pl_temp, dim=1)
+                print(f"after soft{similarity_to_proto.max(dim=1)[0].max(dim=0)[0].item()} {similarity_to_proto.max(dim=1)[0].mean(dim=0).item()}")
 
             maskbool = torch.max(similarity_to_proto, dim=1)[0] > self.p_cutoff
             mask_sum = maskbool.sum()  # number of samples with high confidence
