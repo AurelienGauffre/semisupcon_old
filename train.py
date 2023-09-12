@@ -232,6 +232,7 @@ def main(args):
     if args.multiprocessing_distributed:
         # now, args.world_size means num of total processes in all nodes
         args.world_size = ngpus_per_node * args.world_size
+        print(f'world_size: {args.world_size},ngpus_per_node: {ngpus_per_node}')
 
         # args=(,) means the arguments of main_worker
         mp.spawn(main_worker, nprocs=ngpus_per_node, args=(ngpus_per_node, args))
@@ -240,7 +241,6 @@ def main(args):
 
 
 def main_worker(gpu, ngpus_per_node, args):
-    print(f'ON PASSE PAR LE MAIN WORKER {gpu}, {ngpus_per_node}, {args}')
     '''
     main_worker is conducted on each GPU.
     '''
