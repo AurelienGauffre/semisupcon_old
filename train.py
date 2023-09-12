@@ -163,6 +163,7 @@ def get_config():
 
 
 def main(args):
+    print('ON PASSE PAR LE MAIn')
     '''
     For (Distributed)DataParallelism,
     main(args) spawn each process (main_worker) to each GPU.
