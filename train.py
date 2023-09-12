@@ -163,7 +163,7 @@ def get_config():
 
 
 def main(args):
-    print('ON PASSE PAR LE MAIn')
+    print('ON PASSE PAR LE MAIN')
     '''
     For (Distributed)DataParallelism,
     main(args) spawn each process (main_worker) to each GPU.
@@ -191,10 +191,10 @@ def main(args):
     args.save_name = str(
         args.save_name if args.save_name is not None else "") + f'{algo_print}{loss_print}_{pl_print}_bs{args.batch_size}_lr{args.lr}'
 
-    # if 'OAR_JOB_ID' in os.environ:
-    #     args.save_name += f"_{os.environ['OAR_JOB_ID']}"
-    # if 'SLURM_JOB_ID' in os.environ:
-    #     args.save_name += f"_{os.environ['SLURM_JOB_ID']}"
+    if 'OAR_JOB_ID' in os.environ:
+        args.save_name += f"_{os.environ['OAR_JOB_ID']}"
+    if 'SLURM_JOB_ID' in os.environ:
+        args.save_name += f"_{os.environ['SLURM_JOB_ID']}"
 
     save_path = os.path.join(args.save_dir, args.save_name)
     if os.path.exists(save_path) and args.overwrite and args.resume == False:
@@ -240,6 +240,7 @@ def main(args):
 
 
 def main_worker(gpu, ngpus_per_node, args):
+    print(f'ON PASSE PAR LE MAIN WORKER {gpu}, {ngpus_per_node}, {args}')
     '''
     main_worker is conducted on each GPU.
     '''
