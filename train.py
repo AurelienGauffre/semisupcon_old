@@ -168,7 +168,8 @@ def main(args):
     For (Distributed)DataParallelism,
     main(args) spawn each process (main_worker) to each GPU.
     '''
-    nb_classes_dict = {'cifar10': 10, 'cifar100': 100, 'stl10': 10, 'svhn': 10, 'imagenet': 1000},
+    nb_classes_dict = {'cifar10': 10, 'cifar100': 100, 'stl10': 10, 'svhn': 10, 'imagenet': 1000}
+    print(args.dataset)
     args.num_classes = nb_classes_dict[args.dataset]
     assert args.num_train_iter % args.epoch == 0, \
         f"# total training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"
