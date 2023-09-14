@@ -1,3 +1,4 @@
+# semisupcon proto with wideresnet 28-8 and full epochs
 algorithm: semisupconproto
 loss: OnlySupconWeights # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
 lambda_proto: 0 #only for Weighted supcon loss
@@ -13,7 +14,7 @@ load_path: ./saved_models/pretrained/pretrainedSimCLRcifar100wrn_28_2_epochs256/
 overwrite: True
 use_tensorboard: True
 use_wandb: True
-wandb_project: semisupcon_cifar100wrn_28_2
+wandb_project: semisupcon_cifar100wrn_28_8
 epoch: 256 #1024
 num_train_iter: 262144 # 1048576
 num_eval_iter: 5120
@@ -36,7 +37,7 @@ weight_decay: 0.0005
 layer_decay: 1.0
 amp: False
 clip: 0.0
-net: wrn_28_2_proto
+net: wrn_28_8_proto
 net_from_name: False # If True, net_builder takes models in torch.vision models (False de base)
 data_dir: ./data
 dataset: cifar100
