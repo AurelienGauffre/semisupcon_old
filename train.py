@@ -189,8 +189,12 @@ def main(args):
             algo_print = "proto"
         if args.pl == 'pl=max':
             pl_print = 'max_'
-        elif args.pl == 'softmax_':
-            pl_print = f'pl=softmaxT={args.pl_temp}'
+        elif args.pl == 'softmax':
+            pl_print = f'pl=softmaxT={args.pl_temp}_'
+        else:
+            raise ValueError(f"Unknown pl {args.pl}")
+
+
 
     args.save_name = str(
         args.save_name if args.save_name is not None else "") + f'{algo_print}{loss_print}_{pl_print}bs{args.batch_size}_lr{args.lr}'

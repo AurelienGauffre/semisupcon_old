@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=cgs@v100 
 
-#SBATCH --job-name=semisupcon_1
+#SBATCH --job-name=ssc1
 ##SBATCH -C v100-16g                 # uncomment to target only 16GB V100 GPU
 ##SBATCH -C v100-32g                 # uncomment to target only 32GB V100 GPU
 #SBATCH --partition=gpu_p2          # uncomment for gpu_p2 partition (32GB V100 GPU)
