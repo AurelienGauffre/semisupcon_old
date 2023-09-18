@@ -306,11 +306,7 @@ def main_worker(gpu, ngpus_per_node, args):
     logger.info(f"Arguments: {model.args}")
 
     # If args.resume, load checkpoints from args.load_path
-    if args.loadpath is None:
-        print('hey')
-        print('hey')
-        print('hey')
-        print('hey')
+
     if args.resume and os.path.exists(args.load_path):
         try:
             model.load_model(args.load_path)
