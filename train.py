@@ -199,9 +199,9 @@ def main(args):
 
 
     args.save_name_wandb = str(
-        f'{algo_print}{loss_print}_{pl_print}bs{args.batch_size}_lr{args.lr}')
+        f'{algo_print}{loss_print}_{pl_print}bs{args.batch_size}_lr{args.lr}_seed{args.seed}')
     if 'OAR_JOB_ID' in os.environ:
-        args.save_name_wandb += f"_AKER{os.environ['OAR_JOB_ID']}"
+        args.save_name_wandb += f"_AK{os.environ['OAR_JOB_ID']}"
     if 'SLURM_JOB_ID' in os.environ:
         args.save_name_wandb += f"_JZ{os.environ['SLURM_JOB_ID']}"
 
