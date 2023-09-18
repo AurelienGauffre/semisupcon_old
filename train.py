@@ -169,7 +169,7 @@ def main(args):
     '''
     print(f"CONFIG FILE : {args.c}")
     nb_classes_dict = {'cifar10': 10, 'cifar100': 100, 'stl10': 10, 'svhn': 10, 'imagenet': 1000}
-    print("DATASET : {args.dataset}")
+    print(f"DATASET : {args.dataset}")
     args.num_classes = nb_classes_dict[args.dataset]
     assert args.num_train_iter % args.epoch == 0, \
         f"NB OF TOTAL training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"
