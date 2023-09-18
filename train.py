@@ -175,6 +175,8 @@ def main(args):
         f"NB OF TOTAL training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"
 
     # set save_name
+    net_print_dic = {'wrn_28_2':'wrn_28_2','wrn_28_2_proto':'wrn_28_2','wrn_28_8':'wrn_28_8','wrn_28_8_proto':'wrn_28_8'}
+    args.wandb_project = f"semisupcon_{args.dataset}{net_print_dic[args.net]}"
     if args.algorithm in ['fixmatch', 'flexmatch']:
         algo_print = args.algorithm
         loss_print = ''
@@ -196,14 +198,16 @@ def main(args):
 
 
 
-    args.save_name = str(
-        args.save_name if args.save_name is not None else "") + f'{algo_print}{loss_print}_{pl_print}bs{args.batch_size}_lr{args.lr}'
+    args.save_name_wandb = str(
+        f'{algo_print}{loss_print}_{pl_print}bs{args.batch_size}_lr{args.lr}')
     if 'OAR_JOB_ID' in os.environ:
-        args.save_name += f"_{os.environ['OAR_JOB_ID']}"
+        args.save_name_wandb += f"_AKER{os.environ['OAR_JOB_ID']}"
     if 'SLURM_JOB_ID' in os.environ:
-        args.save_name += f"_{os.environ['SLURM_JOB_ID']}"
+        args.save_name_wandb += f"_JZ{os.environ['SLURM_JOB_ID']}"
 
+    args.save_name = f"{args.algorithm}_{args.dataset}_{args.num_labels}_{args.seed}" # savename is used for saving model dirname (we dont need as much details as wandb name)
     # set save_path
+    print(args.save_name,args.save_name_wandb)
     save_path = os.path.join(args.save_dir, args.save_name)
     if os.path.exists(save_path) and args.overwrite and args.resume == False:
         import shutil
@@ -214,6 +218,8 @@ def main(args):
     if args.resume:
         if args.load_path is None:
             raise Exception('Resume of training requires --load_path in the args')
+        if args.load_path == 'auto':
+            args.load_path = os.path.join(args.save_dir, args.save_name, 'latest_model.pth')
         if os.path.abspath(save_path) == os.path.abspath(args.load_path) and not args.overwrite:
             raise Exception('Saving & Loading paths are same. \
                             If you want over-write, give --overwrite in the argument.')
@@ -300,6 +306,11 @@ def main_worker(gpu, ngpus_per_node, args):
     logger.info(f"Arguments: {model.args}")
 
     # If args.resume, load checkpoints from args.load_path
+    if args.loadpath is None:
+        print('hey')
+        print('hey')
+        print('hey')
+        print('hey')
     if args.resume and os.path.exists(args.load_path):
         try:
             model.load_model(args.load_path)

@@ -37,7 +37,7 @@ class WANDBHook(Hook):
             resume = 'never'
         # resume = 'never'
         
-        save_dir = os.path.join(algorithm.args.save_dir, 'wandb', algorithm.args.save_name)
+        save_dir = os.path.join(algorithm.args.save_dir, 'wandb', algorithm.args.save_name_wandb)
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
         if 'WANDB_MODE' in os.environ:

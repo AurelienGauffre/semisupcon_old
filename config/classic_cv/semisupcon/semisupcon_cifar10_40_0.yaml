@@ -1,8 +1,8 @@
-algorithm: fixmatch
+algorithm: semisupcon
 save_dir: ./saved_models/classic_cv
-save_name: fixmatch_svhn_40_0
+save_name: fixmatch_cifar10_40_0
 resume: True
-load_path: ./saved_models/classic_cv/fixmatch_svhn_40_0/latest_model.pth
+load_path: ./saved_models/classic_cv/fixmatch_cifar10_40_0/latest_model.pth
 overwrite: True
 use_tensorboard: True
 use_wandb: True
@@ -32,7 +32,7 @@ use_cat: True
 net: wrn_28_2
 net_from_name: False
 data_dir: ./data
-dataset: svhn
+dataset: cifar10
 train_sampler: RandomSampler
 num_classes: 10
 num_workers: 1
@@ -40,6 +40,12 @@ seed: 0
 world_size: 1
 rank: 0
 multiprocessing_distributed: True
-dist_url: tcp://127.0.0.1:10006
+dist_url: tcp://127.0.0.1:10008
 dist_backend: nccl
 gpu: None
+
+loss: OnlySupconWeights # Supcon&Simclr #OnlySupcon
+lambda_proto: 0 #only for Weighted supcon loss
+pl: softmax # softmax
+pl_temp: .055 # ONLY for softmax pl
+droprate: 0
