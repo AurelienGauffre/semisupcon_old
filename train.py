@@ -178,6 +178,7 @@ def main(args):
     if args.algorithm in ['fixmatch', 'flexmatch']:
         algo_print = args.algorithm
         loss_print = ''
+        pl_print = ''
     elif args.algorithm in ["semisupcon", "semisupconproto"]:
         loss_print = f'_{args.loss}_tau={args.p_cutoff}'
         if args.algorithm == "semisupconproto" and 'Weights' in  args.loss :
@@ -190,8 +191,7 @@ def main(args):
             pl_print = 'max_'
         elif args.pl == 'softmax_':
             pl_print = f'pl=softmaxT={args.pl_temp}'
-        else :
-            pl_print = ''
+
     args.save_name = str(
         args.save_name if args.save_name is not None else "") + f'{algo_print}{loss_print}_{pl_print}bs{args.batch_size}_lr{args.lr}'
     if 'OAR_JOB_ID' in os.environ:
