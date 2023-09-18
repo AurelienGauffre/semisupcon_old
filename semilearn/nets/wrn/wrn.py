@@ -305,7 +305,7 @@ def wrn_28_2_proto(pretrained=False, pretrained_path=None, droprate=0.0, **kwarg
 
 
 def wrn_28_8_proto(pretrained=False, pretrained_path=None, droprate=0.0, **kwargs):
-    model = WideResNetProto(first_stride=1, depth=28, widen_factor=2, droprate=droprate, **kwargs)
+    model = WideResNetProto(first_stride=1, depth=28, widen_factor=8, droprate=droprate, **kwargs)
     if pretrained:
         model = load_checkpoint(model, pretrained_path)
     return model
