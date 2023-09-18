@@ -163,17 +163,18 @@ def get_config():
 
 
 def main(args):
-    print('ON PASSE PAR LE MAIN')
     '''
     For (Distributed)DataParallelism,
     main(args) spawn each process (main_worker) to each GPU.
     '''
+    print(f"CONFIG FILE : {args.c}")
     nb_classes_dict = {'cifar10': 10, 'cifar100': 100, 'stl10': 10, 'svhn': 10, 'imagenet': 1000}
-    print(args.dataset)
+    print("DATASET : {args.dataset}")
     args.num_classes = nb_classes_dict[args.dataset]
     assert args.num_train_iter % args.epoch == 0, \
-        f"# total training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"
+        f"NB OF TOTAL training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"
 
+    # set save_name
     if args.algorithm in ['fixmatch', 'flexmatch']:
         algo_print = args.algorithm
         loss_print = ''
@@ -191,32 +192,31 @@ def main(args):
             pl_print = f'pl=softmaxT={args.pl_temp}'
     args.save_name = str(
         args.save_name if args.save_name is not None else "") + f'{algo_print}{loss_print}_{pl_print}_bs{args.batch_size}_lr{args.lr}'
-
     if 'OAR_JOB_ID' in os.environ:
         args.save_name += f"_{os.environ['OAR_JOB_ID']}"
     if 'SLURM_JOB_ID' in os.environ:
         args.save_name += f"_{os.environ['SLURM_JOB_ID']}"
 
+    # set save_path
     save_path = os.path.join(args.save_dir, args.save_name)
     if os.path.exists(save_path) and args.overwrite and args.resume == False:
         import shutil
         shutil.rmtree(save_path)
     if os.path.exists(save_path) and not args.overwrite:
         raise Exception('already existing model: {}'.format(save_path))
+
     if args.resume:
         if args.load_path is None:
             raise Exception('Resume of training requires --load_path in the args')
         if os.path.abspath(save_path) == os.path.abspath(args.load_path) and not args.overwrite:
             raise Exception('Saving & Loading paths are same. \
                             If you want over-write, give --overwrite in the argument.')
-
     if args.seed is not None:
         warnings.warn('You have chosen to seed training. '
                       'This will turn on the CUDNN deterministic setting, '
                       'which can slow down your training considerably! '
                       'You may see unexpected behavior when restarting '
                       'from checkpoints.')
-
     if args.gpu == 'None':
         args.gpu = None
     if args.gpu is not None:
