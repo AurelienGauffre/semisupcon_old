@@ -21,7 +21,7 @@ class WANDBHook(Hook):
 
     def before_run(self, algorithm):
         # job_id = '_'.join(algorithm.args.save_name.split('_')[:-1])
-        name = algorithm.save_name
+        name = algorithm.save_name_wandb
         project = algorithm.args.wandb_project #algorithm.save_dir.split('/')[-1]
 
         # tags

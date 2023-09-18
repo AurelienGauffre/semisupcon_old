@@ -9,7 +9,7 @@ save_dir: ./saved_models/classic_cv
 save_name:  #cat=True + droprate .5 #semisupcon1.2 (all_withoutsimclr_withoutunsupce) #(pretrained:simclr124epochs) #semisupcon 1.2 (without simclr) # (with 0.5*Simclr) # (0.5*Simclr) # semisupcon1.2 (withoutsimclr) (pretrained:simclr124epochs) #(without simclr)
 resume: True
 droprate: 0
-resume_only_weight: True # When resuming a model, only take the weight for finetuning (make epochs,scheduler, optimizer start from scratch)
+resume_only_weight: False # When resuming a model, only take the weight for finetuning (make epochs,scheduler, optimizer start from scratch)
 load_path: auto # ./saved_models/pretrained/pretrainedSimCLRcifar100wrn_28_2_epochs256/epoch124.pth #latest_model.pth epoch124
 overwrite: True
 use_tensorboard: True
