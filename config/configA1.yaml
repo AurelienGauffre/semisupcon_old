@@ -6,7 +6,7 @@ pl: softmax # softmax
 pl_temp: .055 # ONLY for softmax pl
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
-save_name:  #cat=True + droprate .5 #semisupcon1.2 (all_withoutsimclr_withoutunsupce) #(pretrained:simclr124epochs) #semisupcon 1.2 (without simclr) # (with 0.5*Simclr) # (0.5*Simclr) # semisupcon1.2 (withoutsimclr) (pretrained:simclr124epochs) #(without simclr)
+save_name:
 wandb_name: "EXP1:LR"
 resume: True
 droprate: 0
