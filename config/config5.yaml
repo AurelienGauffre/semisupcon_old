@@ -15,7 +15,6 @@ load_path: auto # ./saved_models/pretrained/pretrainedSimCLRcifar100wrn_28_2_epo
 overwrite: True
 use_tensorboard: True
 use_wandb: True
-wandb_project: semisupcon_cifar100wrn_28_8
 epoch: 256 #1024
 num_train_iter: 262144 # 1048576
 num_eval_iter: 5120

@@ -174,7 +174,7 @@ def main(args):
     assert args.num_train_iter % args.epoch == 0, \
         f"NB OF TOTAL training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"
 
-    # set save_name
+    # set wandb name
     net_print_dic = {'wrn_28_2':'wrn_28_2','wrn_28_2_proto':'wrn_28_2','wrn_28_8':'wrn_28_8','wrn_28_8_proto':'wrn_28_8'}
     args.wandb_project = f"semisupcon_{args.dataset}{net_print_dic[args.net]}"
     if args.algorithm in ['fixmatch', 'flexmatch']:
@@ -205,7 +205,9 @@ def main(args):
     if 'SLURM_JOB_ID' in os.environ:
         args.save_name_wandb += f"_JZ{os.environ['SLURM_JOB_ID']}"
 
-    args.save_name = f"{args.algorithm}_{args.dataset}_{args.num_labels}_{args.seed}" # savename is used for saving model dirname (we dont need as much details as wandb name)
+    # set savename
+    if args.save_name is None :
+        args.save_name = f"{args.algorithm}_{args.dataset}_{args.num_labels}_{args.seed}" # savename is used for saving model dirname (we dont need as much details as wandb name)
     # set save_path
     print(args.save_name,args.save_name_wandb)
     save_path = os.path.join(args.save_dir, args.save_name)
