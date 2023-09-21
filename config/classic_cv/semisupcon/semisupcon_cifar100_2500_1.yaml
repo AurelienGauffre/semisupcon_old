@@ -1,6 +1,6 @@
 algorithm: semisupcon
 save_dir: ./saved_models/classic_cv
-save_name: semisupcon_cifar100_2500_0
+save_name: semisupcon_cifar100_2500_1
 wandb_name:
 resume: True
 load_path: auto
