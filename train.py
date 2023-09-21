@@ -209,7 +209,9 @@ def main(args):
     if args.save_name is None :
         args.save_name = f"{args.algorithm}_{args.dataset}_{args.num_labels}_{args.seed}" # savename is used for saving model dirname (we dont need as much details as wandb name)
     # set save_path
-    print(args.save_name,args.save_name_wandb)
+    print(f" #### SAVE PATH : {args.save_dir}/{args.save_name}")
+    print(f" #### SAVE NAME WANDB : {args.save_name_wandb}")
+
     save_path = os.path.join(args.save_dir, args.save_name)
     if os.path.exists(save_path) and args.overwrite and args.resume == False:
         import shutil
@@ -316,7 +318,7 @@ def main_worker(gpu, ngpus_per_node, args):
             logger.info("Fail to resume load path {}".format(args.load_path))
             args.resume = False
     else:
-        logger.info("#### Resume load path {} does not exist ####".format(args.load_path))
+        logger.info(f"#### Resume load path {format(args.load_path)} does not exist ####")
 
     if hasattr(model, 'warmup'):
         logger.info(("Warmup stage"))
