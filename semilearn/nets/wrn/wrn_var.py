@@ -162,8 +162,104 @@ class WideResNetVar(nn.Module):
         return nwd
 
 
+class WideResNetVarProto(nn.Module):
+    def __init__(self, first_stride, num_classes, depth=28, widen_factor=2, drop_rate=0.0, **kwargs):
+        super(WideResNetVar, self).__init__()
+        channels = [16, 16 * widen_factor, 32 * widen_factor, 64 * widen_factor, 128 * widen_factor]
+        assert ((depth - 4) % 6 == 0)
+        n = (depth - 4) / 6
+        block = BasicBlock
+        # 1st conv before any network block
+        self.conv1 = nn.Conv2d(3, channels[0], kernel_size=3, stride=1,
+                               padding=1, bias=True)
+        # 1st block
+        self.block1 = NetworkBlock(
+            n, channels[0], channels[1], block, first_stride, drop_rate, activate_before_residual=True)
+        # 2nd block
+        self.block2 = NetworkBlock(
+            n, channels[1], channels[2], block, 2, drop_rate)
+        # 3rd block
+        self.block3 = NetworkBlock(
+            n, channels[2], channels[3], block, 2, drop_rate)
+        # 4th block
+        self.block4 = NetworkBlock(
+            n, channels[3], channels[4], block, 2, drop_rate)
+        # global average pooling and classifier
+        self.bn1 = nn.BatchNorm2d(channels[4], momentum=0.001, eps=0.001)
+        self.relu = nn.LeakyReLU(negative_slope=0.1, inplace=False)
+        # self.classifier = nn.Linear(channels[4], num_classes)
+        self.channels = channels[4]
+        self.num_features = channels[4]
+
+        # rot_classifier for Remix Match
+        # self.is_remix = is_remix
+        # if is_remix:
+        #     self.rot_classifier = nn.Linear(self.channels, 4)
+
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='leaky_relu')
+            elif isinstance(m, nn.BatchNorm2d):
+                m.weight.data.fill_(1)
+                m.bias.data.zero_()
+            elif isinstance(m, nn.Linear):
+                nn.init.xavier_normal_(m.weight.data)
+                m.bias.data.zero_()
+
+        self.prototypes = nn.Parameter(torch.randn(num_classes, channels[3]))
+    def forward(self, x, only_fc=False, only_feat=False, **kwargs):
+        """
+        Args:
+            x: input tensor, depends on only_fc and only_feat flag
+            only_fc: only use classifier, input should be features before classifier
+            only_feat: only return pooled features
+        """
+
+        if only_fc:
+            return self.classifier(x)
+
+        out = self.extract(x)
+        out = F.adaptive_avg_pool2d(out, 1)
+        feat = out.view(-1, self.channels)
+
+        contrastive_feats = F.normalize(self.contrastive_head(feat), dim=1)
+        proto_proj = F.normalize(self.prototypes, dim=1)
+
+
+        result_dict = {'contrastive_feats': contrastive_feats, "proto_proj": proto_proj}
+        return result_dict
+
+    def extract(self, x):
+        out = self.conv1(x)
+        out = self.block1(out)
+        out = self.block2(out)
+        out = self.block3(out)
+        out = self.block4(out)
+        out = self.relu(self.bn1(out))
+        return out
+
+    def group_matcher(self, coarse=False, prefix=''):
+        matcher = dict(stem=r'^{}conv1'.format(prefix),
+                       blocks=r'^{}block(\d+)'.format(prefix) if coarse else r'^{}block(\d+)\.layer.(\d+)'.format(
+                           prefix))
+        return matcher
+
+    def no_weight_decay(self):
+        nwd = []
+        for n, _ in self.named_parameters():
+            if 'bn' in n or 'bias' in n:
+                nwd.append(n)
+        return nwd
+
+
 def wrn_var_37_2(pretrained=False, pretrained_path=None, **kwargs):
     model = WideResNetVar(first_stride=2, depth=28, widen_factor=2, **kwargs)
+    if pretrained:
+        model = load_checkpoint(model, pretrained_path)
+    return model
+
+def wrn_var_37_2_proto(pretrained=False, pretrained_path=None, **kwargs):
+    model = WideResNetVarProto(first_stride=2, depth=28, widen_factor=2, **kwargs)
     if pretrained:
         model = load_checkpoint(model, pretrained_path)
     return model

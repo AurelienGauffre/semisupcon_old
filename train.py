@@ -206,7 +206,7 @@ def main(args):
         args.save_name_wandb += f"_JZ{os.environ['SLURM_JOB_ID']}"
 
     # set savename
-    # args.save_name should be set to none for run that will requires to resume weights,
+    # args.save_name should not be set to none for run that will requires to resume weights .
     # otherwise the model is save using the wandb unique name
     if args.save_name is None :
         #args.save_name = f"{args.algorithm}_{args.dataset}_{args.num_labels}_{args.seed}" # savename is used for saving model dirname (we dont need as much details as wandb name)
