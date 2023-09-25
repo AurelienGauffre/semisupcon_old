@@ -6,7 +6,7 @@ pl: softmax # softmax
 pl_temp: .040 # ONLY for softmax pl
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
-save_name:
+save_name: semisupcon_stl10_1000_pl_temp=.4
 wandb_name:
 resume: True
 droprate: 0

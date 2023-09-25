@@ -2,7 +2,7 @@
 algorithm: fixmatch
 save_dir: ./saved_models/classic_cv
 resume: True
-load_path: ./saved_models/classic_cv/fixmatch_stl10_1000_0/latest_model.pth
+load_path:
 overwrite: True
 use_tensorboard: True
 use_wandb: True
@@ -43,3 +43,6 @@ multiprocessing_distributed: True
 dist_url: tcp://127.0.0.1:10007
 dist_backend: nccl
 gpu: None
+
+wandb_name:
+save_name:
