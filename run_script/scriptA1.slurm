@@ -16,7 +16,7 @@
 
 #SBATCH --hint=nomultithread         # hyperthreading is deactivated
 #SBATCH --qos=qos_gpu-t4 #for jobs > 100h
-#SBATCH --time=45:00:00              # maximum execution time requested (HH:MM:SS)
+#SBATCH --time=99:00:00              # maximum execution time requested (HH:MM:SS)
 #SBATCH --output=OAR.%j.out    # name of output file
 
 module purge  
