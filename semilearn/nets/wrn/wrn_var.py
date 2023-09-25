@@ -164,7 +164,7 @@ class WideResNetVar(nn.Module):
 
 class WideResNetVarProto(nn.Module):
     def __init__(self, first_stride, num_classes, depth=28, widen_factor=2, drop_rate=0.0, **kwargs):
-        super(WideResNetVar, self).__init__()
+        super(WideResNetVarProto, self).__init__()
         channels = [16, 16 * widen_factor, 32 * widen_factor, 64 * widen_factor, 128 * widen_factor]
         assert ((depth - 4) % 6 == 0)
         n = (depth - 4) / 6

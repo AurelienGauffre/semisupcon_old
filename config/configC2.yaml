@@ -11,7 +11,7 @@ wandb_name:
 resume: True
 droprate: 0
 resume_only_weight: False # When resuming a model, only take the weight for finetuning (make epochs,scheduler, optimizer start from scratch)
-load_path:  #latest_model.pth epoch124
+load_path:  semisupcon_stl10_1000_pl_temp=.5
 overwrite: True
 use_tensorboard: True
 use_wandb: True

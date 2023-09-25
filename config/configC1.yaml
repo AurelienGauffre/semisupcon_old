@@ -1,4 +1,4 @@
-# Config C : small  1 fixmatch smaal
+# Config C : small  1 fixmatch stl10
 algorithm: fixmatch
 save_dir: ./saved_models/classic_cv
 resume: True
