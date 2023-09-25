@@ -175,7 +175,8 @@ def main(args):
         f"NB OF TOTAL training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"
 
     # set wandb name
-    net_print_dic = {'wrn_28_2':'wrn_28_2','wrn_28_2_proto':'wrn_28_2','wrn_28_8':'wrn_28_8','wrn_28_8_proto':'wrn_28_8'}
+    net_print_dic = {'wrn_28_2':'wrn_28_2','wrn_28_2_proto':'wrn_28_2','wrn_28_8':'wrn_28_8','wrn_28_8_proto':'wrn_28_8',
+                     'wrn_var_37_2':'wrn_var_37_2','wrn_var_37_2_proto':'wrn_var_37_2'}
     args.wandb_project = f"semisupcon_{args.dataset}{net_print_dic[args.net]}"
     #args.wandb_project = f"semisupcon_{args.dataset}_{args.num_labels}_{net_print_dic[args.net]}"
     if args.algorithm in ['fixmatch', 'flexmatch']:
