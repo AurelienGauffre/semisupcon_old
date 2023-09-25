@@ -10,13 +10,13 @@
 
 #SBATCH --nodes=1                    # we request one node
 #SBATCH --ntasks-per-node=1          # with one task per node (= number of GPUs here)
-#SBATCH --gres=gpu:1                 # number of GPUs per node (max 8 with gpu_p2, gpu_p4, gpu_p5)
+#SBATCH --gres=gpu:1                 # number of GPUs per node ( with gpu_p2, gpu_p4, gpu_p5)
 
 #SBATCH --cpus-per-task=10           # number of cores per task (1/4 of the 4-GPUs node)
 
 #SBATCH --hint=nomultithread         # hyperthreading is deactivated
 #SBATCH --qos=qos_gpu-t4 #for jobs > 100h
-#SBATCH --time=1:00:00              # maximum execution time requested (HH:MM:SS)
+#SBATCH --time=99:00:00              # maximum execution time requested (HH:MM:SS)
 #SBATCH --output=OAR.%j.out    # name of output file
 
 module purge  
