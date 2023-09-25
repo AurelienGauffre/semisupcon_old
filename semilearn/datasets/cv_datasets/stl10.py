@@ -64,8 +64,8 @@ def get_stl10(args, alg, name, num_labels, num_classes, data_dir='./data', inclu
 
     data_dir = os.path.join(data_dir, name.lower())
     dset = getattr(torchvision.datasets, name.upper())
-    dset_lb = dset(data_dir, split='train', download=True)
-    dset_ulb = dset(data_dir, split='unlabeled', download=True)
+    dset_lb = dset(data_dir, split='train', download=False)
+    dset_ulb = dset(data_dir, split='unlabeled', download=False)
     lb_data, lb_targets = dset_lb.data.transpose([0, 2, 3, 1]), dset_lb.labels.astype(np.int64)
     ulb_data = dset_ulb.data.transpose([0, 2, 3, 1])
 
@@ -104,7 +104,7 @@ def get_stl10(args, alg, name, num_labels, num_classes, data_dir='./data', inclu
     ulb_dset = BasicDataset(alg, ulb_data, ulb_targets, num_classes, transform_weak, True, transform_strong, False)
 
     dset = getattr(torchvision.datasets, name.upper())
-    dset_lb = dset(data_dir, split='test', download=True)
+    dset_lb = dset(data_dir, split='test', download=False)
     data, targets = dset_lb.data.transpose([0, 2, 3, 1]), dset_lb.labels.astype(np.int64)
     eval_dset = BasicDataset(alg, data, targets, num_classes, transform_val, False, None, False)
 
