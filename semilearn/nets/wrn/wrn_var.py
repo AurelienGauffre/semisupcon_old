@@ -208,9 +208,9 @@ class WideResNetVarProto(nn.Module):
 
         self.prototypes = nn.Parameter(torch.randn(num_classes, channels[3]))
         self.contrastive_head = nn.Sequential(  # projection for contrastive loss
-            nn.Linear(channels[3], channels[3]),
+            nn.Linear(channels[4], channels[4]),
             nn.ReLU(inplace=True),
-            nn.Linear(channels[3], channels[3])
+            nn.Linear(channels[4], channels[4])
         )
     def forward(self, x, only_fc=False, only_feat=False, **kwargs):
         """
