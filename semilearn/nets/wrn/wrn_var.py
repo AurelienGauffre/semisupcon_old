@@ -206,7 +206,7 @@ class WideResNetVarProto(nn.Module):
                 nn.init.xavier_normal_(m.weight.data)
                 m.bias.data.zero_()
 
-        self.prototypes = nn.Parameter(torch.randn(num_classes, channels[3]))
+        self.prototypes = nn.Parameter(torch.randn(num_classes, channels[4]))
         self.contrastive_head = nn.Sequential(  # projection for contrastive loss
             nn.Linear(channels[4], channels[4]),
             nn.ReLU(inplace=True),
