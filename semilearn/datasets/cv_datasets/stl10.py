@@ -5,18 +5,18 @@ import os
 import json
 import torchvision
 import numpy as np
-import math 
+import math
 from torchvision import transforms
 
 from .datasetbase import BasicDataset
 from semilearn.datasets.utils import sample_labeled_unlabeled_data
 from semilearn.datasets.augmentation import RandAugment
 
-
 mean, std = {}, {}
 mean['stl10'] = [x / 255 for x in [112.4, 109.1, 98.6]]
 std['stl10'] = [x / 255 for x in [68.4, 66.6, 68.5]]
 img_size = 96
+
 
 def get_transform(mean, std, crop_size, train=True, crop_ratio=0.95):
     img_size = int(img_size / crop_ratio)
@@ -34,14 +34,14 @@ def get_transform(mean, std, crop_size, train=True, crop_ratio=0.95):
 
 
 def get_stl10(args, alg, name, num_labels, num_classes, data_dir='./data', include_lb_to_ulb=False):
-    
     crop_size = args.img_size
     crop_ratio = args.crop_ratio
     img_size = int(math.floor(crop_size / crop_ratio))
 
     transform_weak = transforms.Compose([
         transforms.Resize(crop_size),
-        transforms.RandomCrop((crop_size, crop_size), padding=int(crop_size * (1 - crop_ratio)), padding_mode='reflect'),
+        transforms.RandomCrop((crop_size, crop_size), padding=int(crop_size * (1 - crop_ratio)),
+                              padding_mode='reflect'),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize(mean[name], std[name])
@@ -49,7 +49,8 @@ def get_stl10(args, alg, name, num_labels, num_classes, data_dir='./data', inclu
 
     transform_strong = transforms.Compose([
         transforms.Resize(crop_size),
-        transforms.RandomCrop((crop_size, crop_size), padding=int(crop_size * (1 - crop_ratio)), padding_mode='reflect'),
+        transforms.RandomCrop((crop_size, crop_size), padding=int(crop_size * (1 - crop_ratio)),
+                              padding_mode='reflect'),
         transforms.RandomHorizontalFlip(),
         RandAugment(3, 5),
         transforms.ToTensor(),
@@ -59,7 +60,7 @@ def get_stl10(args, alg, name, num_labels, num_classes, data_dir='./data', inclu
     transform_val = transforms.Compose([
         transforms.Resize(crop_size),
         transforms.ToTensor(),
-        transforms.Normalize(mean[name], std[name],)
+        transforms.Normalize(mean[name], std[name], )
     ])
 
     data_dir = os.path.join(data_dir, name.lower())
@@ -77,11 +78,11 @@ def get_stl10(args, alg, name, num_labels, num_classes, data_dir='./data', inclu
                                               lb_imbalance_ratio=args.lb_imb_ratio,
                                               ulb_imbalance_ratio=args.ulb_imb_ratio,
                                               load_exist=True)
-    ulb_targets = np.ones((ulb_data.shape[0], )) * -1
+    ulb_targets = np.ones((ulb_data.shape[0],)) * -1
     lb_data, lb_targets = lb_data[lb_idx], lb_targets[lb_idx]
     if include_lb_to_ulb:
         ulb_data = np.concatenate([lb_data, ulb_data], axis=0)
-        ulb_targets = np.concatenate([lb_targets, np.ones((ulb_data.shape[0] - lb_data.shape[0], )) * -1], axis=0)
+        ulb_targets = np.concatenate([lb_targets, np.ones((ulb_data.shape[0] - lb_data.shape[0],)) * -1], axis=0)
     ulb_targets = ulb_targets.astype(np.int64)
 
     # output the distribution of labeled data for remixmatch
@@ -109,3 +110,6 @@ def get_stl10(args, alg, name, num_labels, num_classes, data_dir='./data', inclu
     eval_dset = BasicDataset(alg, data, targets, num_classes, transform_val, False, None, False)
 
     return lb_dset, ulb_dset, eval_dset
+
+
+
