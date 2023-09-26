@@ -24,4 +24,4 @@ module load pytorch-gpu/py3/1.12.1
 
 cd /gpfsscratch/rech/cgs/ued97kp/semisupcon
 
-python3 train.py --c ./config/configC2.yaml
+python3 train.py --c ./config/configC3.yaml
