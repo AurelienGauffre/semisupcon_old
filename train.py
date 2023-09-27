@@ -175,17 +175,28 @@ def main(args):
         f"NB OF TOTAL training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"
 
     # set wandb name
-    net_print_dic = {'wrn_28_2':'wrn_28_2','wrn_28_2_proto':'wrn_28_2','wrn_28_8':'wrn_28_8','wrn_28_8_proto':'wrn_28_8',
-                     'wrn_var_37_2':'wrn_var_37_2','wrn_var_37_2_proto':'wrn_var_37_2'}
+    net_print_dic = {'wrn_28_2': 'wrn_28_2', 'wrn_28_2_proto': 'wrn_28_2', 'wrn_28_8': 'wrn_28_8',
+                     'wrn_28_8_proto': 'wrn_28_8',
+                     'wrn_var_37_2': 'wrn_var_37_2', 'wrn_var_37_2_proto': 'wrn_var_37_2',
+                     'vit_small_patch2_32': 'vit_small_patch2_32', 'vit_small_patch2_32_proto': 'vit_small_patch2_32',
+                     'vit_tiny_patch2_32': 'vit_tiny_patch2_32', 'vit_tiny_patch2_32_proto': 'vit_tiny_patch2_32',
+                     'vit_small_patch16_224': 'vit_small_patch16_224',
+                     'vit_small_patch16_224_proto': 'vit_small_patch16_224',
+                     'vit_base_patch16_96': 'vit_base_patch16_96', 'vit_base_patch16_96_proto': 'vit_base_patch16_96',
+                     'vit_base_patch16_224': 'vit_base_patch16_224',
+                     'vit_base_patch16_224_proto': 'vit_base_patch16_224'
+
+                     }
+
     args.wandb_project = f"semisupcon_{args.dataset}{net_print_dic[args.net]}"
-    #args.wandb_project = f"semisupcon_{args.dataset}_{args.num_labels}_{net_print_dic[args.net]}"
+    # args.wandb_project = f"semisupcon_{args.dataset}_{args.num_labels}_{net_print_dic[args.net]}"
     if args.algorithm in ['fixmatch', 'flexmatch']:
         algo_print = args.algorithm
         loss_print = ''
         pl_print = ''
     elif args.algorithm in ["semisupcon", "semisupconproto"]:
         loss_print = f'_{args.loss}_tau={args.p_cutoff}'
-        if args.algorithm == "semisupconproto" and 'Weights' in  args.loss :
+        if args.algorithm == "semisupconproto" and 'Weights' in args.loss:
             loss_print += f'_lambdaProto={args.lambda_proto}'
         if args.algorithm == "semisupcon":
             algo_print = args.algorithm
@@ -198,7 +209,6 @@ def main(args):
         else:
             raise ValueError(f"Unknown pl {args.pl}")
 
-
     print_prefix_wandb_name = '' if args.wandb_name is None else f'{args.wandb_name}_'
     args.save_name_wandb = str(
         f'{print_prefix_wandb_name}{algo_print}{loss_print}_{pl_print}bs{args.batch_size}_lr{args.lr}_seed{args.seed}')
@@ -210,8 +220,8 @@ def main(args):
     # set savename
     # args.save_name should not be set to none for run that will requires to resume weights .
     # otherwise the model is save using the wandb unique name
-    if args.save_name is None :
-        #args.save_name = f"{args.algorithm}_{args.dataset}_{args.num_labels}_{args.seed}" # savename is used for saving model dirname (we dont need as much details as wandb name)
+    if args.save_name is None:
+        # args.save_name = f"{args.algorithm}_{args.dataset}_{args.num_labels}_{args.seed}" # savename is used for saving model dirname (we dont need as much details as wandb name)
         args.save_name = args.save_name_wandb
     # set save_path
     print(f" #### SAVE PATH : {args.save_dir}/{args.save_name}")
