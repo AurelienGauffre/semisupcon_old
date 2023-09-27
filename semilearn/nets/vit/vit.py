@@ -140,7 +140,7 @@ class VisionTransformer(nn.Module):
             self, img_size=224, patch_size=16, in_chans=3, num_classes=1000, global_pool='token',
             embed_dim=768, depth=12, num_heads=12, mlp_ratio=4., qkv_bias=True,
             drop_rate=0., attn_drop_rate=0., drop_path_rate=0., init_values=None,
-            embed_layer=PatchEmbed, norm_layer=None, act_layer=None, block_fn=Block):
+            embed_layer=PatchEmbed, norm_layer=None, act_layer=None, block_fn=Block,args=None):
         """
         Args:
             img_size (int, tuple): input image size
@@ -247,7 +247,7 @@ class VisionTransformerProto(nn.Module):
             self, img_size=224, patch_size=16, in_chans=3, num_classes=1000, global_pool='token',
             embed_dim=768, depth=12, num_heads=12, mlp_ratio=4., qkv_bias=True,
             drop_rate=0., attn_drop_rate=0., drop_path_rate=0., init_values=None,
-            embed_layer=PatchEmbed, norm_layer=None, act_layer=None, block_fn=Block):
+            embed_layer=PatchEmbed, norm_layer=None, act_layer=None, block_fn=Block,args=None):
         """
         Args:
             img_size (int, tuple): input image size
