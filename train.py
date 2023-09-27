@@ -209,7 +209,7 @@ def main(args):
         else:
             raise ValueError(f"Unknown pl {args.pl}")
 
-    print_prefix_wandb_name = '' if args.wandb_name is None else f'{args.wandb_name}_'
+    print_prefix_wandb_name = '' if getattr(args, 'wandb_name', None) is None else f'{args.wandb_name}_'
     args.save_name_wandb = str(
         f'{print_prefix_wandb_name}{algo_print}{loss_print}_{pl_print}bs{args.batch_size}_lr{args.lr}_seed{args.seed}')
     if 'OAR_JOB_ID' in os.environ:
