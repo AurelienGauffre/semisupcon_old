@@ -194,11 +194,11 @@ def main(args):
         algo_print = args.algorithm
         loss_print = ''
         pl_print = ''
-    elif args.algorithm in ["semisupcon", "semisupconproto"]:
+    elif args.algorithm in ["semisupcon", "semisupconproto","semisupconproto2"]:
         loss_print = f'_{args.loss}_tau={args.p_cutoff}'
         if args.algorithm == "semisupconproto" and 'Weights' in args.loss:
             loss_print += f'_lambdaProto={args.lambda_proto}'
-        if args.algorithm == "semisupcon":
+        if args.algorithm in ["semisupcon","semisupconproto2"]:
             algo_print = args.algorithm
         elif args.algorithm == "semisupconproto":
             algo_print = "proto"
