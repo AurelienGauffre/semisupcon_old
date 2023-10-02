@@ -662,19 +662,19 @@ class SemiSupConProto(AlgorithmBase):
                     dim=0)
 
                 if self.args.loss == "OnlySupcon":
-                    contrastive_x_all = torch.cat(
-                        (contrastive_x_all, contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool]), dim=0)
-                    y_all = torch.cat((y_all, (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
-                                      dim=0)  # TODO Ne pas hardcoder le nombre de classes
+                    # contrastive_x_all = torch.cat(
+                    #     (contrastive_x_all, contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool]), dim=0)
+                    # y_all = torch.cat((y_all, (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
+                    #                   dim=0)  # TODO Ne pas hardcoder le nombre de classes
 
                     supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
 
                     total_loss = supcon_loss
                 elif self.args.loss == "OnlySupconWeights":
-                    contrastive_x_all = torch.cat(
-                        (contrastive_x_all, contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool]), dim=0)
-                    y_all = torch.cat((y_all, (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
-                                      dim=0)  # TODO Ne pas hardcoder le nombre de classes
+                    # contrastive_x_all = torch.cat(
+                    #     (contrastive_x_all, contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool]), dim=0)
+                    # y_all = torch.cat((y_all, (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
+                    #                   dim=0)  # TODO Ne pas hardcoder le nombre de classes
 
                     weights = torch.ones(y_all.shape[0]).cuda()
                     weights[:self.args.num_classes] *= self.args.lambda_proto
