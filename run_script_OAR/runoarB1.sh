@@ -1,5 +1,5 @@
 cd ~/semisupcon
-. sscenv/bin/activate
+. envsemisupcon/bin/activate
 git pull
 DSDIR="/home/aptikal/gauffrea/datasets"
 DSDIR_CUSTOM="/home/aptikal/gauffrea/datasets"
