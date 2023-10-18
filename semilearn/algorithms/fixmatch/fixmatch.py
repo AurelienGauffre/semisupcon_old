@@ -207,7 +207,7 @@ class SemiSupCon(AlgorithmBase):
                 (contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool]), dim=0)
             y_all = torch.cat((y_lb, pseudo_label[maskbool], pseudo_label[maskbool]), dim=0)
 
-            if self.args.loss == "only_unsup":
+            if self.args.loss == "simclr":
                 simclr_loss = self.supcon_loss(
                     embeddings=torch.cat((contrastive_x_ulb_s_0, contrastive_x_ulb_s_1)),
                     labels=torch.arange(len(maskbool)).repeat(2))
@@ -445,26 +445,29 @@ class SemiSupConProto(AlgorithmBase):
             maskbool = torch.max(similarity_to_proto, dim=1)[0] > self.p_cutoff
             mask_sum = maskbool.sum()  # number of samples with high confidence
 
-            contrastive_x_all = torch.cat(
-                (proto_proj, contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool]), dim=0)
-            y_all = torch.cat(
-                (torch.arange(self.args.num_classes).cuda(), y_lb, pseudo_label[maskbool], pseudo_label[maskbool],),
-                dim=0)  # TODO Ne pas hardcoder le nombre de classes
-
             if self.args.loss == "OnlySupcon":
                 contrastive_x_all = torch.cat(
-                    (contrastive_x_all, contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool]), dim=0)
-                y_all = torch.cat((y_all, (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
-                                  dim=0)  # TODO Ne pas hardcoder le nombre de classes
+                    (proto_proj, contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool],contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool]),
+                    dim=0)
+                y_all = torch.cat(
+                    (torch.arange(self.args.num_classes).cuda(), y_lb, pseudo_label[maskbool], pseudo_label[maskbool],(torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
+                    dim=0)
+
+
 
                 supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
 
                 total_loss = supcon_loss
             elif self.args.loss == "OnlySupconWeights":
+
                 contrastive_x_all = torch.cat(
-                    (contrastive_x_all, contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool]), dim=0)
-                y_all = torch.cat((y_all, (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
-                                  dim=0)  # TODO Ne pas hardcoder le nombre de classes
+                    (proto_proj, contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool],
+                     contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool]),
+                    dim=0)
+                y_all = torch.cat(
+                    (torch.arange(self.args.num_classes).cuda(), y_lb, pseudo_label[maskbool], pseudo_label[maskbool],
+                     (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
+                    dim=0)
 
                 weights = torch.ones(y_all.shape[0]).cuda()
                 weights[:self.args.num_classes] *= self.args.lambda_proto
@@ -473,9 +476,24 @@ class SemiSupConProto(AlgorithmBase):
 
                 total_loss = supcon_loss
 
+            elif self.args.loss == "simclr":
+                simclr = self.supcon_loss(
+                    embeddings=torch.cat((contrastive_x_ulb_s_0, contrastive_x_ulb_s_1)),
+                    labels=torch.arange(len(maskbool)).repeat(2))
+
+                total_loss = simclr
+
+
 
             elif self.args.loss == "Supcon&SimclrRemaining)":
-                "Supcon to labeled and pseudolabels + simclr only on non pseudo labeled examples"
+            # "Supcon to labeled and pseudolabels + simclr only on non pseudo labeled examples"
+                contrastive_x_all = torch.cat(
+                    (proto_proj, contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool]),
+                    dim=0)
+                y_all = torch.cat(
+                    (torch.arange(self.args.num_classes).cuda(), y_lb, pseudo_label[maskbool], pseudo_label[maskbool],),
+                    dim=0)
+
 
                 supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
                 simclr = self.supcon_loss(
@@ -484,7 +502,14 @@ class SemiSupConProto(AlgorithmBase):
                 total_loss = supcon_loss + simclr
 
             elif self.args.loss == "Supcon&SimclrAll":
-                "Supcon to labeled and pseudolabels + simclr on all unsupervised labels"
+                #"Supcon to labeled and pseudolabels + simclr on all unsupervised labels"
+
+
+                contrastive_x_all = torch.cat(
+                    (proto_proj, contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool]), dim=0)
+                y_all = torch.cat(
+                    (torch.arange(self.args.num_classes).cuda(), y_lb, pseudo_label[maskbool], pseudo_label[maskbool],),
+                    dim=0)
                 supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
                 simclr = self.supcon_loss(
                     embeddings=torch.cat((contrastive_x_ulb_s_0, contrastive_x_ulb_s_1)),
@@ -665,7 +690,7 @@ class SemiSupConProto(AlgorithmBase):
                     # contrastive_x_all = torch.cat(
                     #     (contrastive_x_all, contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool]), dim=0)
                     # y_all = torch.cat((y_all, (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
-                    #                   dim=0)  # TODO Ne pas hardcoder le nombre de classes
+                    #                   dim=0)
 
                     supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
 
@@ -674,8 +699,7 @@ class SemiSupConProto(AlgorithmBase):
                     # contrastive_x_all = torch.cat(
                     #     (contrastive_x_all, contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool]), dim=0)
                     # y_all = torch.cat((y_all, (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
-                    #                   dim=0)  # TODO Ne pas hardcoder le nombre de classes
-
+                    #                   dim=0)
                     weights = torch.ones(y_all.shape[0]).cuda()
                     weights[:self.args.num_classes] *= self.args.lambda_proto
                     supcon_loss = self.supcon_loss_weights(embeddings=contrastive_x_all, labels=y_all,

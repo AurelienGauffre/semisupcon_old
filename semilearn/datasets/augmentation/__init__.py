@@ -1,4 +1,4 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
-from .randaugment import RandAugment
+from .randaugment import RandAugment, SimCLRTransformAndCutout
 from .transforms import *

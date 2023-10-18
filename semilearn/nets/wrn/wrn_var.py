@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from semilearn.nets.utils import load_checkpoint
+from torchinfo import summary
 
 momentum = 0.001
 
@@ -268,3 +269,8 @@ def wrn_var_37_2_proto(pretrained=False, pretrained_path=None, **kwargs):
     if pretrained:
         model = load_checkpoint(model, pretrained_path)
     return model
+
+if __name__ == "__main__":
+    model = wrn_var_37_2(num_classes=10)
+    BS = 1
+    summary(model, input_size=(BS, 3, 32, 32))

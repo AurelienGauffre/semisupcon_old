@@ -60,3 +60,5 @@ pynacl
 wandb
 aim
 pytorch-metric-learning
+torchinfo
+lightly

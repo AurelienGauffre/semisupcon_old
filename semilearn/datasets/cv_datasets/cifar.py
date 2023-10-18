@@ -10,8 +10,9 @@ import math
 
 from torchvision import transforms
 from .datasetbase import BasicDataset
-from semilearn.datasets.augmentation import RandAugment, RandomResizedCropAndInterpolation
+from semilearn.datasets.augmentation import RandAugment, RandomResizedCropAndInterpolation, SimCLRTransformAndCutout
 from semilearn.datasets.utils import split_ssl_data
+
 
 
 mean, std = {}, {}
@@ -20,6 +21,7 @@ mean['cifar100'] = [x / 255 for x in [129.3, 124.1, 112.4]]
 
 std['cifar10'] = [0.229, 0.224, 0.225]
 std['cifar100'] = [x / 255 for x in [68.2, 65.4, 70.4]]
+
 
 
 def get_cifar(args, alg, name, num_labels, num_classes, data_dir='./data', include_lb_to_ulb=True):
@@ -38,15 +40,27 @@ def get_cifar(args, alg, name, num_labels, num_classes, data_dir='./data', inclu
         transforms.ToTensor(),
         transforms.Normalize(mean[name], std[name])
     ])
-
-    transform_strong = transforms.Compose([
-        transforms.Resize(crop_size),
-        transforms.RandomCrop(crop_size, padding=int(crop_size * (1 - crop_ratio)), padding_mode='reflect'),
-        transforms.RandomHorizontalFlip(),
-        RandAugment(3, 5),
-        transforms.ToTensor(),
-        transforms.Normalize(mean[name], std[name])
-    ])
+    if not hasattr(args, 'augment') or args.augment is None or args.augment == '' or args.augment == 'randaugment':
+        transform_strong = transforms.Compose([
+            transforms.Resize(crop_size),
+            transforms.RandomCrop(crop_size, padding=int(crop_size * (1 - crop_ratio)), padding_mode='reflect'),
+            transforms.RandomHorizontalFlip(),
+            RandAugment(3, 5),
+            transforms.ToTensor(),
+            transforms.Normalize(mean[name], std[name])
+        ])
+    elif args.augment == 'simaugment1':
+        transform_strong = transforms.Compose([
+            SimCLRTransformAndCutout(input_size=args.img_size, gaussian_blur=0.0),
+            transforms.ToTensor(),
+            transforms.Normalize(mean[name], std[name])
+        ])
+    elif args.augment == 'simaugment2':
+        transform_strong = transforms.Compose([
+            SimCLRTransformAndCutout(input_size=args.img_size,min_scale=.4,cj_strength=1.3,gaussian_blur=0.0),
+            transforms.ToTensor(),
+            transforms.Normalize(mean[name], std[name])
+        ])
 
     transform_val = transforms.Compose([
         transforms.Resize(crop_size),

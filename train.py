@@ -208,6 +208,10 @@ def main(args):
             pl_print = f'pl=softmaxT={args.pl_temp}_'
         else:
             raise ValueError(f"Unknown pl {args.pl}")
+    elif args.algorithm == "unsup":
+        algo_print = args.algorithm
+        loss_print = args.loss
+        pl_print = ''
 
     print_prefix_wandb_name = '' if getattr(args, 'wandb_name', None) is None else f'{args.wandb_name}_'
     args.save_name_wandb = str(
@@ -344,8 +348,9 @@ def main_worker(gpu, ngpus_per_node, args):
     model.train()
 
     # print validation (and test results)
-    for key, item in model.results_dict.items():
-        logger.info(f"Model result - {key} : {item}")
+    if hasattr(model, 'results_dict'):
+        for key, item in model.results_dict.items():
+            logger.info(f"Model result - {key} : {item}")
 
     if hasattr(model, 'finetune'):
         logger.info("Finetune stage")

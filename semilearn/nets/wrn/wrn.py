@@ -5,8 +5,9 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from torchinfo import summary
 from semilearn.nets.utils import load_checkpoint
+
 
 momentum = 0.001
 
@@ -309,3 +310,8 @@ def wrn_28_8_proto(pretrained=False, pretrained_path=None, droprate=0.0, **kwarg
     if pretrained:
         model = load_checkpoint(model, pretrained_path)
     return model
+
+if __name__ == "__main__":
+    model = wrn_28_2(num_classes=10)
+    BS = 1
+    summary(model, input_size=(BS, 3, 32, 32))

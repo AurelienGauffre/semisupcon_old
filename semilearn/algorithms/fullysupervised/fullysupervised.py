@@ -43,7 +43,8 @@ class FullySupervised(AlgorithmBase):
             
         for epoch in range(self.start_epoch, self.epochs):
             self.epoch = epoch
-            
+            print(f"Epoch: {epoch}")
+
             # prevent the training iterations exceed args.num_train_iter
             if self.it > self.num_train_iter:
                 break

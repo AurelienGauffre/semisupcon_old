@@ -19,6 +19,7 @@ def load_checkpoint(model, checkpoint_path):
     if checkpoint_path and os.path.isfile(checkpoint_path):
         checkpoint = torch.load(checkpoint_path, map_location='cpu')
     else:
+        print(f'No checkpoint found at {checkpoint_path}, try to download from url')
         checkpoint = load_state_dict_from_url(checkpoint_path, map_location='cpu')
 
     
