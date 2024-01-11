@@ -174,7 +174,7 @@ def main(args):
     assert args.num_train_iter % args.epoch == 0, \
         f"NB OF TOTAL training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"
 
-    # set wandb name
+    # set appropriate wandb name
     net_print_dic = {'wrn_28_2': 'wrn_28_2', 'wrn_28_2_proto': 'wrn_28_2', 'wrn_28_8': 'wrn_28_8',
                      'wrn_28_8_proto': 'wrn_28_8',
                      'wrn_var_37_2': 'wrn_var_37_2', 'wrn_var_37_2_proto': 'wrn_var_37_2',
