@@ -37,6 +37,9 @@ def setattr_cls_from_kwargs(cls, kwargs):
 
 
 def send_model_cuda(args, model, clip_batch=True):
+    if args.speed :
+        model = torch.compile(model)
+
     if not torch.cuda.is_available():
         raise Exception('ONLY GPU TRAINING IS SUPPORTED')
     elif args.distributed:

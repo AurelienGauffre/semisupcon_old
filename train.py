@@ -323,8 +323,7 @@ def main_worker(gpu, ngpus_per_node, args):
         model = get_algorithm(args, _net_builder, tb_log, logger)
     logger.info(f'Number of Trainable Params: {count_parameters(model.model)}')
 
-    if args.speed :
-        model = torch.compile(model)
+
     # SET Devices for (Distributed) DataParallel
     model.model = send_model_cuda(args, model.model)
     model.ema_model = send_model_cuda(args, model.ema_model, clip_batch=False)

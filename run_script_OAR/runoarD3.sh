@@ -1,5 +1,5 @@
 cd ~/semisupcon
-. speedenv/bin/activate
+. envspeed/bin/activate
 git pull
 DSDIR="/home/aptikal/gauffrea/datasets"
 DSDIR_CUSTOM="/home/aptikal/gauffrea/datasets"
