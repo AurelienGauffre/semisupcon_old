@@ -69,8 +69,8 @@ def send_model_cuda(args, model, clip_batch=True):
     else:
         model = torch.nn.DataParallel(model).cuda()
 
-    if args.speed :
-        model = torch.compile(model)
+    # if args.speed :
+    #     model = torch.compile(model)
 
     return model
 
