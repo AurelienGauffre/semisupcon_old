@@ -487,6 +487,13 @@ class SemiSupConProto(AlgorithmBase):
             elif self.args.loss == "AblationFixMatch": # E1
                 # Exactly the same loss as fixmatch algo, but using a supcon proto (it's just here to check that the following losses were build on clean base)
 
+                # To avoid using the contrastive projection head, we use contrastive=False
+                outputs = self.model(inputs, contrastive=False)
+                contrastive_x_lb = outputs['logits'][:num_lb]
+                contrastive_x_ulb_w, contrastive_x_ulb_s_0, contrastive_x_ulb_s_1 = outputs['logits'][num_lb:].chunk(3)
+
+
+
                 sup_loss = self.ce_loss(contrastive_x_lb, y_lb, reduction='mean')
                 supcon_loss = sup_loss # avoid error in log_dict
                 # probs_x_ulb_w = torch.softmax(logits_x_ulb_w, dim=-1)
@@ -551,8 +558,7 @@ class SemiSupConProto(AlgorithmBase):
                 total_loss = sup_loss + self.lambda_u * (unsup_loss_0 + unsup_loss_1)
 
             elif self.args.loss == "AblationFixMatchDoubleAug+Simclr":  # E3
-                # We use the same loss as fixmatch but using both strong augmentations x_ulb_s_0 and x_ulb_s_1
-
+                # Same as E2 + simclr loss on the unconfident examples
                 sup_loss = self.ce_loss(contrastive_x_lb, y_lb, reduction='mean')
                 supcon_loss = sup_loss  # avoid error in log_dict
                 # probs_x_ulb_w = torch.softmax(logits_x_ulb_w, dim=-1)
