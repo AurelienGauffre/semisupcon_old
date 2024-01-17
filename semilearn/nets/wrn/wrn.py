@@ -207,6 +207,7 @@ class WideResNetProto(nn.Module):
         # No classifier whem using prototypes
         # self.classifier = nn.Linear(channels[3], num_classes)  # proba for BCE
 
+        self.classifier = nn.Linear(channels[3], num_classes) #just used in ablation, when contrastive is False
         self.contrastive_head = nn.Sequential(  # projection for contrastive loss
             nn.Linear(channels[3], channels[3]),
             nn.ReLU(inplace=True),
@@ -238,7 +239,7 @@ class WideResNetProto(nn.Module):
                 nn.init.xavier_normal_(m.weight.data)
                 m.bias.data.zero_()
 
-    def forward(self, x, **kwargs):
+    def forward(self, x, contrastive=True, **kwargs):
         """
         Args:
             x: input tensor, depends on only_fc and only_feat flag
@@ -252,8 +253,10 @@ class WideResNetProto(nn.Module):
         out = F.adaptive_avg_pool2d(out, 1)
         feat = out.view(-1, self.channels)
 
-        contrastive_feats =  F.normalize(self.contrastive_head(feat), dim=1) # on normalise les la projection des embedings
-
+        if contrastive :
+            contrastive_feats =  F.normalize(self.contrastive_head(feat), dim=1) # on normalise les la projection des embedings
+        else :
+            contrastive_feats = self.classifier(feat) # tres mauvais nom car ce sont des logits mais flemme de changer juste pour cette ablation
         if self.proto_after_head:
             proto_proj = F.normalize(self.prototypes, dim=1)
         else:

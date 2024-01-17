@@ -487,10 +487,11 @@ class SemiSupConProto(AlgorithmBase):
             elif self.args.loss == "AblationFixMatch": # E1
                 # Exactly the same loss as fixmatch algo, but using a supcon proto (it's just here to check that the following losses were build on clean base)
 
+
                 # To avoid using the contrastive projection head, we use contrastive=False
                 outputs = self.model(inputs, contrastive=False)
-                contrastive_x_lb = outputs['logits'][:num_lb]
-                contrastive_x_ulb_w, contrastive_x_ulb_s_0, contrastive_x_ulb_s_1 = outputs['logits'][num_lb:].chunk(3)
+                contrastive_x_lb = outputs['contrastive_feats'][:num_lb]
+                contrastive_x_ulb_w, contrastive_x_ulb_s_0, contrastive_x_ulb_s_1 = outputs['contrastive_feats'][num_lb:].chunk(3)
 
 
 
