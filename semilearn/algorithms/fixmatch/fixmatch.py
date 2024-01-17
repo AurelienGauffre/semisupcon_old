@@ -483,8 +483,8 @@ class SemiSupConProto(AlgorithmBase):
 
                 total_loss = simclr
 
-            elif self.args.loss == "AblationFixMatch":
-                # We use the same loss as fixmatch but using both strong augmentations x_ulb_s_0 and x_ulb_s_1
+            elif self.args.loss == "AblationFixMatch": # E1
+                # Exactly the same loss as fixmatch algo, but using a supcon proto (it's just here to check that the following losses were build on clean base)
 
                 sup_loss = self.ce_loss(contrastive_x, y_lb, reduction='mean')
 
@@ -512,6 +512,79 @@ class SemiSupConProto(AlgorithmBase):
                                                    mask=mask)
 
                 total_loss = sup_loss + self.lambda_u * unsup_loss
+
+
+            elif self.args.loss == "AblationFixMatchDoubleAug": #E2
+                # We use the same loss as fixmatch but using both strong augmentations x_ulb_s_0 and x_ulb_s_1
+
+                sup_loss = self.ce_loss(contrastive_x, y_lb, reduction='mean')
+
+                # probs_x_ulb_w = torch.softmax(logits_x_ulb_w, dim=-1)
+                probs_x_ulb_w = self.compute_prob(contrastive_x_ulb_w.detach())
+
+                # if distribution alignment hook is registered, call it
+                # this is implemented for imbalanced algorithm - CReST
+                if self.registered_hook("DistAlignHook"):
+                    probs_x_ulb_w = self.call_hook("dist_align", "DistAlignHook", probs_x_ulb=probs_x_ulb_w.detach())
+
+                # compute mask
+                mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=probs_x_ulb_w, softmax_x_ulb=False)
+                mask_sum = mask.bool().sum()
+                # generate unlabeled targets using pseudo label hook
+                pseudo_label = self.call_hook("gen_ulb_targets", "PseudoLabelingHook",
+                                              logits=probs_x_ulb_w,
+                                              use_hard_label=self.use_hard_label,
+                                              T=self.T,
+                                              softmax=False)
+
+                unsup_loss_0 = self.consistency_loss(contrastive_x_ulb_s_0,
+                                                   pseudo_label,
+                                                   'ce',
+                                                   mask=mask)
+                unsup_loss_1 = self.consistency_loss(contrastive_x_ulb_s_1,
+                                                     pseudo_label,
+                                                     'ce',
+                                                     mask=mask)
+
+                total_loss = sup_loss + self.lambda_u * (unsup_loss_0 + unsup_loss_1)
+
+            elif self.args.loss == "AblationFixMatchDoubleAug+Simclr":  # E3
+                # We use the same loss as fixmatch but using both strong augmentations x_ulb_s_0 and x_ulb_s_1
+
+                sup_loss = self.ce_loss(contrastive_x, y_lb, reduction='mean')
+
+                # probs_x_ulb_w = torch.softmax(logits_x_ulb_w, dim=-1)
+                probs_x_ulb_w = self.compute_prob(contrastive_x_ulb_w.detach())
+
+                # if distribution alignment hook is registered, call it
+                # this is implemented for imbalanced algorithm - CReST
+                if self.registered_hook("DistAlignHook"):
+                    probs_x_ulb_w = self.call_hook("dist_align", "DistAlignHook", probs_x_ulb=probs_x_ulb_w.detach())
+
+                # compute mask
+                mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=probs_x_ulb_w, softmax_x_ulb=False)
+                mask_sum = mask.bool().sum()
+                # generate unlabeled targets using pseudo label hook
+                pseudo_label = self.call_hook("gen_ulb_targets", "PseudoLabelingHook",
+                                              logits=probs_x_ulb_w,
+                                              use_hard_label=self.use_hard_label,
+                                              T=self.T,
+                                              softmax=False)
+
+                unsup_loss_0 = self.consistency_loss(contrastive_x_ulb_s_0,
+                                                     pseudo_label,
+                                                     'ce',
+                                                     mask=mask)
+                unsup_loss_1 = self.consistency_loss(contrastive_x_ulb_s_1,
+                                                     pseudo_label,
+                                                     'ce',
+                                                     mask=mask)
+
+                simclr_loss = self.supcon_loss(
+                    embeddings=torch.cat((contrastive_x_ulb_s_0[~mask], contrastive_x_ulb_s_1[~mask])),
+                    labels=torch.arange(sum(~mask)).repeat(2))
+                print(f"percentage of unconfident : {sum(~mask)/y_ulb.shape[0]}")
+                total_loss = sup_loss + self.lambda_u * (unsup_loss_0 + unsup_loss_1) + simclr_loss
 
 
 
