@@ -1,13 +1,16 @@
+# Ablation
+# fixmatch + double augm + proto
 algorithm: semisupconproto
-dataset: cifar100
-loss: OnlySupconWeights # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
+dataset: cifar10
+loss: AblationFixMatchDoubleAug # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
 lambda_proto: 0 #only for Weighted supcon loss
 pl: softmax # softmax
-pl_temp: .055 # ONLY for softmax pl
+pl_temp: .040 # USeless here
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
 save_name:
-wandb_name: "EXP2:TEMP"
+wandb_name: "EXP4:Aumgmentation simaugment1"
+augment: 'simaugment1'
 resume: True
 droprate: 0
 resume_only_weight: False # When resuming a model, only take the weight for finetuning (make epochs,scheduler, optimizer start from scratch)
@@ -15,8 +18,8 @@ load_path: ./saved_models/pretrained/pretrainedSimCLRcifar100wrn_28_2_epochs256/
 overwrite: True
 use_tensorboard: True
 use_wandb: True
-epoch: 1024 #1024
-num_train_iter: 1048576 # 1048576
+epoch: 256 #1024
+num_train_iter: 262144 # 1048576
 num_eval_iter: 5120
 num_log_iter: 256
 num_labels: 2500 # 100 2500cifar100
@@ -24,7 +27,7 @@ batch_size: 64 # 64
 eval_batch_size: 256
 hard_label: True
 T: 0.5
-p_cutoff: 0.95 # 0.7 ou .95 pour fixmat for pseudo labeling
+p_cutoff: 0.95 # 0.7 ou .95 pour fixmatchtau for pseudo labeling
 ulb_loss_ratio: 1.0
 uratio: 7
 ema_m: 0.999
@@ -37,7 +40,7 @@ weight_decay: 0.0005
 layer_decay: 1.0
 amp: False
 clip: 0.0
-net: wrn_28_8_proto
+net: wrn_28_2_proto
 net_from_name: False # If True, net_builder takes models in torch.vision models (False de base)
 data_dir: ./data
 train_sampler: RandomSampler
