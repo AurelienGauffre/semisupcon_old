@@ -1,5 +1,6 @@
 # Ablation
 # fixmatch + double aug
+wandb_project: semisupcon_ablation
 algorithm: semisupconproto
 dataset: cifar10
 loss: AblationFixMatchDoubleAug # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)

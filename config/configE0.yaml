@@ -1,5 +1,6 @@
 # Ablation
 # fixmatch classique
+wandb_project: semisupcon_ablation
 algorithm: fixmatch
 dataset: cifar100
 use_cat: True # if false allows to detach
