@@ -3,7 +3,7 @@
 wandb_project: semisupcon_ablation
 wandb_name: "Ablation E3"
 algorithm: semisupconproto
-dataset: cifar10
+dataset: cifar100
 loss: AblationFixMatchDoubleAug+Simclr # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
 lambda_proto: 0 #only for Weighted supcon loss
 pl: softmax # softmax
