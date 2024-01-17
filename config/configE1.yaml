@@ -1,6 +1,7 @@
 # Ablation
 # fixmatch classique mais em utilisant semisupcon (on doit retomber exactement sur E0)
 wandb_project: semisupcon_ablation
+wandb_name: "Ablation E1"
 algorithm: semisupconproto
 dataset: cifar100
 loss: AblationFixMatch # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
@@ -10,7 +11,6 @@ pl_temp: .040 # USeless here
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
 save_name:
-wandb_name: "EXP4:Aumgmentation simaugment1"
 resume: False
 droprate: 0
 resume_only_weight: False # When resuming a model, only take the weight for finetuning (make epochs,scheduler, optimizer start from scratch)

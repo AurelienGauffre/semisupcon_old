@@ -1,12 +1,12 @@
 # Ablation
 # fixmatch classique
 wandb_project: semisupcon_ablation
+wandb_name: "Ablation E0"
 algorithm: fixmatch
 dataset: cifar100
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
 save_name:
-wandb_name: "EXP4:Augmentation simaugment1"
 resume: False
 droprate: 0
 load_path: #latest_model.pth epoch124
