@@ -458,7 +458,8 @@ class SemiSupConProto(AlgorithmBase):
                 supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
 
                 total_loss = supcon_loss
-            elif self.args.loss == "OnlySupconWeights":
+            elif self.args.loss == "OnlySupconWeights": #E6 Loss classique avec 0 sur les lambda_proto pour que les proto ne servent pas d'anchor
+
 
                 contrastive_x_all = torch.cat(
                     (proto_proj, contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool],
@@ -486,8 +487,8 @@ class SemiSupConProto(AlgorithmBase):
             elif self.args.loss == "AblationFixMatch": # E1
                 # Exactly the same loss as fixmatch algo, but using a supcon proto (it's just here to check that the following losses were build on clean base)
 
-                sup_loss = self.ce_loss(contrastive_x, y_lb, reduction='mean')
-
+                sup_loss = self.ce_loss(contrastive_x_lb, y_lb, reduction='mean')
+                supcon_loss = sup_loss # avoid error in log_dict
                 # probs_x_ulb_w = torch.softmax(logits_x_ulb_w, dim=-1)
                 probs_x_ulb_w = self.compute_prob(contrastive_x_ulb_w.detach())
 
@@ -517,7 +518,8 @@ class SemiSupConProto(AlgorithmBase):
             elif self.args.loss == "AblationFixMatchDoubleAug": #E2
                 # We use the same loss as fixmatch but using both strong augmentations x_ulb_s_0 and x_ulb_s_1
 
-                sup_loss = self.ce_loss(contrastive_x, y_lb, reduction='mean')
+                sup_loss = self.ce_loss(contrastive_x_lb, y_lb, reduction='mean')
+                supcon_loss = sup_loss  # avoid error in log_dict
 
                 # probs_x_ulb_w = torch.softmax(logits_x_ulb_w, dim=-1)
                 probs_x_ulb_w = self.compute_prob(contrastive_x_ulb_w.detach())
@@ -551,8 +553,8 @@ class SemiSupConProto(AlgorithmBase):
             elif self.args.loss == "AblationFixMatchDoubleAug+Simclr":  # E3
                 # We use the same loss as fixmatch but using both strong augmentations x_ulb_s_0 and x_ulb_s_1
 
-                sup_loss = self.ce_loss(contrastive_x, y_lb, reduction='mean')
-
+                sup_loss = self.ce_loss(contrastive_x_lb, y_lb, reduction='mean')
+                supcon_loss = sup_loss  # avoid error in log_dict
                 # probs_x_ulb_w = torch.softmax(logits_x_ulb_w, dim=-1)
                 probs_x_ulb_w = self.compute_prob(contrastive_x_ulb_w.detach())
 
@@ -563,6 +565,7 @@ class SemiSupConProto(AlgorithmBase):
 
                 # compute mask
                 mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=probs_x_ulb_w, softmax_x_ulb=False)
+
                 mask_sum = mask.bool().sum()
                 # generate unlabeled targets using pseudo label hook
                 pseudo_label = self.call_hook("gen_ulb_targets", "PseudoLabelingHook",
@@ -579,16 +582,27 @@ class SemiSupConProto(AlgorithmBase):
                                                      pseudo_label,
                                                      'ce',
                                                      mask=mask)
-
+                mask_simclr_bool = mask.to(torch.bool)
                 simclr_loss = self.supcon_loss(
-                    embeddings=torch.cat((contrastive_x_ulb_s_0[~mask], contrastive_x_ulb_s_1[~mask])),
-                    labels=torch.arange(sum(~mask)).repeat(2))
-                print(f"percentage of unconfident : {sum(~mask)/y_ulb.shape[0]}")
+                    embeddings=torch.cat((contrastive_x_ulb_s_0[~mask_simclr_bool], contrastive_x_ulb_s_1[~mask_simclr_bool])),
+                    labels=torch.arange(sum(~mask_simclr_bool)).repeat(2))
+
                 total_loss = sup_loss + self.lambda_u * (unsup_loss_0 + unsup_loss_1) + simclr_loss
 
+            elif self.args.loss == "SupconSimclrRemaining": #E4
+                # "Supcon to labeled and pseudolabels + nothing on unconfident examples"
+                contrastive_x_all = torch.cat(
+                    (proto_proj, contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool]),
+                    dim=0)
+                y_all = torch.cat(
+                    (torch.arange(self.args.num_classes).cuda(), y_lb, pseudo_label[maskbool], pseudo_label[maskbool],),
+                    dim=0)
 
+                supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
 
-            elif self.args.loss == "SupconSimclrRemaining":
+                total_loss = supcon_loss
+
+            elif self.args.loss == "SupconSimclrRemaining": #E5
                 # "Supcon to labeled and pseudolabels + simclr only on non pseudo labeled examples"
                 contrastive_x_all = torch.cat(
                     (proto_proj, contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool]),
