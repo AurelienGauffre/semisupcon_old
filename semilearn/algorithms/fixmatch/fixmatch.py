@@ -420,32 +420,32 @@ class SemiSupConProto(AlgorithmBase):
             if self.use_cat:  # does not support detach of CE
                 inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s_0, x_ulb_s_1))
         #TODO UNCOMMENT THIS
-            #     outputs = self.model(inputs, contrastive=True)
-            #     contrastive_x = outputs['contrastive_feats']
-            #     contrastive_x_lb = contrastive_x[:num_lb]
-            #     contrastive_x_ulb_w, contrastive_x_ulb_s_0, contrastive_x_ulb_s_1 = contrastive_x[num_lb:].chunk(3)
-            #     proto_proj = outputs['proto_proj']
-            # else:
-            #     raise ValueError("SemiSupConProto does not support non-cat mode currently")
-            #
-            # feat_dict = {'x_lb': contrastive_x_lb, 'x_ulb_w': contrastive_x_ulb_w,
-            #              'x_ulb_s': [contrastive_x_ulb_s_0, contrastive_x_ulb_s_1]}
-            #
-            # similarity_to_proto = contrastive_x_ulb_w @ proto_proj.t()  # (N, K) = (N, D) @ (D, K) equivalent des softmax
-            # # print(f"similarity to proto first line : {similarity_to_proto[0, :]} and first label {y_ulb[0]}")
-            #
-            # if self.args.pl == "max":
-            #     pseudo_label = torch.argmax(similarity_to_proto, dim=1)
-            # elif self.args.pl == "softmax":
-            #     pseudo_label = torch.argmax(similarity_to_proto, dim=1)
-            #     # print(
-            #     #     f"before soft{similarity_to_proto.max(dim=1)[0].max(dim=0)[0].item()} {similarity_to_proto.max(dim=1)[0].mean(dim=0).item()}")
-            #     similarity_to_proto = torch.softmax((similarity_to_proto + 1) / 2 / self.args.pl_temp, dim=1)
-            #     # print(f"after soft{similarity_to_proto.max(dim=1)[0].max(dim=0)[0].item()} {similarity_to_proto.max(dim=1)[0].mean(dim=0).item()}")
-            #
-            # maskbool = torch.max(similarity_to_proto, dim=1)[0] > self.p_cutoff
-            # mask_sum = maskbool.sum()  # number of samples with high confidence
+                outputs = self.model(inputs, contrastive=True)
+                contrastive_x = outputs['contrastive_feats']
+                contrastive_x_lb = contrastive_x[:num_lb]
+                contrastive_x_ulb_w, contrastive_x_ulb_s_0, contrastive_x_ulb_s_1 = contrastive_x[num_lb:].chunk(3)
+                proto_proj = outputs['proto_proj']
+            else:
+                raise ValueError("SemiSupConProto does not support non-cat mode currently")
 
+            feat_dict = {'x_lb': contrastive_x_lb, 'x_ulb_w': contrastive_x_ulb_w,
+                         'x_ulb_s': [contrastive_x_ulb_s_0, contrastive_x_ulb_s_1]}
+
+            similarity_to_proto = contrastive_x_ulb_w @ proto_proj.t()  # (N, K) = (N, D) @ (D, K) equivalent des softmax
+            # print(f"similarity to proto first line : {similarity_to_proto[0, :]} and first label {y_ulb[0]}")
+
+            if self.args.pl == "max":
+                pseudo_label = torch.argmax(similarity_to_proto, dim=1)
+            elif self.args.pl == "softmax":
+                pseudo_label = torch.argmax(similarity_to_proto, dim=1)
+                # print(
+                #     f"before soft{similarity_to_proto.max(dim=1)[0].max(dim=0)[0].item()} {similarity_to_proto.max(dim=1)[0].mean(dim=0).item()}")
+                similarity_to_proto = torch.softmax((similarity_to_proto + 1) / 2 / self.args.pl_temp, dim=1)
+                # print(f"after soft{similarity_to_proto.max(dim=1)[0].max(dim=0)[0].item()} {similarity_to_proto.max(dim=1)[0].mean(dim=0).item()}")
+
+            maskbool = torch.max(similarity_to_proto, dim=1)[0] > self.p_cutoff
+            mask_sum = maskbool.sum()  # number of samples with high confidence
+            #TODO TO THIS
             maskbool = torch.zeros(x_ulb_w.shape[0]).bool().cuda()
             feat_dict = {}
 
