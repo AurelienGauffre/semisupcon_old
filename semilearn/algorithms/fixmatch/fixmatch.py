@@ -419,6 +419,7 @@ class SemiSupConProto(AlgorithmBase):
         with self.amp_cm():
             if self.use_cat:  # does not support detach of CE
                 inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s_0, x_ulb_s_1))
+        #TODO UNCOMMENT THIS
             #     outputs = self.model(inputs, contrastive=True)
             #     contrastive_x = outputs['contrastive_feats']
             #     contrastive_x_lb = contrastive_x[:num_lb]
