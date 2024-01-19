@@ -550,8 +550,9 @@ class SemiSupConProto(AlgorithmBase):
                                                      pseudo_label,
                                                      'ce',
                                                      mask=maskbool)
+                unsup_loss = unsup_loss_0 + unsup_loss_1
 
-                total_loss = sup_loss + self.lambda_u * (unsup_loss_0 + unsup_loss_1)
+                total_loss = sup_loss + self.lambda_u * unsup_loss
 
             elif self.args.loss == "AblationFixMatchDoubleAug+Simclr":  # E3
                 # Same as E2 + simclr loss on the unconfident examples
@@ -582,14 +583,14 @@ class SemiSupConProto(AlgorithmBase):
                                                      pseudo_label,
                                                      'ce',
                                                      mask=maskbool)
-
+                unsup_loss = unsup_loss_0 + unsup_loss_1
 
                 simclr_loss = self.supcon_loss(
                     embeddings=torch.cat(
                         (contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool])),
                     labels=torch.arange(sum(~maskbool)).repeat(2))
 
-                total_loss = sup_loss + self.lambda_u * (unsup_loss_0 + unsup_loss_1) + simclr_loss
+                total_loss = sup_loss + self.lambda_u * unsup_loss + simclr_loss
 
             elif self.args.loss == "SupconSimclrRemaining":  # E4
                 # "Supcon to labeled and pseudolabels + nothing on unconfident examples"
