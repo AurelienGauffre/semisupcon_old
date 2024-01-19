@@ -516,7 +516,7 @@ class SemiSupConProto(AlgorithmBase):
                                                    pseudo_label,
                                                    'ce',
                                                    mask=maskbool)
-                print(maskbool)
+
                 total_loss = sup_loss + self.lambda_u * unsup_loss
 
 
@@ -584,7 +584,8 @@ class SemiSupConProto(AlgorithmBase):
                                                      'ce',
                                                      mask=maskbool)
                 unsup_loss = unsup_loss_0 + unsup_loss_1
-
+                # convert to boolean
+                maskbool = maskbool.bool()
                 simclr_loss = self.supcon_loss(
                     embeddings=torch.cat(
                         (contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool])),
