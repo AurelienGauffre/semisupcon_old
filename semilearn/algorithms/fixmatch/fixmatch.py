@@ -611,7 +611,7 @@ class SemiSupConProto(AlgorithmBase):
 
                 total_loss = sup_loss + self.lambda_u * unsup_loss + simclr_loss
 
-            elif self.args.loss == "SupconSimclr-Unconfident":  # E4
+            elif self.args.loss == "AblationSupconSimclr-Unconfident":  # E4
                 # "Supcon to labeled and pseudolabels + nothing on unconfident examples"
                 contrastive_x_all = torch.cat(
                     (proto_proj, contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool]),
@@ -620,6 +620,7 @@ class SemiSupConProto(AlgorithmBase):
                     (torch.arange(self.args.num_classes).cuda(), y_lb, pseudo_label[maskbool], pseudo_label[maskbool],),
                     dim=0)
 
+                unsup_loss = torch.zeros(1)
                 supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
 
                 total_loss = supcon_loss
