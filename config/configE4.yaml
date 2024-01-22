@@ -5,7 +5,7 @@ wandb_name: "Ablation E4"
 save_name: E4
 algorithm: semisupconproto
 dataset: cifar100
-loss: SupconSimclrRemaining # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
+loss: SupconSimclr-Unconfident # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
 lambda_proto: 0 #only for Weighted supcon loss
 pl: softmax # softmax
 pl_temp: .040 # USeless here
