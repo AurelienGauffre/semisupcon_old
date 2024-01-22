@@ -620,7 +620,7 @@ class SemiSupConProto(AlgorithmBase):
                     (torch.arange(self.args.num_classes).cuda(), y_lb, pseudo_label[maskbool], pseudo_label[maskbool],),
                     dim=0)
 
-                unsup_loss = torch.zeros(1)
+                unsup_loss = torch.zeros(1).cuda()
                 supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
 
                 total_loss = supcon_loss
