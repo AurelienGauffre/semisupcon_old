@@ -638,6 +638,7 @@ class SemiSupConProto(AlgorithmBase):
                 simclr = self.supcon_loss(
                     embeddings=torch.cat((contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool])),
                     labels=torch.arange(sum(~maskbool)).repeat(2))
+                unsup_loss = simclr
                 total_loss = supcon_loss + simclr
 
             elif self.args.loss == "Supcon&SimclrAll":
