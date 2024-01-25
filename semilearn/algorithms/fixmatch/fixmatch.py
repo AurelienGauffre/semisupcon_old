@@ -425,7 +425,6 @@ class SemiSupConProto(AlgorithmBase):
         with self.amp_cm():
             if self.use_cat:  # does not support detach of CE
                 inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s_0, x_ulb_s_1))
-                # TODO UNCOMMENT THIS
 
                 outputs = self.model(inputs, contrastive=self.is_contrastive)
                 contrastive_x = outputs['contrastive_feats']
@@ -454,7 +453,7 @@ class SemiSupConProto(AlgorithmBase):
                 maskbool = torch.max(similarity_to_proto, dim=1)[0] > self.p_cutoff
                 mask_sum = maskbool.sum()  # number of samples with high confidence
 
-            if self.args.loss == "OnlySupcon":
+            if self.args.loss == "OnlySupcon": #E7
                 contrastive_x_all = torch.cat(
                     (proto_proj, contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool],
                      contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool]),
@@ -480,6 +479,25 @@ class SemiSupConProto(AlgorithmBase):
 
                 weights = torch.ones(y_all.shape[0]).cuda()
                 weights[:self.args.num_classes] *= self.args.lambda_proto
+                supcon_loss = self.supcon_loss_weights(embeddings=contrastive_x_all, labels=y_all,
+                                                       weights=weights)
+
+                total_loss = supcon_loss
+
+            elif self.args.loss == "OnlySupconWeightsOnUnconfident":  # E8 On coupe les unconfident label comme ca pour voir si ca coincide
+
+                contrastive_x_all = torch.cat(
+                    (proto_proj, contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool],
+                     contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool]),
+                    dim=0)
+                y_all = torch.cat(
+                    (torch.arange(self.args.num_classes).cuda(), y_lb, pseudo_label[maskbool], pseudo_label[maskbool],
+                     (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
+                    dim=0)
+                #counting unconfident label in ~maskbool
+                P = sum(~maskbool)
+                weights = torch.ones(y_all.shape[0]).cuda()
+                weights[-2*P:] *= self.args.lambda_proto
                 supcon_loss = self.supcon_loss_weights(embeddings=contrastive_x_all, labels=y_all,
                                                        weights=weights)
 
