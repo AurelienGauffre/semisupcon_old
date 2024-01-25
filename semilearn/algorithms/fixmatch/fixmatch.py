@@ -462,7 +462,7 @@ class SemiSupConProto(AlgorithmBase):
                     (torch.arange(self.args.num_classes).cuda(), y_lb, pseudo_label[maskbool], pseudo_label[maskbool],
                      (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
                     dim=0)
-
+                unsup_loss = torch.zeros(1).cuda()
                 supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
 
                 total_loss = supcon_loss
@@ -500,7 +500,7 @@ class SemiSupConProto(AlgorithmBase):
                 weights[-2*P:] *= self.args.lambda_proto
                 supcon_loss = self.supcon_loss_weights(embeddings=contrastive_x_all, labels=y_all,
                                                        weights=weights)
-
+                unsup_loss = torch.zeros(1).cuda()
                 total_loss = supcon_loss
 
             elif self.args.loss == "AblationSupcon-DoubleAugm":  # E7 Supcon-
