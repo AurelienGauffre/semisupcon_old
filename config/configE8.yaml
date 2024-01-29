@@ -6,15 +6,15 @@ save_name: E8
 algorithm: semisupconproto
 dataset: cifar100
 loss: OnlySupconWeightsOnUnconfident # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
-lambda_proto: 0.1 #only for Weighted supcon loss
+lambda_proto: 0.5 #only for Weighted supcon loss
 pl: softmax # softmax
 pl_temp: .040 # USeless here
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
-resume: True
+resume: False
 droprate: 0
 resume_only_weight: False # When resuming a model, only take the weight for finetuning (make epochs,scheduler, optimizer start from scratch)
-load_path: auto #latest_model.pth epoch124
+load_path: #auto #latest_model.pth epoch124
 overwrite: True
 use_tensorboard: True
 use_wandb: True
