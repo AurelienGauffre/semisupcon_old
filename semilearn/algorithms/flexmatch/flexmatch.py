@@ -6,10 +6,12 @@ import torch
 from .utils import FlexMatchThresholdingHook
 
 from semilearn.core import AlgorithmBase
+from semilearn.core.algorithmbase import SupConLossWeights
 from semilearn.core.utils import ALGORITHMS
 from semilearn.algorithms.hooks import PseudoLabelingHook
 from semilearn.algorithms.utils import SSL_Argument, str2bool
 
+from pytorch_metric_learning import losses
 
 @ALGORITHMS.register('flexmatch')
 class FlexMatch(AlgorithmBase):
@@ -57,7 +59,7 @@ class FlexMatch(AlgorithmBase):
                                                      thresh_warmup=self.args.thresh_warmup), "MaskingHook")
         super().set_hooks()
 
-    def train_step(self, x_lb, y_lb, idx_ulb, x_ulb_w, x_ulb_s):
+    def train_step(self, x_lb, y_lb, idx_ulb, x_ulb_w, x_ulb_s, y_ulb):
         num_lb = y_lb.shape[0]
 
         # inference and calculate sup/unsup losses
@@ -95,6 +97,7 @@ class FlexMatch(AlgorithmBase):
             # compute mask
             mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=probs_x_ulb_w, softmax_x_ulb=False,
                                   idx_ulb=idx_ulb)
+            mask_sum = mask.bool().sum()
 
             # generate unlabeled targets using pseudo label hook
             pseudo_label = self.call_hook("gen_ulb_targets", "PseudoLabelingHook",
@@ -114,7 +117,11 @@ class FlexMatch(AlgorithmBase):
         log_dict = self.process_log_dict(sup_loss=sup_loss.item(),
                                          unsup_loss=unsup_loss.item(),
                                          total_loss=total_loss.item(),
-                                         util_ratio=mask.float().mean().item())
+                                         util_ratio=mask.float().mean().item(),
+                                         pseudolabel_accuracy=((torch.argmax(logits_x_ulb_w,
+                                                                             dim=1) == y_ulb).float() * mask).sum() / mask_sum.item() if mask_sum > 0 else 0
+                                         )
+
         return out_dict, log_dict
 
     def get_save_dict(self):
@@ -174,6 +181,8 @@ class FlexMatchContrastive(AlgorithmBase):
         super().__init__(args, net_builder, tb_log, logger)
         # flexmatch specified arguments
         self.init(T=args.T, p_cutoff=args.p_cutoff, hard_label=args.hard_label, thresh_warmup=args.thresh_warmup)
+        self.supcon_loss = losses.SupConLoss()
+        self.supcon_loss_weights = SupConLossWeights()
         self.is_contrastive = True
 
     def init(self, T, p_cutoff, hard_label=True, thresh_warmup=True):
