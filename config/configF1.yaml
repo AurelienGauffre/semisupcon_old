@@ -4,12 +4,16 @@ wandb_project: semisupcon_ablation
 wandb_name: "F1 FlexmatchCL"
 algorithm: flexmatch_contrastive
 dataset: cifar100
+loss: classico_va_bene
+lambda_proto: 0 #only for Weighted supcon loss
+pl: softmax # softmax
+pl_temp: .040
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
-save_name: E0
+save_name: F1
 resume: False
 droprate: 0
-load_path: auto #latest_model.pth epoch124
+load_path: #auto #latest_model.pth epoch124
 overwrite: True
 use_tensorboard: True
 use_wandb: True
