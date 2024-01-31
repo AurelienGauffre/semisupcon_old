@@ -425,7 +425,6 @@ class SemiSupConProto(AlgorithmBase):
         with self.amp_cm():
             if self.use_cat:  # does not support detach of CE
                 inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s_0, x_ulb_s_1))
-
                 outputs = self.model(inputs, contrastive=self.is_contrastive)
                 contrastive_x = outputs['contrastive_feats']
                 contrastive_x_lb = contrastive_x[:num_lb]
@@ -449,8 +448,9 @@ class SemiSupConProto(AlgorithmBase):
                     #     f"before soft{similarity_to_proto.max(dim=1)[0].max(dim=0)[0].item()} {similarity_to_proto.max(dim=1)[0].mean(dim=0).item()}")
                     similarity_to_proto = torch.softmax((similarity_to_proto + 1) / 2 / self.args.pl_temp, dim=1)
                     # print(f"after soft{similarity_to_proto.max(dim=1)[0].max(dim=0)[0].item()} {similarity_to_proto.max(dim=1)[0].mean(dim=0).item()}")
-
-                maskbool = torch.max(similarity_to_proto, dim=1)[0] > self.p_cutoff
+                mask2 = self.call_hook("masking", "MaskingHook", logits_x_ulb=similarity_to_proto, softmax_x_ulb=False)
+                maskbool = mask2.bool()
+                #maskbool = torch.max(similarity_to_proto, dim=1)[0] > self.p_cutoff
                 mask_sum = maskbool.sum()  # number of samples with high confidence
 
             if self.args.loss == "OnlySupcon": #E7
