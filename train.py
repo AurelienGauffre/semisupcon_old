@@ -198,7 +198,7 @@ def main(args):
         loss_print = f'_{args.loss}_tau={args.p_cutoff}'
         if args.algorithm == "semisupconproto" and 'Weights' in args.loss:
             loss_print += f'_lambdaProto={args.lambda_proto}'
-        if args.algorithm in ["semisupcon","semisupconproto2","flexmatch_contrastive"]:
+        if args.algorithm in ["semisupcon","semisupconproto","semisupconproto2","flexmatch_contrastive"]:
             algo_print = args.algorithm
         if args.pl == 'pl=max':
             pl_print = 'max_'
