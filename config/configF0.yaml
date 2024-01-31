@@ -6,7 +6,7 @@ algorithm: flexmatch
 dataset: cifar100
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
-save_name: F0
+save_name:
 resume: False
 droprate: 0
 load_path: auto #latest_model.pth epoch124

@@ -8,7 +8,7 @@ from .utils import FlexMatchThresholdingHook
 from semilearn.core import AlgorithmBase
 from semilearn.core.algorithmbase import SupConLossWeights
 from semilearn.core.utils import ALGORITHMS
-from semilearn.algorithms.hooks import PseudoLabelingHook, FixedThresholdingHook
+from semilearn.algorithms.hooks import PseudoLabelingHook
 from semilearn.algorithms.utils import SSL_Argument, str2bool
 
 from pytorch_metric_learning import losses
@@ -59,9 +59,9 @@ class FlexMatch(AlgorithmBase):
 
     def set_hooks(self):
         self.register_hook(PseudoLabelingHook(), "PseudoLabelingHook")
-        # self.register_hook(FlexMatchThresholdingHook(ulb_dest_len=self.args.ulb_dest_len, num_classes=self.num_classes,
-        #                                              thresh_warmup=self.args.thresh_warmup), "MaskingHook")
-        self.register_hook(FixedThresholdingHook(), "MaskingHook")
+        self.register_hook(FlexMatchThresholdingHook(ulb_dest_len=self.args.ulb_dest_len, num_classes=self.num_classes,
+                                                     thresh_warmup=self.args.thresh_warmup), "MaskingHook")
+        #self.register_hook(FixedThresholdingHook(), "MaskingHook") # celui de Fixmatch
         super().set_hooks()
 
     def train_step(self, x_lb, y_lb, idx_ulb, x_ulb_w, x_ulb_s, y_ulb):
