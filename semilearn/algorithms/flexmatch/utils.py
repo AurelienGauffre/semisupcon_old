@@ -59,7 +59,8 @@ class FlexMatchThresholdingHook(MaskingHook):
         if idx_ulb[select == 1].nelement() != 0:
             self.selected_label[idx_ulb[select == 1]] = max_idx[select == 1]
         self.update()
-
+        #print the % of 1 in mask
+        print(torch.sum(mask)/mask.nelement())
         return mask
         
         
