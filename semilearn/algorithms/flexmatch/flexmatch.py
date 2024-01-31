@@ -1,4 +1,3 @@
-
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
@@ -40,11 +39,12 @@ class FlexMatch(AlgorithmBase):
                 predominant
 
         """
+
     def __init__(self, args, net_builder, tb_log=None, logger=None):
-        super().__init__(args, net_builder, tb_log, logger) 
+        super().__init__(args, net_builder, tb_log, logger)
         # flexmatch specified arguments
         self.init(T=args.T, p_cutoff=args.p_cutoff, hard_label=args.hard_label, thresh_warmup=args.thresh_warmup)
-    
+
     def init(self, T, p_cutoff, hard_label=True, thresh_warmup=True):
         self.T = T
         self.p_cutoff = p_cutoff
@@ -53,7 +53,8 @@ class FlexMatch(AlgorithmBase):
 
     def set_hooks(self):
         self.register_hook(PseudoLabelingHook(), "PseudoLabelingHook")
-        self.register_hook(FlexMatchThresholdingHook(ulb_dest_len=self.args.ulb_dest_len, num_classes=self.num_classes, thresh_warmup=self.args.thresh_warmup), "MaskingHook")
+        self.register_hook(FlexMatchThresholdingHook(ulb_dest_len=self.args.ulb_dest_len, num_classes=self.num_classes,
+                                                     thresh_warmup=self.args.thresh_warmup), "MaskingHook")
         super().set_hooks()
 
     def train_step(self, x_lb, y_lb, idx_ulb, x_ulb_w, x_ulb_s):
@@ -69,7 +70,7 @@ class FlexMatch(AlgorithmBase):
                 feats_x_lb = outputs['feat'][:num_lb]
                 feats_x_ulb_w, feats_x_ulb_s = outputs['feat'][num_lb:].chunk(2)
             else:
-                outs_x_lb = self.model(x_lb) 
+                outs_x_lb = self.model(x_lb)
                 logits_x_lb = outs_x_lb['logits']
                 feats_x_lb = outs_x_lb['feat']
                 outs_x_ulb_s = self.model(x_ulb_s)
@@ -79,7 +80,7 @@ class FlexMatch(AlgorithmBase):
                     outs_x_ulb_w = self.model(x_ulb_w)
                     logits_x_ulb_w = outs_x_ulb_w['logits']
                     feats_x_ulb_w = outs_x_ulb_w['feat']
-            feat_dict = {'x_lb':feats_x_lb, 'x_ulb_w':feats_x_ulb_w, 'x_ulb_s':feats_x_ulb_s}
+            feat_dict = {'x_lb': feats_x_lb, 'x_ulb_w': feats_x_ulb_w, 'x_ulb_s': feats_x_ulb_s}
 
             sup_loss = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
 
@@ -92,10 +93,11 @@ class FlexMatch(AlgorithmBase):
                 probs_x_ulb_w = self.call_hook("dist_align", "DistAlignHook", probs_x_ulb=probs_x_ulb_w.detach())
 
             # compute mask
-            mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=probs_x_ulb_w, softmax_x_ulb=False, idx_ulb=idx_ulb)
-            
+            mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=probs_x_ulb_w, softmax_x_ulb=False,
+                                  idx_ulb=idx_ulb)
+
             # generate unlabeled targets using pseudo label hook
-            pseudo_label = self.call_hook("gen_ulb_targets", "PseudoLabelingHook", 
+            pseudo_label = self.call_hook("gen_ulb_targets", "PseudoLabelingHook",
                                           logits=probs_x_ulb_w,
                                           use_hard_label=self.use_hard_label,
                                           T=self.T,
@@ -109,12 +111,11 @@ class FlexMatch(AlgorithmBase):
             total_loss = sup_loss + self.lambda_u * unsup_loss
 
         out_dict = self.process_out_dict(loss=total_loss, feat=feat_dict)
-        log_dict = self.process_log_dict(sup_loss=sup_loss.item(), 
-                                         unsup_loss=unsup_loss.item(), 
-                                         total_loss=total_loss.item(), 
+        log_dict = self.process_log_dict(sup_loss=sup_loss.item(),
+                                         unsup_loss=unsup_loss.item(),
+                                         total_loss=total_loss.item(),
                                          util_ratio=mask.float().mean().item())
         return out_dict, log_dict
-        
 
     def get_save_dict(self):
         save_dict = super().get_save_dict()
@@ -187,7 +188,7 @@ class FlexMatchContrastive(AlgorithmBase):
                                                      thresh_warmup=self.args.thresh_warmup), "MaskingHook")
         super().set_hooks()
 
-    def train_step(self, x_lb, y_lb, idx_ulb, x_ulb_w, x_ulb_s_0,x_ulb_s_1):
+    def train_step(self, x_lb, y_lb, idx_ulb, x_ulb_w, x_ulb_s_0, x_ulb_s_1, y_ulb):
         num_lb = y_lb.shape[0]
 
         # inference and calculate sup/unsup losses
@@ -209,48 +210,46 @@ class FlexMatchContrastive(AlgorithmBase):
             similarity_to_proto = contrastive_x_ulb_w @ proto_proj.t()
             pseudo_label = torch.argmax(similarity_to_proto, dim=1)
 
-
             if self.args.pl == "softmax":
                 similarity_to_proto = torch.softmax((similarity_to_proto + 1) / 2 / self.args.pl_temp, dim=1)
             # print(
             #     f"before soft{similarity_to_proto.max(dim=1)[0].max(dim=0)[0].item()} {similarity_to_proto.max(dim=1)[0].mean(dim=0).item()}")
-            similarity_to_proto = torch.softmax((similarity_to_proto + 1) / 2 / self.args.pl_temp, dim=1)
+            prob = torch.softmax((similarity_to_proto + 1) / 2 / self.args.pl_temp, dim=1)
 
             mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=similarity_to_proto, softmax_x_ulb=False,
                                   idx_ulb=idx_ulb)
+            # convert binarty float mask of 0 and 1 to boolean mask
+            mask = mask.bool()
 
-            sup_loss = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
-            # probs_x_ulb_w = torch.softmax(logits_x_ulb_w, dim=-1)
-            probs_x_ulb_w = self.compute_prob(logits_x_ulb_w.detach())
+            mask_sum = mask.sum()
 
-            # if distribution alignment hook is registered, call it
-            # this is implemented for imbalanced algorithm - CReST
             if self.registered_hook("DistAlignHook"):
-                probs_x_ulb_w = self.call_hook("dist_align", "DistAlignHook", probs_x_ulb=probs_x_ulb_w.detach())
+                prob = self.call_hook("dist_align", "DistAlignHook", probs_x_ulb=prob.detach())
 
-            # compute mask
-            mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=probs_x_ulb_w, softmax_x_ulb=False,
-                                  idx_ulb=idx_ulb)
+            pseudo_label = torch.argmax(similarity_to_proto, dim=1)
 
-            # generate unlabeled targets using pseudo label hook
-            pseudo_label = self.call_hook("gen_ulb_targets", "PseudoLabelingHook",
-                                          logits=probs_x_ulb_w,
-                                          use_hard_label=self.use_hard_label,
-                                          T=self.T,
-                                          softmax=False)
+            # Your favorite loss here, E7 here (onlysupcon avec meme poids partout)
+            contrastive_x_all = torch.cat(
+                (proto_proj, contrastive_x_lb, contrastive_x_ulb_s_0[mask], contrastive_x_ulb_s_1[mask],
+                 contrastive_x_ulb_s_0[~mask], contrastive_x_ulb_s_1[~mask]),
+                dim=0)
+            y_all = torch.cat(
+                (torch.arange(self.args.num_classes).cuda(), y_lb, pseudo_label[mask], pseudo_label[mask],
+                 (torch.arange(sum(~mask)).cuda() + self.args.num_classes).repeat(2)),
+                dim=0)
+            unsup_loss = torch.zeros(1).cuda()
+            supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
 
-            unsup_loss = self.consistency_loss(logits_x_ulb_s,
-                                               pseudo_label,
-                                               'ce',
-                                               mask=mask)
-
-            total_loss = sup_loss + self.lambda_u * unsup_loss
+            total_loss = supcon_loss
 
         out_dict = self.process_out_dict(loss=total_loss, feat=feat_dict)
-        log_dict = self.process_log_dict(sup_loss=sup_loss.item(),
+        log_dict = self.process_log_dict(supcon_loss=supcon_loss.item(),
                                          unsup_loss=unsup_loss.item(),
                                          total_loss=total_loss.item(),
-                                         util_ratio=mask.float().mean().item())
+                                         util_ratio=mask.float().mean().item(),
+                                         pseudolabel_accuracy=((
+                                                                       pseudo_label == y_ulb).float() * mask.float()).sum() / mask_sum.item() if mask_sum > 0 else 0)
+
         return out_dict, log_dict
 
     def get_save_dict(self):
