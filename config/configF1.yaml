@@ -26,7 +26,7 @@ batch_size: 64 # 64
 eval_batch_size: 256
 hard_label: True
 T: 0.5
-thresh_warmup: True
+thresh_warmup: False
 p_cutoff: 0.95 # 0.7 ou .95 pour fixmatcht for pseudo labeling
 ulb_loss_ratio: 1.0
 uratio: 7
