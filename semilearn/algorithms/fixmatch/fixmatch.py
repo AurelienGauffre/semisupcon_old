@@ -503,6 +503,25 @@ class SemiSupConProto(AlgorithmBase):
                 unsup_loss = torch.zeros(1).cuda()
                 total_loss = supcon_loss
 
+            elif self.args.loss == "OnlySupconWeightsMulti":  # E9 Des poids differents pour les unconfident label
+
+                contrastive_x_all = torch.cat(
+                    (proto_proj, contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool],
+                     contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool]),
+                    dim=0)
+                y_all = torch.cat(
+                    (torch.arange(self.args.num_classes).cuda(), y_lb, pseudo_label[maskbool], pseudo_label[maskbool],
+                     (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
+                    dim=0)
+                # counting unconfident label in ~maskbool
+                P = sum(~maskbool)
+                weights = torch.ones(y_all.shape[0]).cuda()
+                weights[-2 * P:] *= self.args.lambda_ydown
+                supcon_loss = self.supcon_loss_weights(embeddings=contrastive_x_all, labels=y_all,
+                                                       weights=weights)
+                unsup_loss = torch.zeros(1).cuda()
+                total_loss = supcon_loss
+
             elif self.args.loss == "AblationSupcon-DoubleAugm":  # E7 Supcon-
 
                 contrastive_x_all = torch.cat(
