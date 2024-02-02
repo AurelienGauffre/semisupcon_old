@@ -34,8 +34,8 @@ regex
 requests
 requests-oauthlib
 rsa
-ruamel.yaml
-ruamel.yaml.clib
+ruamel.yaml==0.17.21
+ruamel.yaml.clib==0.2.6
 scikit-image
 scikit-learn
 scipy
@@ -45,7 +45,7 @@ tensorboard-data-server
 tensorboard-plugin-wit
 threadpoolctl
 tifffile
-timm
+timm==0.5.4
 tokenizers
 torch
 torchaudio
@@ -62,3 +62,4 @@ aim
 pytorch-metric-learning
 torchinfo
 lightly
+PyJWT
