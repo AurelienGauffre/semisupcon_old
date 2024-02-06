@@ -7,6 +7,7 @@ def upload_metrics(file_path):
     # Initialize a wandb run with the experiment name
     wandb.init(project=data.params.wandb_project, name=data.params.save_name_wandb)
     # Log hyperparameters
+    print(data.params)
     wandb.config.update(data.params)
     # Log metrics
     for metric in data.metrics:
