@@ -109,7 +109,7 @@ class YAMLSAVE_Hook(Hook):
             for key, item in algorithm.log_dict.items():
                 # J'enleve la condition de logging d'appartenance a log_key_list ci dessus
                 log_dict[key] = float(item)
-            log_dict['it'] = algorithm.it
+            log_dict['Step'] = algorithm.it
             self.logged_metrics.append(log_dict)
             data = {
                 'params': algorithm.args.__dict__,
