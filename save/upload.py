@@ -11,7 +11,7 @@ def upload_metrics(file_path):
     # Log hyperparameters
 
     # Log metrics
-    for metric in data.metrics:
+    for metric in data.logged_metrics:
         wandb.log(metric)
     # Mark run as finished
     wandb.finish()
