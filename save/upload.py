@@ -12,7 +12,7 @@ def upload_metrics(file_path):
 
     # Log metrics
     for metric in data.logged_metrics:
-        wandb.log(metric)
+        wandb.log(metric,step = metric['Step'])
     # Mark run as finished
     wandb.finish()
 
