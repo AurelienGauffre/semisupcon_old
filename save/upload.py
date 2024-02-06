@@ -5,7 +5,7 @@ import wandb
 def upload_metrics(file_path):
     data = OmegaConf.load(file_path)
     # Initialize a wandb run with the experiment name
-    wandb.init(project=data.wandb_project, name=data.experiment_name)
+    wandb.init(project=data.params.wandb_project, name=data.params.experiment_name)
     # Log hyperparameters
     wandb.config.update(data.params)
     # Log metrics

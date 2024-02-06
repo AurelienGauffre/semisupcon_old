@@ -111,6 +111,12 @@ class YAMLSAVE_Hook(Hook):
                 log_dict[key] = float(item)
             log_dict['it'] = algorithm.it
             self.logged_metrics.append(log_dict)
+            data = {
+                'params': algorithm.args.__dict__,
+                'logged_metrics': self.logged_metrics,
+            }
+            OmegaConf.save(config=OmegaConf.create(data), f=f"{self.file_path[:-5]}.yaml")
+
 
     def after_run(self, algorithm):
         data = {
