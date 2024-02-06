@@ -14,7 +14,7 @@ import torch.nn.functional as F
 from torch.cuda.amp import autocast, GradScaler
 
 from semilearn.core.hooks import Hook, get_priority, CheckpointHook, TimerHook, LoggingHook, DistSamplerSeedHook, \
-    ParamUpdateHook, EvaluationHook, EMAHook, WANDBHook, AimHook
+    ParamUpdateHook, EvaluationHook, EMAHook, WANDBHook, AimHook, YAMLSAVE_Hook
 from semilearn.core.utils import get_dataset, get_data_loader, get_optimizer, get_cosine_schedule_with_warmup, \
     Bn_Controller
 from semilearn.core.criterions import CELoss, ConsistencyLoss
@@ -225,6 +225,7 @@ class AlgorithmBase:
             self.register_hook(WANDBHook(), None, "LOWEST")
         if self.args.use_aim:
             self.register_hook(AimHook(), None, "LOWEST")
+        self.register_hook(YAMLSAVE_Hook(), None, "LOWEST")
 
     def process_batch(self, input_args=None, **kwargs):
         """

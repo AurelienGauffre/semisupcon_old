@@ -47,9 +47,9 @@ threadpoolctl
 tifffile
 timm==0.5.4
 tokenizers
-torch
-torchaudio
-torchvision
+torch==1.13.0
+torchaudio==0.13.0
+torchvision=0.14
 tqdm
 transformers
 typing-extensions

@@ -165,7 +165,7 @@ def get_data_loader(args,
 
         per_epoch_steps = num_iters // num_epochs
 
-        num_samples = per_epoch_steps * batch_size * num_replicas
+        num_samples = per_epoch_steps * batch_size * num_replicas # definition implicite de ce qu'est une epoch en fait ici
 
         return DataLoader(dset, batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=collact_fn,
                           pin_memory=pin_memory, sampler=data_sampler(dset, num_replicas=num_replicas, rank=rank, num_samples=num_samples),
