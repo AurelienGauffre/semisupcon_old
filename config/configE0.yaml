@@ -1,7 +1,7 @@
 # Ablation
 # fixmatch classique
 wandb_project: semisupcon_ablation
-wandb_name: "Ablation E0"
+wandb_name: "Ablation E0 AMP"
 algorithm: fixmatch
 dataset: cifar100
 use_cat: True # if false allows to detach
@@ -13,8 +13,8 @@ load_path: auto #latest_model.pth epoch124
 overwrite: True
 use_tensorboard: True
 use_wandb: True
-epoch: 1024 #1024 # 256
-num_train_iter: 1048576 # 1048576 # 262144
+epoch: 256 #1024 # 256
+num_train_iter: 262144 # 1048576 # 262144
 num_eval_iter: 5120
 num_log_iter: 256
 num_labels: 2500 # 100 2500cifar100
@@ -33,7 +33,7 @@ lr: 0.03
 momentum: 0.9
 weight_decay: 0.001
 layer_decay: 1.0
-amp: False
+amp: True
 clip: 0.0
 net: wrn_28_2
 net_from_name: False # If True, net_builder takes models in torch.vision models (False de base)
