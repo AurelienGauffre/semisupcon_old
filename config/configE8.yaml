@@ -1,8 +1,8 @@
 # Ablation
 # semisupcon classique mais on mets un lambda sur les unconfident
 wandb_project: semisupcon_ablation
-wandb_name: "Ablation E8 wd=.002"
-save_name: E8_long
+wandb_name: "Ablation E8"
+save_name: E8
 algorithm: semisupconproto
 dataset: cifar100
 loss: OnlySupconWeightsOnUnconfident # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
@@ -20,8 +20,8 @@ use_tensorboard: True
 use_wandb: True
 epoch: 256 #256 #1024
 num_train_iter: 262144 #262144 # 1048576
-num_eval_iter: 256 #5120
-num_log_iter: 256
+num_eval_iter: 5120 #5120
+num_log_iter: 512 #256
 num_labels: 2500 # 100 2500cifar100
 batch_size: 64 # 64
 eval_batch_size: 256
@@ -36,7 +36,7 @@ img_size: 32
 optim: SGD
 lr: 0.03
 momentum: 0.9
-weight_decay: 0.002
+weight_decay: 0.001
 layer_decay: 1.0
 amp: True
 clip: 0.0
