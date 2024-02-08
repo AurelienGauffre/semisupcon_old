@@ -1,7 +1,7 @@
 # Ablation
 # semisupcon classique mais on mets un lambda sur les unconfident
 wandb_project: semisupcon_ablation
-wandb_name: "Ablation E8"
+wandb_name: "Ablation E8 long"
 save_name: E8_long
 algorithm: semisupconproto
 dataset: cifar100
