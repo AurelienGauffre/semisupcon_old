@@ -104,6 +104,7 @@ class FlexMatch(AlgorithmBase):
                                   idx_ulb=idx_ulb)
             mask_sum = mask.bool().sum()
 
+
             # generate unlabeled targets using pseudo label hook
             pseudo_label = self.call_hook("gen_ulb_targets", "PseudoLabelingHook",
                                           logits=probs_x_ulb_w,
@@ -117,6 +118,10 @@ class FlexMatch(AlgorithmBase):
                                                mask=mask)
 
             total_loss = sup_loss + self.lambda_u * unsup_loss
+
+
+
+
 
         out_dict = self.process_out_dict(loss=total_loss, feat=feat_dict)
         log_dict = self.process_log_dict(sup_loss=sup_loss.item(),
@@ -251,8 +256,22 @@ class FlexMatchContrastive(AlgorithmBase):
                 (torch.arange(self.args.num_classes).cuda(), y_lb, pseudo_label[mask], pseudo_label[mask],
                  (torch.arange(sum(~mask)).cuda() + self.args.num_classes).repeat(2)),
                 dim=0)
+
+            P = sum(~mask)
+            weights = torch.ones(y_all.shape[0]).cuda()
+            weights[-2 * P:] *= self.args.lambda_proto
+            supcon_loss = self.supcon_loss_weights(embeddings=contrastive_x_all, labels=y_all,
+                                                   weights=weights)
             unsup_loss = torch.zeros(1).cuda()
-            supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
+            total_loss = supcon_loss
+
+            #
+            #
+            # unsup_loss = torch.zeros(1).cuda()
+            # supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
+
+
+
 
             total_loss = supcon_loss
 

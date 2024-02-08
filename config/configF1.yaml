@@ -1,11 +1,11 @@
 # Ablation
 # fixmatch classique
 wandb_project: semisupcon_ablation
-wandb_name: "F1 FlexmatchCL"
+wandb_name: "F1 FlexmatchCL lambda_proto0.2 on unconfident"
 algorithm: flexmatch_contrastive
 dataset: cifar100
 loss: classico_va_bene
-lambda_proto: 0 #only for Weighted supcon loss
+lambda_proto: 0.2 #only for Weighted supcon loss
 pl: softmax # softmax
 pl_temp: .040
 use_cat: True # if false allows to detach
