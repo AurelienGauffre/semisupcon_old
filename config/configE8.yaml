@@ -1,8 +1,8 @@
 # Ablation
 # semisupcon classique mais on mets un lambda sur les unconfident
 wandb_project: semisupcon_ablation
-wandb_name: "Ablation E8"
-save_name: E8
+wandb_name: "Ablation E8 AMP"
+save_name: E8_AMP
 algorithm: semisupconproto
 dataset: cifar100
 loss: OnlySupconWeightsOnUnconfident # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
