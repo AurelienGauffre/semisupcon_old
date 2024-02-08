@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --account=cgs@v100 
+#SBATCH --account=cgs@a100
 
 #SBATCH --job-name=E0_big
 ##SBATCH -C v100-16g                 # uncomment to target only 16GB V100 GPU
