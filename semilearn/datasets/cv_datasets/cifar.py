@@ -130,7 +130,10 @@ if __name__ == "__main__":
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
-
+    # Load CIFAR-10 dataset
+    trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
+    # Load CIFAR-100 dataset
+    trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform)
     # Load STL-10 dataset
     trainset = torchvision.datasets.STL10(root='./data', split='train', download=True, transform=transform)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True, num_workers=2)

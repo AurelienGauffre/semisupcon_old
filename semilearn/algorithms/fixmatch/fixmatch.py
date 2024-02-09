@@ -109,7 +109,9 @@ class FixMatch(AlgorithmBase):
                                          total_loss=total_loss.item(),
                                          util_ratio=mask.float().mean().item(),
                                          pseudolabel_accuracy=((torch.argmax(logits_x_ulb_w,
-                                                                             dim=1) == y_ulb).float() * mask).sum() / mask_sum.item() if mask_sum > 0 else 0
+                                                                             dim=1) == y_ulb).float() * mask).sum() / mask_sum.item() if mask_sum > 0 else 0,
+                                         unsup_accuracy=((torch.argmax(logits_x_ulb_s,
+                                                                                dim=1) == y_ulb).float()).sum() / y_ulb.shape[0]
                                          # else float('nan')
                                          )
         return out_dict, log_dict
