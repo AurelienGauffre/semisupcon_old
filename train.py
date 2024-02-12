@@ -218,6 +218,7 @@ def main(args):
         args.save_name_wandb += f"_AK{os.environ['OAR_JOB_ID']}"
     if 'SLURM_JOB_ID' in os.environ:
         args.save_name_wandb += f"_JZ{os.environ['SLURM_JOB_ID']}"
+        args.data_dir = "/gpfsscratch/rech/cgs/ued97kp/semisupcon/data"
 
     # set savename
     # args.save_name should not be set to none for run that will requires to resume weights .

@@ -24,4 +24,9 @@ module load pytorch-gpu/py3/1.12.1
 
 cd /gpfsscratch/rech/cgs/ued97kp/semisupcon
 
+DSDIR="/gpfsscratch/rech/cgs/ued97kp/semisupcon/data"
+DSDIR_CUSTOM="/gpfsscratch/rech/cgs/ued97kp/semisupcon/data"
+export DSDIR
+export DSDIR_CUSTOM
+
 python3 train.py --c ./config/configE0.yaml
