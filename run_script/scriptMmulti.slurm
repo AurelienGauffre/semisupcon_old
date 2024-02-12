@@ -20,7 +20,9 @@
 #SBATCH --output=OAR.%j.out    # name of output file
 
 module purge  
-module load pytorch-gpu/py3/1.12.1
+module load cpuarch/amd
+module load pytorch-gpu/py3/1.13.0
+
 
 cd /gpfsscratch/rech/cgs/ued97kp/semisupcon
 
