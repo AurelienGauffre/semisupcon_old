@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=cgs@a100
 
-#SBATCH --job-name=E0_big
+#SBATCH --job-name=Nmulti_big
 ##SBATCH -C v100-16g                 # uncomment to target only 16GB V100 GPU
 ##SBATCH -C v100-32g                 # uncomment to target only 32GB V100 GPU
 ##SBATCH --partition=gpu_p2          # uncomment for gpu_p2 partition (32GB V100 GPU)
@@ -28,4 +28,4 @@ cd /gpfsscratch/rech/cgs/ued97kp/semisupcon
 
 python3 train.py --c ./config/configM0.yaml &
 python3 train.py --c ./config/configM1.yaml &
-python3 train.py --c ./config/configM2.yaml &
+python3 train.py --c ./config/configM2.yaml
