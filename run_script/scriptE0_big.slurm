@@ -19,7 +19,8 @@
 #SBATCH --time=5:00:00              # maximum execution time requested (HH:MM:SS)
 #SBATCH --output=OAR.%j.out    # name of output file
 
-module purge  
+module purge
+module load cpuarch/amd
 module load pytorch-gpu/py3/1.12.1
 
 cd /gpfsscratch/rech/cgs/ued97kp/semisupcon
