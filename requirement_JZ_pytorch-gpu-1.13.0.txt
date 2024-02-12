@@ -48,7 +48,7 @@ tifffile
 timm
 tokenizers
 torch
-torchaudio==
+torchaudio
 torchvision
 tqdm
 transformers
