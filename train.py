@@ -173,6 +173,7 @@ def main(args):
     # Check if CUDA is available in the current PyTorch installation
     if torch.cuda.is_available():
         # Print CUDA version as reported by PyTorch
+        print("Torch Version:", torch.__version__)
         print("CUDA Version:", torch.version.cuda)
         # Additionally, print the number of CUDA devices detected
         print("Number of CUDA Devices:", torch.cuda.device_count())
