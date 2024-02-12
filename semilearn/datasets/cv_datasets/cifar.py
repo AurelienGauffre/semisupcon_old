@@ -27,6 +27,8 @@ std['cifar100'] = [x / 255 for x in [68.2, 65.4, 70.4]]
 def get_cifar(args, alg, name, num_labels, num_classes, data_dir='./data', include_lb_to_ulb=True):
     data_dir = os.path.join(data_dir, name.lower())
     dset = getattr(torchvision.datasets, name.upper())
+    print(f"dset: {dset}")
+    print("data_dir: ", data_dir)
     dset = dset(data_dir, train=True, download=False) #PERSO mis a false ici pour JZ
     data, targets = dset.data, dset.targets
     
