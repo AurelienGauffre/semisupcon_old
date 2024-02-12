@@ -1,14 +1,14 @@
 # Ablation
 # semisupcon classique mais on mets un lambda sur les unconfident
 wandb_project: semisupcon_ablation
-wandb_name: "Ablation E8 long AMP T=.50"
-save_name: E8_AMP_long_temp=.050
+wandb_name: "Ablation E8 long AMP T=.40"
+save_name: E8_AMP_long_temp=.040
 algorithm: semisupconproto
 dataset: cifar100
 loss: OnlySupconWeightsOnUnconfident # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
 lambda_proto: 0.2 #only for Weighted supcon loss
 pl: softmax # softmax
-pl_temp: .050 # USeless here
+pl_temp: .040 # USeless here
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
 resume: True
