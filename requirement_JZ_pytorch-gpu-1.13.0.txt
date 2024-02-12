@@ -63,3 +63,8 @@ pytorch-metric-learning
 torchinfo
 lightly
 PyJWT
+
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+qudida 0.0.4 requires opencv-python-headless>=4.0.1, which is not installed.
+eo-learn-mask 1.3.0 requires opencv-contrib-python-headless, which is not installed.
+albumentations 1.3.0 requires opencv-python-headless>=4.1.1, which is not installed.

@@ -2,6 +2,8 @@ import os
 from omegaconf import OmegaConf
 import wandb
 
+os.environ['WANDB_MODE'] = 'online'
+
 def upload_metrics(file_path):
     data = OmegaConf.load(file_path)
     # Initialize a wandb run with the experiment name
