@@ -8,13 +8,13 @@ import glob
 os.environ['WANDB_MODE'] = 'online'
 
 
-def upload_metrics(file_path, mode='finished'):
+def upload_metrics(file_path, mode):
     data = OmegaConf.load(file_path)
     if mode == 'finished':
-        wandb.init(project=data.params.wandb_project, name=data.params.save_name_wandb,
+        wandb.init(project=data.params.wandb_project, name=data.params.save_name,
                    config=OmegaConf.to_container(data.params))
     else:
-        wandb.init(project=data.params.wandb_project, name=f"TEMP_{data.params.save_name_wandb}",
+        wandb.init(project=data.params.wandb_project, name=f"TEMP_{data.params.save_name}",
                    config=OmegaConf.to_container(data.params))
 
     for metric in data.logged_metrics:
@@ -35,7 +35,7 @@ def should_upload(filename, mode, directory_path):
         return filename.endswith('finished.yaml')
 
 
-def main(directory_path, mode='finished'):
+def main(directory_path, mode):
     yaml_files = glob.glob(os.path.join(directory_path, '*.yaml'))
     for file_path in yaml_files:
         filename = os.path.basename(file_path)
