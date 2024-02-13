@@ -1,6 +1,6 @@
 # M = multi
 wandb_project: semisupcon_ablation
-save_name: E8_mid_lr=0.025
+save_name: E8_mid_wd=0.005
 algorithm: semisupconproto
 dataset: cifar100
 loss: OnlySupconWeightsOnUnconfident # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
@@ -32,9 +32,9 @@ ema_m: 0.999
 crop_ratio: 0.875
 img_size: 32
 optim: SGD
-lr: 0.025
+lr: 0.03
 momentum: 0.9
-weight_decay: 0.001
+weight_decay: 0.005
 layer_decay: 1.0
 amp: True
 clip: 0.0

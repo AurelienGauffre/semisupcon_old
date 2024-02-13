@@ -213,48 +213,18 @@ def main(args):
 
     args.wandb_project = getattr(args, 'wandb_project', f"semisupcon_{args.dataset}{net_print_dic[args.net]}")
     # args.wandb_project = f"semisupcon_{args.dataset}_{args.num_labels}_{net_print_dic[args.net]}"
-    if args.algorithm in ['fixmatch', 'flexmatch']:
-        algo_print = args.algorithm
-        loss_print = ''
-        pl_print = ''
-    elif args.algorithm in ["semisupcon", "semisupconproto","semisupconproto2","flexmatch_contrastive"]:
-        loss_print = f'_{args.loss}_tau={args.p_cutoff}'
-        if args.algorithm == "semisupconproto" and 'Weights' in args.loss:
-            loss_print += f'_lambdaProto={args.lambda_proto}'
-        if args.algorithm in ["semisupcon","semisupconproto","semisupconproto2","flexmatch_contrastive"]:
-            algo_print = args.algorithm
-        if args.pl == 'pl=max':
-            pl_print = 'max_'
-        elif args.pl == 'softmax':
-            pl_print = f'pl=softmaxT={args.pl_temp}_'
-        else:
-            raise ValueError(f"Unknown pl {args.pl}")
-    elif args.algorithm == "unsup":
-        algo_print = args.algorithm
-        loss_print = args.loss
-        pl_print = ''
 
-    print_prefix_wandb_name = '' if getattr(args, 'wandb_name', None) is None else f'{args.wandb_name}_'
-    args.save_name_wandb = str(
-        f'{print_prefix_wandb_name}{algo_print}{loss_print}_{pl_print}bs{args.batch_size}_lr{args.lr}_seed{args.seed}')
     if 'OAR_JOB_ID' in os.environ:
-        args.save_name_wandb += f"_AK{os.environ['OAR_JOB_ID']}"
+        args.id = f"_AK{os.environ['OAR_JOB_ID']}"
     if 'SLURM_JOB_ID' in os.environ:
-        args.save_name_wandb += f"_JZ{os.environ['SLURM_JOB_ID']}"
+        args.id = f"_JZ{os.environ['SLURM_JOB_ID']}"
         args.data_dir = "/gpfsscratch/rech/cgs/ued97kp/semisupcon/data" #PERSO TO CLEAN
 
-
-    # set savename
-    # args.save_name should not be set to none for run that will requires to resume weights .
-    # otherwise the model is save using the wandb unique name
-    if args.save_name is None:
-        # args.save_name = f"{args.algorithm}_{args.dataset}_{args.num_labels}_{args.seed}" # savename is used for saving model dirname (we dont need as much details as wandb name)
-        args.save_name = args.save_name_wandb
-    # set save_path
-    print(f" #### SAVE PATH : {args.save_dir}/{args.save_name}")
-    print(f" #### SAVE NAME WANDB : {args.save_name_wandb}")
-
+    args.wandb_name =  args.save_name
     save_path = os.path.join(args.save_dir, args.save_name)
+    print(f" #### SAVE PATH : {args.save_dir}/{args.save_name}")
+
+
     if os.path.exists(save_path) and args.overwrite and args.resume == False:
         import shutil
         shutil.rmtree(save_path)

@@ -88,15 +88,27 @@ class YAMLSAVE_Hook(Hook):
 
         params = algorithm.args.__dict__
         self.file_path = f"save/{params['save_name']}.yaml"
-        #check if the file exists, if not create a void file :
-        if not os.path.exists(self.file_path):
+        # check if the file exists, if not create a void file :
+        if not os.path.exists(self.file_path) or algorithm.args.resume is False:
             data = {
                 'params': params,
                 'logged_metrics': [],
             }
             OmegaConf.save(config=OmegaConf.create(data), f=self.file_path)
         else:
-            print(f"File {self.file_path} already exists, appending to it")
+            # compare the params of the file with the current params
+            data = OmegaConf.load(self.file_path)
+            self.logged_metrics = data['logged_metrics']
+            # compare data['params'] and params dictionaries except on one key that is id which is different each time
+            d1 = {k: v for k, v in data['params'].items() if k not in ['id', 'dist_url']}
+            d2 = {k: v for k, v in params.items() if k not in ['id', 'dist_url']}
+            if d1 != d2:
+                raise ValueError(f"File {self.file_path} already exists, but the parameters are different :"
+                                 f" {d1} "
+                                 f"!= "
+                                 f"{d2}")
+
+            print(f"File {self.file_path} already exists and parameters are the same, appending to it")
 
     def after_train_step(self, algorithm):
         data = OmegaConf.load(self.file_path)
@@ -107,16 +119,16 @@ class YAMLSAVE_Hook(Hook):
             #     if key in self.log_key_list:
             #         log_dict[key] = item
             for key, item in algorithm.log_dict.items():
-                # J'enleve la condition de logging d'appartenance a log_key_list ci dessus
                 log_dict[key] = float(item)
             log_dict['Step'] = algorithm.it
             self.logged_metrics.append(log_dict)
+
+        if self.every_n_iters(algorithm, 2 * algorithm.num_eval_iter):
             data = {
                 'params': algorithm.args.__dict__,
                 'logged_metrics': self.logged_metrics,
             }
-            OmegaConf.save(config=OmegaConf.create(data), f=f"{self.file_path[:-5]}.yaml")
-
+            OmegaConf.save(config=OmegaConf.create(data), f=f"{self.file_path}")
 
     def after_run(self, algorithm):
         data = {
@@ -125,3 +137,5 @@ class YAMLSAVE_Hook(Hook):
         }
 
         OmegaConf.save(config=OmegaConf.create(data), f=f"{self.file_path[:-5]}_finished.yaml")
+        # remove the old file :
+        os.remove(self.file_path)

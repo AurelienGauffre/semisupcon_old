@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=cgs@a100
 
-#SBATCH --job-name=Nmulti_big
+#SBATCH --job-name=Mmulti
 ##SBATCH -C v100-16g                 # uncomment to target only 16GB V100 GPU
 ##SBATCH -C v100-32g                 # uncomment to target only 32GB V100 GPU
 ##SBATCH --partition=gpu_p2          # uncomment for gpu_p2 partition (32GB V100 GPU)
@@ -16,7 +16,7 @@
 
 #SBATCH --hint=nomultithread         # hyperthreading is deactivated
 ##SBATCH --qos=qos_gpu-t4 #for jobs > 100h
-#SBATCH --time=5:00:00              # maximum execution time requested (HH:MM:SS)
+#SBATCH --time=20:00:00              # maximum execution time requested (HH:MM:SS)
 #SBATCH --output=OAR.%j.out    # name of output file
 
 module purge  
@@ -28,4 +28,9 @@ cd /gpfsscratch/rech/cgs/ued97kp/semisupcon
 
 python3 train.py --c ./config/configM0.yaml &
 python3 train.py --c ./config/configM1.yaml &
-python3 train.py --c ./config/configM2.yaml
+python3 train.py --c ./config/configM2.yaml &
+python3 train.py --c ./config/configM3.yaml &
+python3 train.py --c ./config/configM4.yaml &
+python3 train.py --c ./config/configM5.yaml &
+python3 train.py --c ./config/configM6.yaml &
+python3 train.py --c ./config/configM7.yaml &
