@@ -1,13 +1,12 @@
 # E=Ablation
 # fixmatch classique
 wandb_project: semisupcon_ablation
-wandb_name: "E0_mid"
+save_name: M0:E0_mid
 algorithm: fixmatch
 dataset: cifar100
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
-save_name:
-resume: False
+resume: True
 droprate: 0
 load_path: auto #latest_model.pth epoch124
 overwrite: True

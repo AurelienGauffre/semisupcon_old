@@ -1,6 +1,6 @@
 # M = multi
 wandb_project: semisupcon_ablation
-save_name: E8_mid_droprate=0.2
+save_name: M6:E8_mid_droprate=0.2
 algorithm: semisupconproto
 dataset: cifar100
 loss: OnlySupconWeightsOnUnconfident # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)

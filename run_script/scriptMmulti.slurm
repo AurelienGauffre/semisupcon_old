@@ -26,5 +26,11 @@ module load pytorch-gpu/py3/1.13.0
 
 cd /gpfsscratch/rech/cgs/ued97kp/semisupcon
 
-python3 train.py --c ./config/configM0.yaml
-
+python3 train.py --c ./config/configM0.yaml &
+python3 train.py --c ./config/configM1.yaml &
+python3 train.py --c ./config/configM2.yaml &
+python3 train.py --c ./config/configM3.yaml &
+python3 train.py --c ./config/configM4.yaml &
+python3 train.py --c ./config/configM5.yaml &
+python3 train.py --c ./config/configM6.yaml &
+python3 train.py --c ./config/configM7.yaml
