@@ -40,7 +40,7 @@ def main(directory_path, mode):
     for file_path in yaml_files:
         filename = os.path.basename(file_path)
         if should_upload(filename, mode, directory_path):
-            upload_metrics(file_path)
+            upload_metrics(file_path,mode)
             if mode == 'finished':
                 new_file_path = file_path.replace('finished.yaml', 'uploaded.yaml')
                 os.rename(file_path, new_file_path)
