@@ -3,6 +3,7 @@ import sys
 from omegaconf import OmegaConf
 import wandb
 import time
+import glob
 
 os.environ['WANDB_MODE'] = 'online'
 
@@ -35,11 +36,11 @@ def should_upload(filename, mode, directory_path):
 
 
 def main(directory_path, mode='finished'):
-    for filename in os.listdir(directory_path):
-        print(filename)
+    yaml_files = glob.glob(os.path.join(directory_path, '*.yaml'))
+    for file_path in yaml_files:
+        filename = os.path.basename(file_path)
         if should_upload(filename, mode, directory_path):
-            file_path = os.path.join(directory_path, filename)
-            upload_metrics(file_path, mode)
+            upload_metrics(file_path)
             if mode == 'finished':
                 new_file_path = file_path.replace('finished.yaml', 'uploaded.yaml')
                 os.rename(file_path, new_file_path)
