@@ -22,7 +22,7 @@ class WANDBHook(Hook):
 
     def before_run(self, algorithm):
         # job_id = '_'.join(algorithm.args.save_name.split('_')[:-1])
-        name = algorithm.args.save_name_wandb
+        name = algorithm.args.save_name
         project = algorithm.args.wandb_project  # algorithm.save_dir.split('/')[-1]
 
         # tags
@@ -38,7 +38,7 @@ class WANDBHook(Hook):
             resume = 'never'
         # resume = 'never'
 
-        save_dir = os.path.join(algorithm.args.save_dir, 'wandb', algorithm.args.save_name_wandb)
+        save_dir = os.path.join(algorithm.args.save_dir, 'wandb', algorithm.args.save_name)
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
         if 'WANDB_MODE' in os.environ:
