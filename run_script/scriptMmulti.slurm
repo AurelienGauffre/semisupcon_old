@@ -33,4 +33,4 @@ python3 train.py --c ./config/configM3.yaml &
 python3 train.py --c ./config/configM4.yaml &
 python3 train.py --c ./config/configM5.yaml &
 python3 train.py --c ./config/configM6.yaml &
-python3 train.py --c ./config/configM7.yaml &
+python3 train.py --c ./config/configM7.yaml
