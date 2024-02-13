@@ -7,10 +7,15 @@ import time
 os.environ['WANDB_MODE'] = 'online'
 
 
-def upload_metrics(file_path):
+def upload_metrics(file_path, mode='finished'):
     data = OmegaConf.load(file_path)
-    wandb.init(project=data.params.wandb_project, name=data.params.save_name_wandb,
-               config=OmegaConf.to_container(data.params))
+    if mode == 'finished':
+        wandb.init(project=data.params.wandb_project, name=data.params.save_name_wandb,
+                   config=OmegaConf.to_container(data.params))
+    else:
+        wandb.init(project=f"{data.params.wandb_project}_temp", name=data.params.save_name_wandb,
+                   config=OmegaConf.to_container(data.params))
+
     for metric in data.logged_metrics:
         wandb.log(metric, step=metric['Step'])
     wandb.finish()
@@ -33,7 +38,7 @@ def main(directory_path, mode='finished'):
     for filename in os.listdir(directory_path):
         if should_upload(filename, mode, directory_path):
             file_path = os.path.join(directory_path, filename)
-            upload_metrics(file_path)
+            upload_metrics(file_path, mode)
             if mode == 'finished':
                 new_file_path = file_path.replace('finished.yaml', 'uploaded.yaml')
                 os.rename(file_path, new_file_path)
