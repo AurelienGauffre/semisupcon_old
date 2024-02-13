@@ -13,7 +13,7 @@ def upload_metrics(file_path, mode='finished'):
         wandb.init(project=data.params.wandb_project, name=data.params.save_name_wandb,
                    config=OmegaConf.to_container(data.params))
     else:
-        wandb.init(project=f"{data.params.wandb_project}_temp", name=data.params.save_name_wandb,
+        wandb.init(project=data.params.wandb_project, name=f"TEMP_{data.params.save_name_wandb}",
                    config=OmegaConf.to_container(data.params))
 
     for metric in data.logged_metrics:
