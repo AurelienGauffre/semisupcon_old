@@ -1,22 +1,26 @@
-# E=Ablation
-# fixmatch classique
+# M = multi
 wandb_project: semisupcon_ablation
-save_name: M0:E0_mid
-algorithm: fixmatch
+save_name: N9:E8_mid_pltemp=0.045
+algorithm: semisupconproto
 dataset: cifar100
+loss: OnlySupconWeightsOnUnconfident # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
+lambda_proto: 0.2 #only for Weighted supcon loss
+pl: softmax # softmax
+pl_temp: 0.045
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
 resume: True
-droprate: 0
+droprate: 0.0375
+resume_only_weight: False # When resuming a model, only take the weight for finetuning (make epochs,scheduler, optimizer start from scratch)
 load_path: auto #latest_model.pth epoch124
 overwrite: True
 use_tensorboard: True
 use_wandb: True
-epoch: 512 #1024 # 256
-num_train_iter: 524288 # 1048576 # 262144
-num_eval_iter: 5120
-num_log_iter: 5120
-num_labels: 2500 # 100 2500cifar100
+epoch: 512 #256 #1024 #512
+num_train_iter: 524288 #262144 # 1048576 #524288
+num_eval_iter: 5120 #5120
+num_log_iter: 5120 #256
+num_labels: 400 # 100 2500cifar100
 batch_size: 64 # 64
 eval_batch_size: 256
 hard_label: True
@@ -30,11 +34,11 @@ img_size: 32
 optim: SGD
 lr: 0.03
 momentum: 0.9
-weight_decay: 0.001
+weight_decay: 0.005
 layer_decay: 1.0
 amp: True
 clip: 0.0
-net: wrn_28_2
+net: wrn_28_2_proto
 net_from_name: False # If True, net_builder takes models in torch.vision models (False de base)
 data_dir: ./data
 train_sampler: RandomSampler
@@ -46,6 +50,7 @@ multiprocessing_distributed: False
 dist_url: tcp://127.0.0.1:10008
 dist_backend: nccl
 gpu: None
+
 
 
 
