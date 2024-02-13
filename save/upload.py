@@ -36,6 +36,7 @@ def should_upload(filename, mode, directory_path):
 
 def main(directory_path, mode='finished'):
     for filename in os.listdir(directory_path):
+        print(filename)
         if should_upload(filename, mode, directory_path):
             file_path = os.path.join(directory_path, filename)
             upload_metrics(file_path, mode)
