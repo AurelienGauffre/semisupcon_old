@@ -10,7 +10,7 @@ pl_temp: 0.045
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
 resume: True
-droprate: 0.0375
+droprate: 0
 resume_only_weight: False # When resuming a model, only take the weight for finetuning (make epochs,scheduler, optimizer start from scratch)
 load_path: auto #latest_model.pth epoch124
 overwrite: True
@@ -34,7 +34,7 @@ img_size: 32
 optim: SGD
 lr: 0.03
 momentum: 0.9
-weight_decay: 0.005
+weight_decay: 0.001
 layer_decay: 1.0
 amp: True
 clip: 0.0

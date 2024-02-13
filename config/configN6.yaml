@@ -34,7 +34,7 @@ img_size: 32
 optim: SGD
 lr: 0.03
 momentum: 0.9
-weight_decay: 0.005
+weight_decay: 0.001
 layer_decay: 1.0
 amp: True
 clip: 0.0
