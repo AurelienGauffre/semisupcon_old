@@ -164,9 +164,6 @@ def get_config():
 
 
 def main(args):
-
-
-
     # Print Python version
     print("### Python Version:", sys.version)
 
@@ -182,10 +179,6 @@ def main(args):
     else:
         print("CUDA is not available. Check your PyTorch installation and GPU drivers.")
 
-
-
-
-
     '''
     For (Distributed)DataParallelism,
     main(args) spawn each process (main_worker) to each GPU.
@@ -198,32 +191,19 @@ def main(args):
         f"NB OF TOTAL training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"
 
     # set appropriate wandb name
-    net_print_dic = {'wrn_28_2': 'wrn_28_2', 'wrn_28_2_proto': 'wrn_28_2', 'wrn_28_8': 'wrn_28_8',
-                     'wrn_28_8_proto': 'wrn_28_8',
-                     'wrn_var_37_2': 'wrn_var_37_2', 'wrn_var_37_2_proto': 'wrn_var_37_2',
-                     'vit_small_patch2_32': 'vit_small_patch2_32', 'vit_small_patch2_32_proto': 'vit_small_patch2_32',
-                     'vit_tiny_patch2_32': 'vit_tiny_patch2_32', 'vit_tiny_patch2_32_proto': 'vit_tiny_patch2_32',
-                     'vit_small_patch16_224': 'vit_small_patch16_224',
-                     'vit_small_patch16_224_proto': 'vit_small_patch16_224',
-                     'vit_base_patch16_96': 'vit_base_patch16_96', 'vit_base_patch16_96_proto': 'vit_base_patch16_96',
-                     'vit_base_patch16_224': 'vit_base_patch16_224',
-                     'vit_base_patch16_224_proto': 'vit_base_patch16_224'
 
-                     }
-
-    args.wandb_project = getattr(args, 'wandb_project', f"semisupcon_{args.dataset}{net_print_dic[args.net]}")
+    args.wandb_project = getattr(args, 'wandb_project', f"semisupcon_{args.dataset}{args.net}")
     # args.wandb_project = f"semisupcon_{args.dataset}_{args.num_labels}_{net_print_dic[args.net]}"
 
     if 'OAR_JOB_ID' in os.environ:
         args.id = f"_AK{os.environ['OAR_JOB_ID']}"
     if 'SLURM_JOB_ID' in os.environ:
         args.id = f"_JZ{os.environ['SLURM_JOB_ID']}"
-        args.data_dir = "/gpfsscratch/rech/cgs/ued97kp/semisupcon/data" #PERSO TO CLEAN
+        args.data_dir = "/gpfsscratch/rech/cgs/ued97kp/semisupcon/data"  # PERSO TO CLEAN
 
     args.wandb_name = args.save_name
     save_path = os.path.join(args.save_dir, args.save_name)
     print(f" #### SAVE PATH : {args.save_dir}/{args.save_name}")
-
 
     if os.path.exists(save_path) and args.overwrite and args.resume == False:
         import shutil
@@ -315,7 +295,6 @@ def main_worker(gpu, ngpus_per_node, args):
     else:
         model = get_algorithm(args, _net_builder, tb_log, logger)
     logger.info(f'Number of Trainable Params: {count_parameters(model.model)}')
-
 
     # SET Devices for (Distributed) DataParallel
     model.model = send_model_cuda(args, model.model)

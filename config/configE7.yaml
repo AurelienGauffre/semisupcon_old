@@ -1,7 +1,6 @@
 # Ablation
 # semisupcon classique avec proto comme anchor
 wandb_project: semisupcon_ablation
-wandb_name: "Ablation E7"
 save_name: E7
 algorithm: semisupconproto
 dataset: cifar100

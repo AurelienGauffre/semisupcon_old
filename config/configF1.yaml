@@ -1,7 +1,7 @@
 # Ablation
 # fixmatch classique
 wandb_project: semisupcon_ablation
-wandb_name: "F1 FlexmatchCL lambda_proto0.2 on unconfident"
+save_name: F1
 algorithm: flexmatch_contrastive
 dataset: cifar100
 loss: classico_va_bene
@@ -10,7 +10,6 @@ pl: softmax # softmax
 pl_temp: .040
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
-save_name:
 resume: False
 droprate: 0
 load_path: auto #latest_model.pth epoch124

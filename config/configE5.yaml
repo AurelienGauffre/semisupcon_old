@@ -1,7 +1,6 @@
 # Ablation
 # semisupcon but separate simclr on unconfident examples
 wandb_project: semisupcon_ablation
-wandb_name: "Ablation E5"
 save_name: E5
 algorithm: semisupconproto
 dataset: cifar100

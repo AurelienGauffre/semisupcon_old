@@ -1,7 +1,6 @@
 # Ablation
 # fixmatch + double augm + simclr sur les uncondifent
 wandb_project: semisupcon_ablation
-wandb_name: "Ablation E3"
 save_name: E3
 algorithm: semisupconproto
 dataset: cifar100

@@ -1,7 +1,6 @@
 # Ablation
 # fixmatch + double aug
 wandb_project: semisupcon_ablation
-wandb_name: "Ablation E2"
 save_name: E2
 algorithm: semisupconproto
 dataset: cifar100

@@ -1,27 +1,22 @@
-# Ablation
-# fixmatch classique mais em utilisant semisupcon (on doit retomber exactement sur E0)
+# N cifar100 - 400 labels
+# fixmatch classique
 wandb_project: semisupcon_ablation
-save_name: "Ablation E1"
-algorithm: semisupconproto
+save_name: N0:E0_mid
+algorithm: fixmatch
 dataset: cifar100
-loss: AblationFixMatch # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
-lambda_proto: 0 #only for Weighted supcon loss
-pl: softmax # softmax
-pl_temp: .040 # Useless here in E1
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
-resume: False
+resume: True
 droprate: 0
-resume_only_weight: False # When resuming a model, only take the weight for finetuning (make epochs,scheduler, optimizer start from scratch)
 load_path: auto #latest_model.pth epoch124
 overwrite: True
 use_tensorboard: True
 use_wandb: True
-epoch: 256 #1024
-num_train_iter: 262144 # 1048576
+epoch: 512 #1024 # 256
+num_train_iter: 524288 # 1048576 # 262144
 num_eval_iter: 5120
-num_log_iter: 256
-num_labels: 2500 # 100 2500cifar100
+num_log_iter: 5120
+num_labels: 400 # 100 2500cifar100
 batch_size: 64 # 64
 eval_batch_size: 256
 hard_label: True
@@ -37,9 +32,9 @@ lr: 0.03
 momentum: 0.9
 weight_decay: 0.001
 layer_decay: 1.0
-amp: False
+amp: True
 clip: 0.0
-net: wrn_28_2_proto
+net: wrn_28_2
 net_from_name: False # If True, net_builder takes models in torch.vision models (False de base)
 data_dir: ./data
 train_sampler: RandomSampler

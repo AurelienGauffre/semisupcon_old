@@ -1,7 +1,6 @@
 # Ablation
 # semisupcon but dropping unconfident examples
 wandb_project: semisupcon_ablation
-wandb_name: "Ablation E4"
 save_name: E4
 algorithm: semisupconproto
 dataset: cifar100

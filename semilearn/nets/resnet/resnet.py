@@ -264,3 +264,34 @@ class ResNet50(nn.Module):
 def resnet50(pretrained=False, pretrained_path=None, **kwargs):
     model = ResNet50(**kwargs)
     return model
+
+# PERSO
+def resnet18(pretrained=False, pretrained_path=None, **kwargs):
+    model = ResNet50(BasicBlock, [2, 2, 2, 2], **kwargs)
+
+    #Adaptation for smaller images like in CIFAR (32x32)
+    model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+    # Supprimer la couche de MaxPooling
+    model.maxpool = nn.Identity()
+
+    return model
+
+
+import torchvision.models as models
+if __name__ == "__main__":
+    model = resnet18()
+
+    pretrained_model = models.resnet18(weights="IMAGENET1K_V1")
+
+    # Copier les poids du modèle pré-entraîné, à l'exception de la première couche convolutive et du maxpool
+    model_dict = model.state_dict()
+    pretrained_dict = {k: v for k, v in pretrained_model.state_dict().items() if
+                       k in model_dict and 'conv1' not in k and 'maxpool' not in k}
+    model_dict.update(pretrained_dict)
+    
+    model.load_state_dict(model_dict)
+
+    # load the weight from torchvision
+
+
+    print(model)
