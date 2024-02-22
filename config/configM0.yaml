@@ -1,7 +1,7 @@
 # E=Ablation
 # fixmatch classique
 wandb_project: semisupcon_ablation
-save_name: M0:E0_mid_TEST
+save_name: M0:E0_mid
 algorithm: fixmatch
 dataset: cifar100
 use_cat: True # if false allows to detach

@@ -25,7 +25,7 @@ module load pytorch-gpu/py3/1.13.0
 
 
 cd /gpfsscratch/rech/cgs/ued97kp/semisupcon
-
+scancel 736910
 
 python3 train.py --c ./config/configM0.yaml &
 python3 train.py --c ./config/configM1.yaml &

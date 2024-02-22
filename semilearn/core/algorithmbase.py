@@ -198,7 +198,7 @@ class AlgorithmBase:
         initialize model
         """
         model = self.net_builder(num_classes=self.num_classes, pretrained=self.args.use_pretrain,
-                                 pretrained_path=self.args.pretrain_path, args=self.args)
+                                 pretrained_path=self.args.pretrain_path,  args=self.args) #droprate=self.args.droprate résoud le probleme, bug de la lib ?
         return model
 
     def set_ema_model(self):

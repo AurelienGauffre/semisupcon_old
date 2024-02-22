@@ -288,6 +288,7 @@ class WideResNetProto(nn.Module):
 
 
 def wrn_28_2(pretrained=False, pretrained_path=None, droprate=0.0, **kwargs):
+    droprate = kwargs['args'].droprate if ('args' in kwargs and hasattr(kwargs['args'], 'droprate')) else 0 # PERSO bug du droprate pas pris en compte
     model = WideResNet(first_stride=1, depth=28, widen_factor=2, droprate=droprate, **kwargs)
     if pretrained:
         model = load_checkpoint(model, pretrained_path)
@@ -295,6 +296,9 @@ def wrn_28_2(pretrained=False, pretrained_path=None, droprate=0.0, **kwargs):
 
 
 def wrn_28_8(pretrained=False, pretrained_path=None, droprate=0.0, **kwargs):
+    droprate = kwargs['args'].droprate if ('args' in kwargs and hasattr(kwargs['args'], 'droprate')) else 0
+
+
     model = WideResNet(first_stride=1, depth=28, widen_factor=8, droprate=droprate, **kwargs)
     if pretrained:
         model = load_checkpoint(model, pretrained_path)
@@ -302,6 +306,8 @@ def wrn_28_8(pretrained=False, pretrained_path=None, droprate=0.0, **kwargs):
 
 
 def wrn_28_2_proto(pretrained=False, pretrained_path=None, droprate=0.0, **kwargs):
+    droprate = kwargs['args'].droprate if ('args' in kwargs and hasattr(kwargs['args'], 'droprate')) else 0
+
     model = WideResNetProto(first_stride=1, depth=28, widen_factor=2, droprate=droprate, **kwargs)
     if pretrained:
         model = load_checkpoint(model, pretrained_path)
@@ -309,6 +315,7 @@ def wrn_28_2_proto(pretrained=False, pretrained_path=None, droprate=0.0, **kwarg
 
 
 def wrn_28_8_proto(pretrained=False, pretrained_path=None, droprate=0.0, **kwargs):
+    droprate = kwargs['args'].droprate if ('args' in kwargs and hasattr(kwargs['args'], 'droprate')) else 0
     model = WideResNetProto(first_stride=1, depth=28, widen_factor=8, droprate=droprate, **kwargs)
     if pretrained:
         model = load_checkpoint(model, pretrained_path)
