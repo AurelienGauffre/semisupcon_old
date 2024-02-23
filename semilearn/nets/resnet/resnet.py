@@ -6,7 +6,9 @@ import torch
 from torch import Tensor
 import torch.nn as nn
 from typing import Type, Any, Callable, Union, List, Optional
-
+import os
+from semilearn.nets.utils import load_checkpoint
+import torch.nn.functional as F
 
 def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> nn.Conv2d:
     """3x3 convolution with padding"""
@@ -213,7 +215,6 @@ class ResNet50(nn.Module):
 
         return nn.Sequential(*layers)
 
-
     def forward(self, x, only_fc=False, only_feat=False, **kwargs):
         """
         Args:
@@ -233,10 +234,9 @@ class ResNet50(nn.Module):
             return x
 
         out = self.classifier(x)
-        result_dict = {'logits':out, 'feat':x}
+        result_dict = {'logits': out, 'feat': x}
         return result_dict
 
-    
     def extract(self, x):
         x = self.conv1(x)
         x = self.bn1(x)
@@ -248,10 +248,10 @@ class ResNet50(nn.Module):
         x = self.layer3(x)
         x = self.layer4(x)
         return x
-    
 
     def group_matcher(self, coarse=False, prefix=''):
-        matcher = dict(stem=r'^{}conv1|^{}bn1|^{}maxpool'.format(prefix, prefix, prefix), blocks=r'^{}layer(\d+)'.format(prefix) if coarse else r'^{}layer(\d+)\.(\d+)'.format(prefix))
+        matcher = dict(stem=r'^{}conv1|^{}bn1|^{}maxpool'.format(prefix, prefix, prefix),
+                       blocks=r'^{}layer(\d+)'.format(prefix) if coarse else r'^{}layer(\d+)\.(\d+)'.format(prefix))
         return matcher
 
     def no_weight_decay(self):
@@ -261,37 +261,216 @@ class ResNet50(nn.Module):
                 nwd.append(n)
         return nwd
 
-def resnet50(pretrained=False, pretrained_path=None, **kwargs):
-    model = ResNet50(**kwargs)
+class ResNet50_proto(nn.Module):
+
+    def __init__(
+            self,
+            block: Type[Union[BasicBlock, Bottleneck]] = Bottleneck,
+            layers: List[int] = [3, 4, 6, 3],
+            num_classes: int = 1000,
+            zero_init_residual: bool = False,
+            groups: int = 1,
+            width_per_group: int = 64,
+            replace_stride_with_dilation: Optional[List[bool]] = None,
+            norm_layer: Optional[Callable[..., nn.Module]] = None
+    ) -> None:
+        super(ResNet50, self).__init__()
+        if norm_layer is None:
+            norm_layer = nn.BatchNorm2d
+        self._norm_layer = norm_layer
+
+        self.inplanes = 64
+        self.dilation = 1
+        if replace_stride_with_dilation is None:
+            # each element in the tuple indicates if we should replace
+            # the 2x2 stride with a dilated convolution instead
+            replace_stride_with_dilation = [False, False, False]
+        if len(replace_stride_with_dilation) != 3:
+            raise ValueError("replace_stride_with_dilation should be None "
+                             "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
+        self.groups = groups
+        self.base_width = width_per_group
+        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
+                               bias=False)
+        self.bn1 = norm_layer(self.inplanes)
+        self.relu = nn.ReLU(inplace=True)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.layer1 = self._make_layer(block, 64, layers[0])
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=2,
+                                       dilate=replace_stride_with_dilation[0])
+        self.layer3 = self._make_layer(block, 256, layers[2], stride=2,
+                                       dilate=replace_stride_with_dilation[1])
+        self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
+                                       dilate=replace_stride_with_dilation[2])
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.num_features = 512 * block.expansion
+        self.classifier = nn.Linear(512 * block.expansion, num_classes)#peut etre virée
+
+        self.contrastive_head = nn.Sequential(  # projection for contrastive loss
+            nn.Linear(512 * block.expansion, 512 * block.expansion),
+            nn.ReLU(inplace=True),
+            nn.Linear(512 * block.expansion, 512 * block.expansion)
+        )
+        self.prototypes = nn.Parameter(torch.randn(num_classes, 512 * block.expansion))
+
+
+
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+            elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+
+        # Zero-initialize the last BN in each residual branch,
+        # so that the residual branch starts with zeros, and each residual block behaves like an identity.
+        # This improves the model by 0.2~0.3% according to https://arxiv.org/abs/1706.02677
+        if zero_init_residual:
+            for m in self.modules():
+                if isinstance(m, Bottleneck):
+                    nn.init.constant_(m.bn3.weight, 0)  # type: ignore[arg-type]
+                elif isinstance(m, BasicBlock):
+                    nn.init.constant_(m.bn2.weight, 0)  # type: ignore[arg-type]
+
+    def _make_layer(self, block: Type[Union[BasicBlock, Bottleneck]], planes: int, blocks: int,
+                    stride: int = 1, dilate: bool = False) -> nn.Sequential:
+        norm_layer = self._norm_layer
+        downsample = None
+        previous_dilation = self.dilation
+        if dilate:
+            self.dilation *= stride
+            stride = 1
+        if stride != 1 or self.inplanes != planes * block.expansion:
+            downsample = nn.Sequential(
+                conv1x1(self.inplanes, planes * block.expansion, stride),
+                norm_layer(planes * block.expansion),
+            )
+
+        layers = []
+        layers.append(block(self.inplanes, planes, stride, downsample, self.groups,
+                            self.base_width, previous_dilation, norm_layer))
+        self.inplanes = planes * block.expansion
+        for _ in range(1, blocks):
+            layers.append(block(self.inplanes, planes, groups=self.groups,
+                                base_width=self.base_width, dilation=self.dilation,
+                                norm_layer=norm_layer))
+
+        return nn.Sequential(*layers)
+
+    def forward(self, x, only_fc=False, only_feat=False, **kwargs):
+        """
+        Args:
+            x: input tensor, depends on only_fc and only_feat flag
+            only_fc: only use classifier, input should be features before classifier
+            only_feat: only return pooled features
+        """
+
+        if only_fc:
+            return self.fc(x)
+
+        x = self.extract(x)
+        x = self.avgpool(x)
+        x = torch.flatten(x, 1)
+
+        contrastive_feats = F.normalize(self.contrastive_head(x), dim=1)
+        # ICI FINIR POTO
+        if only_feat:
+            return x
+
+        out = self.classifier(x)
+        result_dict = {'logits': out, 'feat': x}
+        return result_dict
+
+    def extract(self, x):
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        return x
+
+    def group_matcher(self, coarse=False, prefix=''):
+        matcher = dict(stem=r'^{}conv1|^{}bn1|^{}maxpool'.format(prefix, prefix, prefix),
+                       blocks=r'^{}layer(\d+)'.format(prefix) if coarse else r'^{}layer(\d+)\.(\d+)'.format(prefix))
+        return matcher
+
+    def no_weight_decay(self):
+        nwd = []
+        for n, _ in self.named_parameters():
+            if 'bn' in n or 'bias' in n:
+                nwd.append(n)
+        return nwd
+
+
+
+def resnet50(pretrained=False, pretrained_path="moco_v2_800ep_pretrain.pth", **kwargs):
+    """pour charger des poids resnset il suffit de mettre dans le config en pretrained_path le nom du fichier .pth v
+    et le ranger dans saved_models/pretrained/. Ce n'est pas le meme comportement pour les vits"""
+    model = ResNet50(Bottleneck, [3, 4, 6, 3])
+
+    if pretrained:
+        model = load_checkpoint_resnet(model, pretrained_path)
     return model
+
 
 # PERSO
-def resnet18(pretrained=False, pretrained_path=None, **kwargs):
-    model = ResNet50(BasicBlock, [2, 2, 2, 2], **kwargs)
-
-    #Adaptation for smaller images like in CIFAR (32x32)
-    model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
-    # Supprimer la couche de MaxPooling
-    model.maxpool = nn.Identity()
-
+def resnet18(pretrained=False, pretrained_path='moco_v2_800ep_pretrain.pth', **kwargs):
+    model = ResNet50(BasicBlock, [2, 2, 2, 2])
+    if pretrained:
+        model = load_checkpoint_resnet(model, pretrained_path)
+    # Adaptation for smaller images like in CIFAR (32x32)
     return model
 
 
-import torchvision.models as models
+import torchvision
+
 if __name__ == "__main__":
-    model = resnet18()
+    model = resnet50(pretrained=True, pretrained_path="moco_v2_800ep_pretrain.pth")
 
-    pretrained_model = models.resnet18(weights="IMAGENET1K_V1")
+    # pretrained_model = torchvision.models.resnet50(weights="IMAGENET1K_V1")
+    #
+    #
+    # model_dict = model.state_dict()
+    # pretrained_dict = {k: v for k, v in pretrained_model.state_dict().items()}
+    # pretrained_dict['classifier.bias'] = pretrained_dict.pop('fc.bias')
+    # pretrained_dict['classifier.weight'] = pretrained_dict.pop('fc.weight')
+    # model_dict.update(pretrained_dict)
+    # model.load_state_dict(model_dict)
+    # model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+    # model.maxpool = nn.Identity()
 
-    # Copier les poids du modèle pré-entraîné, à l'exception de la première couche convolutive et du maxpool
-    model_dict = model.state_dict()
-    pretrained_dict = {k: v for k, v in pretrained_model.state_dict().items() if
-                       k in model_dict and 'conv1' not in k and 'maxpool' not in k}
-    model_dict.update(pretrained_dict)
-    
-    model.load_state_dict(model_dict)
+    # print all the key that are common to both model_dict and pretrained_dict
+    # using an intersection
+    # (set(model_dict.keys()) & set(pretrained_dict.keys()))
+
+    # print all the key that are not common to both model_dict and pretrained_dict
+    # using a difference
+    # print(set(model_dict.keys()) - set(pretrained_dict.keys()))
 
     # load the weight from torchvision
 
-
     print(model)
+
+
+def load_checkpoint_resnet(model,pretrained_path):
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    pretrained_path = os.path.join(base_dir, 'saved_models', 'pretrained', pretrained_path)
+    state_dict_moco = torch.load(pretrained_path, map_location='cpu')['state_dict']
+    new_state_dict = {}
+    for key, item in state_dict_moco.items():
+        print(key)
+        if key.startswith('module'):
+            key = '.'.join(key.split('.')[1:])
+        if key.startswith('encoder_q'):  # to clean moco keys
+            key = '.'.join(key.split('.')[1:])
+        if key.startswith('fc') or key.startswith('classifier') or key.startswith('mlp') or key.startswith('head'):
+            continue
+        print(key)
+        new_state_dict[key] = item
+    model.load_state_dict(new_state_dict, strict=False)
+    print(f"#### Loaded pretrained weights from {pretrained_path} ####")
+    return model
