@@ -37,7 +37,7 @@ weight_decay: 0.001
 layer_decay: 1.0
 amp: True
 clip: 0.0
-net: wrn_28_2
+net: resnet50
 net_from_name: False # If True, net_builder takes models in torch.vision models (False de base)
 data_dir: ./data
 train_sampler: RandomSampler
