@@ -1,13 +1,18 @@
+# G pretrained backbone A resnet50
+# G0 : fixmatch baseline avec resnet50 unpretrained
+# fixmatch classique
 # Ablation
 # semisupcon classique mais on mets un lambda sur les unconfident
 wandb_project: semisupcon_ablation
-save_name: E8
+save_name: "G2: semisupcon resnet50 unpretrained +resset50cifar"
+use_pretrain: True
+pretrain_path: moco_v2_800ep_pretrain.pth
 algorithm: semisupconproto
 dataset: cifar100
 loss: OnlySupconWeightsOnUnconfident # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
 lambda_proto: 0.2 #only for Weighted supcon loss
 pl: softmax # softmax
-pl_temp: .0375
+pl_temp: .04
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
 resume: True
@@ -39,7 +44,7 @@ weight_decay: 0.001
 layer_decay: 1.0
 amp: True
 clip: 0.0
-net: wrn_28_2_proto
+net: resnet50_proto
 net_from_name: False # If True, net_builder takes models in torch.vision models (False de base)
 data_dir: ./data
 train_sampler: RandomSampler

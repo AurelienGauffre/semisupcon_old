@@ -274,7 +274,7 @@ class ResNet50_proto(nn.Module):
             replace_stride_with_dilation: Optional[List[bool]] = None,
             norm_layer: Optional[Callable[..., nn.Module]] = None
     ) -> None:
-        super(ResNet50, self).__init__()
+        super(ResNet50_proto, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         self._norm_layer = norm_layer
@@ -357,7 +357,7 @@ class ResNet50_proto(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def forward(self, x, only_fc=False, only_feat=False, **kwargs):
+    def forward(self, x, **kwargs):
         """
         Args:
             x: input tensor, depends on only_fc and only_feat flag
@@ -365,20 +365,15 @@ class ResNet50_proto(nn.Module):
             only_feat: only return pooled features
         """
 
-        if only_fc:
-            return self.fc(x)
+        out = self.extract(x)
+        out = self.avgpool(out)
+        out = torch.flatten(out, 1)
 
-        x = self.extract(x)
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
-
-        contrastive_feats = F.normalize(self.contrastive_head(x), dim=1)
+        contrastive_feats = F.normalize(self.contrastive_head(out), dim=1)
+        proto_proj = F.normalize(self.prototypes, dim=1)
         # ICI FINIR POTO
-        if only_feat:
-            return x
+        result_dict = {'contrastive_feats': contrastive_feats, "proto_proj": proto_proj}
 
-        out = self.classifier(x)
-        result_dict = {'logits': out, 'feat': x}
         return result_dict
 
     def extract(self, x):
@@ -410,11 +405,11 @@ class ResNet50_proto(nn.Module):
 def resnet50(pretrained=False, pretrained_path="moco_v2_800ep_pretrain.pth", **kwargs):
     """pour charger des poids resnset il suffit de mettre dans le config en pretrained_path le nom du fichier .pth v
     et le ranger dans saved_models/pretrained/. Ce n'est pas le meme comportement pour les vits"""
-    model = ResNet50(Bottleneck, [3, 4, 6, 3])
+    model = ResNet50(Bottleneck, [3, 4, 6, 3], num_classes=kwargs['num_classes'])
 
     if pretrained:
         model = load_checkpoint_resnet(model, pretrained_path)
-
+    # Adaptation for smaller images like in CIFAR (32x32)
     model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
     model.maxpool = nn.Identity()
 
@@ -423,11 +418,38 @@ def resnet50(pretrained=False, pretrained_path="moco_v2_800ep_pretrain.pth", **k
 
 # PERSO
 def resnet18(pretrained=False, pretrained_path='moco_v2_800ep_pretrain.pth', **kwargs):
-    model = ResNet50(BasicBlock, [2, 2, 2, 2])
+    model = ResNet50(BasicBlock, [2, 2, 2, 2], num_classes=kwargs['num_classes'])
     if pretrained:
         model = load_checkpoint_resnet(model, pretrained_path)
     # Adaptation for smaller images like in CIFAR (32x32)
+    model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+    model.maxpool = nn.Identity()
     return model
+
+
+def resnet50_proto(pretrained=False, pretrained_path="moco_v2_800ep_pretrain.pth", **kwargs):
+    """pour charger des poids resnset il suffit de mettre dans le config en pretrained_path le nom du fichier .pth v
+    et le ranger dans saved_models/pretrained/. Ce n'est pas le meme comportement pour les vits"""
+    model = ResNet50_proto(Bottleneck, [3, 4, 6, 3], num_classes=kwargs['num_classes'])
+    if pretrained:
+        model = load_checkpoint_resnet(model, pretrained_path)
+    # Adaptation for smaller images like in CIFAR (32x32)
+    model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+    model.maxpool = nn.Identity()
+
+    return model
+
+
+# PERSO
+def resnet18_proto(pretrained=False, pretrained_path='moco_v2_800ep_pretrain.pth', **kwargs):
+    model = ResNet50_proto(BasicBlock, [2, 2, 2, 2], num_classes=kwargs['num_classes'])
+    if pretrained:
+        model = load_checkpoint_resnet(model, pretrained_path)
+    # Adaptation for smaller images like in CIFAR (32x32)
+    model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+    model.maxpool = nn.Identity()
+    return model
+
 
 
 import torchvision
