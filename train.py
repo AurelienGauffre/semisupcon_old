@@ -201,7 +201,7 @@ def main(args):
         args.id = f"_JZ{os.environ['SLURM_JOB_ID']}"
         args.data_dir = "/gpfsscratch/rech/cgs/ued97kp/semisupcon/data"  # PERSO TO CLEAN
 
-    args.wandb_name = args.save_name
+    args.wandb_name = args.save_name + args.id
     save_path = os.path.join(args.save_dir, args.save_name)
     print(f" #### SAVE PATH : {args.save_dir}/{args.save_name}")
 
