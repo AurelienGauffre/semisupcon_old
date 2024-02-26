@@ -495,7 +495,6 @@ def load_checkpoint_resnet(model,pretrained_path):
             key = '.'.join(key.split('.')[1:])
         if key.startswith('fc') or key.startswith('classifier') or key.startswith('mlp') or key.startswith('head'):
             continue
-        print(key)
         new_state_dict[key] = item
     model.load_state_dict(new_state_dict, strict=False)
     # set(model.state_dict().keys()) & set(new_state_dict.keys())
