@@ -3,7 +3,7 @@
 # fixmatch classique
 wandb_project: semisupcon_ablation
 save_name: "G1: fixmatch resnet50 pretrained"
-pretrained: True
+use_pretrain: True
 pretrain_path: moco_v2_800ep_pretrain.pth
 algorithm: fixmatch
 dataset: cifar100

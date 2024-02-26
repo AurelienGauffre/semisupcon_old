@@ -471,6 +471,7 @@ def load_checkpoint_resnet(model,pretrained_path):
             continue
         print(key)
         new_state_dict[key] = item
-    model.load_state_dict(new_state_dict, strict=False)
+    model.load_state_dict(new_state_dict, strict=True)
+    # set(model.state_dict().keys()) & set(new_state_dict.keys())
     print(f"#### Loaded pretrained weights from {pretrained_path} ####")
     return model
