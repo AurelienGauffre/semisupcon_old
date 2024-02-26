@@ -414,6 +414,10 @@ def resnet50(pretrained=False, pretrained_path="moco_v2_800ep_pretrain.pth", **k
 
     if pretrained:
         model = load_checkpoint_resnet(model, pretrained_path)
+
+    model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+    model.maxpool = nn.Identity()
+
     return model
 
 
