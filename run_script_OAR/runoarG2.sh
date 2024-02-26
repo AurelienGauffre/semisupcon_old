@@ -5,4 +5,4 @@ DSDIR="/home/aptikal/gauffrea/datasets"
 DSDIR_CUSTOM="/home/aptikal/gauffrea/datasets"
 export DSDIR
 export DSDIR_CUSTOM
-python3 train.py --c ./config/configG3.yaml
+python3 train.py --c ./config/configG1.yaml
