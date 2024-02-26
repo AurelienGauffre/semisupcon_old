@@ -4,7 +4,7 @@
 # Ablation
 # semisupcon classique mais on mets un lambda sur les unconfident
 wandb_project: semisupcon_ablation
-save_name: "G2: semisupcon resnet50 unpretrained +resset50cifar"
+save_name: "G2: semisupcon resnet50 pretrained"
 use_pretrain: True
 pretrain_path: moco_v2_800ep_pretrain.pth
 algorithm: semisupconproto
