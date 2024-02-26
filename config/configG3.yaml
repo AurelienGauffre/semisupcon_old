@@ -15,7 +15,7 @@ pl: softmax # softmax
 pl_temp: .04
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
-resume: False
+resume: True
 droprate: 0
 resume_only_weight: False # When resuming a model, only take the weight for finetuning (make epochs,scheduler, optimizer start from scratch)
 load_path: auto #latest_model.pth epoch124
