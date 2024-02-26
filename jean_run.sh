@@ -1,19 +1,20 @@
 #!/bin/bash
 
-# Check if two arguments are provided
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 JOB_NAME walltime=VALUE"
+# Check if at least one argument is provided
+if [ "$#" -lt 1 ]; then
+    echo "Usage: $0 JOB_NAME [walltime=VALUE]"
     exit 1
 fi
 
-# Extract job name and walltime from arguments
+# Extract job name from the first argument
 JOB_NAME=$1
-WALLTIME_ARG=$2
-WALLTIME=${WALLTIME_ARG#*=} # Extract value after '='
 
-# If walltime is empty, set default value
-if [ -z "$WALLTIME" ]; then
-    WALLTIME="99"
+# Default walltime value
+WALLTIME="99"
+
+# If a second argument is provided, extract walltime from it
+if [ ! -z "$2" ]; then
+    WALLTIME_ARG=$2
 fi
 
 # Create the directory for the script if it does not exist
