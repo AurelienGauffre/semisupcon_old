@@ -5,8 +5,8 @@
 # semisupcon classique mais on mets un lambda sur les unconfident
 wandb_project: semisupcon_ablation
 save_name: "G2: semisupcon resnet50 unpretrained +resset50cifar"
-use_pretrain: True
-pretrain_path: moco_v2_800ep_pretrain.pth
+use_pretrain: False
+pretrain_path:
 algorithm: semisupconproto
 dataset: cifar100
 loss: OnlySupconWeightsOnUnconfident # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
