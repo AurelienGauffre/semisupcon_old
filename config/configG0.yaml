@@ -2,7 +2,7 @@
 # G0 : fixmatch baseline avec resnet50 unpretrained
 # fixmatch classique
 wandb_project: semisupcon_ablation
-save_name: "G0: fixmatch resnet50 unpretrained"
+save_name: "G0: fixmatch resnet50 unpretrained+resset50cifar"
 use_pretrain: False
 pretrain_path:
 algorithm: fixmatch
