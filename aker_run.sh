@@ -14,12 +14,13 @@ WALLTIME="99"
 
 # If a second argument is provided, extract walltime from it
 if [ ! -z "$2" ]; then
-    WALLTIME_ARG=$2
+    WALLTIME=$2
 fi
 
 # Create the directory for the script if it does not exist
 mkdir -p ./run_script_OAR
-
+touch ./run_script_OAR/auto_runoar${JOB_NAME}.sh
+chmod +x ./run_script_OAR/auto_runoar${JOB_NAME}.sh
 git pull
 # Create the SLURM script
 cat <<EOF >./run_script_OAR/auto_runoar${JOB_NAME}.sh
@@ -32,7 +33,7 @@ export DSDIR
 export DSDIR_CUSTOM
 python3 train.py --c ./config/config${JOB_NAME}.yaml
 EOF
-chmod +x ./run_script_OAR/auto_runoar${JOB_NAME}.sh
-# Perform git pull to update the repository
+
+
 
 oarsub -l /host=1/gpu=1,walltime=${WALLTIME}:0:0 /home/aptikal/gauffrea/semisupcon/run_script_OAR/auto_runoar${JOB_NAME}.sh
