@@ -32,7 +32,7 @@ export DSDIR
 export DSDIR_CUSTOM
 python3 train.py --c ./config/config${JOB_NAME}.yaml
 EOF
-
+chmod +x ./run_script_OAR/auto_runoar${JOB_NAME}.sh
 # Perform git pull to update the repository
 
 oarsub -l /host=1/gpu=1,walltime=${WALLTIME}:0:0 /home/aptikal/gauffrea/semisupcon/run_script_OAR/auto_runoar${JOB_NAME}.sh
