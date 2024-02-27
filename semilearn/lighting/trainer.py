@@ -5,7 +5,7 @@ import os
 import torch
 import torch.nn as nn
 import numpy as np
-from progress.bar import Bar
+#from progress.bar import Bar
 
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 from semilearn.core.utils import get_optimizer, get_cosine_schedule_with_warmup, get_logger, EMA

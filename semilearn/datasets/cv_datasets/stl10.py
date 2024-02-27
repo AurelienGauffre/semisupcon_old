@@ -19,6 +19,7 @@ img_size = 96
 
 
 def get_transform(mean, std, crop_size, train=True, crop_ratio=0.95):
+    img_size = 96
     img_size = int(img_size / crop_ratio)
 
     if train:
@@ -112,4 +113,12 @@ def get_stl10(args, alg, name, num_labels, num_classes, data_dir='./data', inclu
     return lb_dset, ulb_dset, eval_dset
 
 
-
+if __name__ == "__main__":
+    # Define transformations for the train and test set
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
+    # Load CIFAR-10 dataset
+    trainset = torchvision.datasets.STL10(root='./data', train=True, download=True, transform=transform)
+    # Load CIFAR-100 dataset

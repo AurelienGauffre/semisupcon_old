@@ -136,9 +136,14 @@ if __name__ == "__main__":
     trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
     # Load CIFAR-100 dataset
     trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform)
+
     # Load STL-10 dataset
     trainset = torchvision.datasets.STL10(root='./data', split='train', download=True, transform=transform)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True, num_workers=2)
+    validset = torchvision.datasets.STL10(root='./data', split='test', download=True, transform=transform)
 
-    testset = torchvision.datasets.STL10(root='./data', split='test', download=True, transform=transform)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False, num_workers=2)
+    # Load SVHN dataset
+    trainset = torchvision.datasets.SVHN(root='./data', split='train', download=True, transform=transform)
+    validset = torchvision.datasets.SVHN(root='./data', split='test', download=True, transform=transform)
+
+
+    # Eurosat
