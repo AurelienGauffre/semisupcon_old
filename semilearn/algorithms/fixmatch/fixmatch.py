@@ -504,26 +504,53 @@ class SemiSupConProto(AlgorithmBase):
                                                        weights=weights)
                 unsup_loss = torch.zeros(1).cuda()
                 total_loss = supcon_loss
+                print(total_loss)
+            elif self.args.loss == "SemiSupConLoss":  # E9 Des poids differents pour les unconfident label
 
-            elif self.args.loss == "OnlySupconWeightsMulti":  # E9 Des poids differents pour les unconfident label
+                # Concatenate features for contrastive learning
+                contrastive_x_all = torch.cat([
+                    proto_proj,
+                    contrastive_x_lb,
+                    contrastive_x_ulb_s_0[maskbool],
+                    contrastive_x_ulb_s_1[maskbool],
+                    contrastive_x_ulb_s_0[~maskbool],
+                    contrastive_x_ulb_s_1[~maskbool]
+                ], dim=0)
 
-                contrastive_x_all = torch.cat(
-                    (proto_proj, contrastive_x_lb, contrastive_x_ulb_s_0[maskbool], contrastive_x_ulb_s_1[maskbool],
-                     contrastive_x_ulb_s_0[~maskbool], contrastive_x_ulb_s_1[~maskbool]),
-                    dim=0)
-                y_all = torch.cat(
-                    (torch.arange(self.args.num_classes).cuda(), y_lb, pseudo_label[maskbool], pseudo_label[maskbool],
-                     (torch.arange(sum(~maskbool)).cuda() + self.args.num_classes).repeat(2)),
-                    dim=0)
-                # counting unconfident label in ~maskbool
-                P = sum(~maskbool)
+                # Concatenate labels and pseudo labels accordingly
+                y_all = torch.cat([
+                    torch.arange(self.args.num_classes).cuda(),  # Prototype labels
+                    y_lb,  # Labeled data labels
+                    pseudo_label[maskbool],  # Pseudo labels for confident unlabeled data
+                    pseudo_label[maskbool],  # Duplicate for second set of confident unlabeled data
+                    (torch.arange((~maskbool).sum()) + self.args.num_classes).repeat(2).cuda()
+                    # Incremented labels for unconfident unlabeled data
+                ], dim=0)
+
+                # Initialize weights for all data points
                 weights = torch.ones(y_all.shape[0]).cuda()
-                weights[-2 * P:] *= self.args.lambda_ydown
-                weights[:self.args.num_classes] *= self.args.lambda_proto
-                supcon_loss = self.supcon_loss_weights(embeddings=contrastive_x_all, labels=y_all,
-                                                       weights=weights)
-                unsup_loss = torch.zeros(1).cuda()
+                P = (~maskbool).sum().item()  # Number of unconfident unlabeled data points
+
+                # Apply different weights based on the data type
+                weights[-2 * P:] *= self.args.lambda_ydown  # Apply down-weighting for unconfident unlabeled data
+                weights[:self.args.num_classes] *= self.args.lambda_proto  # Apply weighting for prototypes
+
+                # Apply lambda_yup for confident unlabeled data points
+                proto_lb_len = proto_proj.size(0) + contrastive_x_lb.size(0)
+                mask_true_len = maskbool.sum().item()
+                start_index = proto_lb_len
+                end_index = start_index + 2 * mask_true_len
+                weights[start_index:end_index] *= self.args.lambda_yup
+
+                # Compute the supervised contrastive loss
+                supcon_loss = self.supcon_loss_weights(embeddings=contrastive_x_all, labels=y_all, weights=weights)
+
+                # Assuming unsupervised loss is not used in this context
+                unsup_loss = torch.zeros(1).cuda()  # Placeholder for unsupervised loss, if necessary
+
+                # Final total loss is just the supervised contrastive loss in this case
                 total_loss = supcon_loss
+                print(total_loss)
 
             elif self.args.loss == "AblationSupcon-DoubleAugm":  # E7 Supcon-
 

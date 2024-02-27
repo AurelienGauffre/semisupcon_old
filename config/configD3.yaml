@@ -1,33 +1,22 @@
-#D Test sans slicing
-algorithm: semisupconproto
-dataset: cifar100
-loss: OnlySupconWeights # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
-lambda_proto: 0 #only for Weighted supcon loss
-pl: softmax # softmax
-pl_temp: .055 # ONLY for softmax pl
-use_cat: True # if false allows to detach
+# D cifar10 40 labels semisupcon
+
+algorithm: semisupconproto # fixmatch
 save_dir: ./saved_models/classic_cv
-save_name:  #cat=True + droprate .5 #semisupcon1.2 (all_withoutsimclr_withoutunsupce) #(pretrained:simclr124epochs) #semisupcon 1.2 (without simclr) # (with 0.5*Simclr) # (0.5*Simclr) # semisupcon1.2 (withoutsimclr) (pretrained:simclr124epochs) #(without simclr)
-wandb_project: "Semisupcon SpeedTest"
-wandb_name: base + compile
-speed: True
-resume: False
-droprate: 0
-resume_only_weight: False # When resuming a model, only take the weight for finetuning (make epochs,scheduler, optimizer start from scratch)
-load_path: ./saved_models/pretrained/pretrainedSimCLRcifar100wrn_28_2_epochs256/epoch124.pth #latest_model.pth epoch124
+resume: True
+load_path: auto
 overwrite: True
 use_tensorboard: True
 use_wandb: True
-epoch: 256 #1024
-num_train_iter: 262144 # 1048576
-num_eval_iter: 256 # TO CHANGE 5120
-num_log_iter: 256
-num_labels: 2500 # 100 2500cifar100
-batch_size: 64 # 64
+epoch: 1024  #256 #512 #1024
+num_train_iter: 1048576 # 262144 # 524288 # 1048576
+num_eval_iter: 5120
+num_log_iter: 512 #256
+num_labels: 400
+batch_size: 64
 eval_batch_size: 256
 hard_label: True
 T: 0.5
-p_cutoff: 0.7 # 0.7 ou .95 pour fixmatchtau for pseudo labeling
+p_cutoff: 0.95
 ulb_loss_ratio: 1.0
 uratio: 7
 ema_m: 0.999
@@ -36,22 +25,30 @@ img_size: 32
 optim: SGD
 lr: 0.03
 momentum: 0.9
-weight_decay: 0.0005
+weight_decay: 0.001 #0.001 pour cifar100
 layer_decay: 1.0
-amp: False
+amp: True
 clip: 0.0
+use_cat: True
 net: wrn_28_2_proto
-net_from_name: False # If True, net_builder takes models in torch.vision models (False de base)
+net_from_name: False
 data_dir: ./data
+dataset: cifar100
 train_sampler: RandomSampler
 num_workers: 1
 seed: 0
 world_size: 1
 rank: 0
-multiprocessing_distributed: False
+multiprocessing_distributed: True
 dist_url: tcp://127.0.0.1:10008
 dist_backend: nccl
 gpu: None
 
+wandb_project: semisupcon_datasets
+save_name: D3
+loss: OnlySupconWeightsOnUnconfident # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
+lambda_proto: 0.2 #only for Weighted supcon loss
+pl: softmax # softmax
+pl_temp: .04
 
 

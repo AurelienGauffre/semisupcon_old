@@ -184,22 +184,22 @@ def main(args):
     main(args) spawn each process (main_worker) to each GPU.
     '''
     print(f"CONFIG FILE : {args.c}")
-    nb_classes_dict = {'cifar10': 10, 'cifar100': 100, 'stl10': 10, 'svhn': 10, 'imagenet': 1000}
+    nb_classes_dict = {'cifar10': 10, 'cifar100': 100, 'stl10': 10, 'svhn': 10, 'imagenet': 1000, 'eurosat': 10, "tissuemnist": 8}
     print(f"DATASET : {args.dataset}")
     args.num_classes = nb_classes_dict[args.dataset]
     assert args.num_train_iter % args.epoch == 0, \
         f"NB OF TOTAL training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"
-
-    # set appropriate wandb name
 
     args.wandb_project = getattr(args, 'wandb_project', f"semisupcon_{args.dataset}{args.net}")
     # args.wandb_project = f"semisupcon_{args.dataset}_{args.num_labels}_{net_print_dic[args.net]}"
 
     if 'OAR_JOB_ID' in os.environ:
         args.id = f"_AK{os.environ['OAR_JOB_ID']}"
-    if 'SLURM_JOB_ID' in os.environ:
+    elif 'SLURM_JOB_ID' in os.environ:
         args.id = f"_JZ{os.environ['SLURM_JOB_ID']}"
         args.data_dir = "/gpfsscratch/rech/cgs/ued97kp/semisupcon/data"  # PERSO TO CLEAN
+    else :
+        args.id = f""
 
     args.wandb_name = args.save_name + args.id
     save_path = os.path.join(args.save_dir, args.save_name)

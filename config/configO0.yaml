@@ -1,25 +1,26 @@
-# G pretrained backbone A resnet50
-# G0 : fixmatch baseline avec resnet50 unpretrained
-# fixmatch classique
-wandb_project: semisupcon_ablation
-save_name: "G1: fixmatch resnet50 pretrained +resset50cifar!"
-use_pretrain: True
-pretrain_path: moco_v2_800ep_pretrain.pth
-algorithm: fixmatch
+# O test lambda loss
+wandb_project: semisupcon_bestloss
+save_name: O0
+algorithm: semisupconproto
 dataset: cifar100
+loss: OnlySupconWeightsOnUnconfident # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
+lambda_proto: 0.2 #only for Weighted supcon loss
+pl: softmax # softmax
+pl_temp: .04
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
 resume: True
 droprate: 0
+resume_only_weight: False # When resuming a model, only take the weight for finetuning (make epochs,scheduler, optimizer start from scratch)
 load_path: auto #latest_model.pth epoch124
 overwrite: True
 use_tensorboard: True
 use_wandb: True
-epoch: 256 #1024 # 256
-num_train_iter: 262144 # 1048576 # 262144
-num_eval_iter: 5120
-num_log_iter: 256
-num_labels: 2500 # 100 2500cifar100
+epoch: 256 #256 #1024 #512
+num_train_iter: 262144 #262144 # 1048576 #524288
+num_eval_iter: 5120 #5120
+num_log_iter: 5120 #256
+num_labels: 400 # 100 2500cifar100
 batch_size: 64 # 64
 eval_batch_size: 256
 hard_label: True
@@ -37,7 +38,7 @@ weight_decay: 0.001
 layer_decay: 1.0
 amp: True
 clip: 0.0
-net: resnet50
+net: wrn_28_2_proto
 net_from_name: False # If True, net_builder takes models in torch.vision models (False de base)
 data_dir: ./data
 train_sampler: RandomSampler
