@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage check
+# Check if at least one argument is provided
 if [ "$#" -lt 1 ]; then
     echo "Usage: $0 JOB_NAMES [walltime=VALUE]"
     exit 1
@@ -8,11 +8,15 @@ fi
 
 # Extract job names from the first argument and split by '_'
 IFS='_' read -ra JOB_NAMES <<< "$1"
+JOB_NAME_STRING="${JOB_NAMES[*]}"
+
+# Replace spaces with underscores to create the filename
+JOB_NAME_FILE="${JOB_NAME_STRING// /_}"
 
 # Default walltime value
 WALLTIME="99"
 
-# Extract walltime from the second argument if provided
+# If a second argument is provided, it is assumed to be the walltime
 if [ ! -z "$2" ]; then
     WALLTIME=$2
 fi
@@ -20,11 +24,11 @@ fi
 # Create the directory for the script if it does not exist
 mkdir -p ./run_script
 
-# Create the SLURM script with dynamic job names
-cat <<EOF >./run_script/auto_script${JOB_NAMES[*]}.slurm
+# Create the SLURM script with a concatenated job name
+cat <<EOF > "./run_script/auto_script${JOB_NAME_FILE}.slurm"
 #!/bin/bash
 #SBATCH --account=cgs@v100
-#SBATCH --job-name=${JOB_NAMES[*]}
+#SBATCH --job-name=${JOB_NAME_FILE}
 ##SBATCH -C v100-16g                 # uncomment to target only 16GB V100 GPU
 ##SBATCH -C v100-32g                 # uncomment to target only 32GB V100 GPU
 #SBATCH --partition=gpu_p2          # uncomment for gpu_p2 partition (32GB V100 GPU)
@@ -49,14 +53,15 @@ EOF
 
 # Append the nohup commands for each job to the SLURM script
 for JOB_NAME in "${JOB_NAMES[@]}"; do
-    echo "nohup python3 train.py --c ./config/config${JOB_NAME}.yaml &" >> ./run_script/auto_script${JOB_NAMES[*]}.slurm
+    echo "nohup python3 train.py --c ./config/config${JOB_NAME}.yaml &" >> "./run_script/auto_script${JOB_NAME_FILE}.slurm"
 done
 
 # Add a wait command to ensure all background jobs complete before the script ends
-echo "wait" >> ./run_script/auto_script${JOB_NAMES[*]}.slurm
+echo "wait" >> "./run_script/auto_script${JOB_NAME_FILE}.slurm"
 
 # Perform git pull to update the repository
 git pull
 
-# Submit the SLURM job
-sbatch ./run_script/auto_script${JOB_NAMES[*]}.slurm
+echo "SLURM script created: ./run_script/auto_script${JOB_NAME_FILE}.slurm"
+# Note: The actual submission is commented out for safety. Uncomment the following line to enable it.
+# sbatch "./run_script/auto_script${JOB_NAME_FILE}.slurm"
