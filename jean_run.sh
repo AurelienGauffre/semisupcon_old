@@ -1,4 +1,7 @@
 #!/bin/bash
+# usage :
+# . jean_run.sh E1 50 to tun the job E1 with 50 hours of walltime
+# . jean_run.sh E1_E2 50 to tun the job E1 and E2 on same GPU with 50 hours of walltime
 
 # Check if at least one argument is provided
 if [ "$#" -lt 1 ]; then

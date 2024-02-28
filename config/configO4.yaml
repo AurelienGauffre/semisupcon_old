@@ -4,8 +4,8 @@ save_name: O4
 algorithm: semisupconproto
 dataset: cifar100
 loss: SemiSupConLoss # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
-lambda_proto: .5 #only for Weighted supcon loss
-lambda_yup: 1 #only for Weighted supcon loss
+lambda_proto: 1 #only for Weighted supcon loss
+lambda_yup: 1.2 #only for Weighted supcon loss
 lambda_ydown: .2 #only for Weighted supcon loss
 pl: softmax # softmax
 pl_temp: .04
