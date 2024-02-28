@@ -1,4 +1,4 @@
-# D cifar10 40 labels semisupcon
+# D cifar100 400 labels
 
 algorithm: semisupconproto # fixmatch
 save_dir: ./saved_models/classic_cv
@@ -7,8 +7,8 @@ load_path: auto
 overwrite: True
 use_tensorboard: True
 use_wandb: True
-epoch: 1024  #256 #512 #1024
-num_train_iter: 1048576 # 262144 # 524288 # 1048576
+epoch: 256  #256 #512 #1024
+num_train_iter: 262144 # 262144 # 524288 # 1048576
 num_eval_iter: 5120
 num_log_iter: 512 #256
 num_labels: 400

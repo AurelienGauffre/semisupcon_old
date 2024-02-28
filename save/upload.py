@@ -17,10 +17,17 @@ def upload_metrics(file_path, mode):
         wandb.init(project='TEMP'+data.params.wandb_project, name=f"TEMP_{data.params.save_name}",
                    config=OmegaConf.to_container(data.params))
 
+    best_acc = float('-inf')  # Initialize best accuracy with negative infinity
     for metric in data.logged_metrics:
-        wandb.log(metric, step=metric['Step'])
-    wandb.finish()
+        # Update best_acc if the current metric is 'eval/top-1-acc' and its value is greater than best_acc
+        if 'eval/top-1-acc' in metric and metric['eval/top-1-acc'] > best_acc:
+            best_acc = metric['eval/top-1-acc']
 
+        # Log the current metrics
+        wandb.log(metric, step=metric['Step'])
+        wandb.log({"eval/best-acc": best_acc}, step=metric['Step'])
+
+    wandb.finish()
 
 def should_upload(filename, mode, directory_path):
     file_path = os.path.join(directory_path, filename)
