@@ -66,5 +66,4 @@ echo "wait" >> "./run_script/auto_script${JOB_NAME_FILE}.slurm"
 git pull
 
 echo "SLURM script created: ./run_script/auto_script${JOB_NAME_FILE}.slurm"
-# Note: The actual submission is commented out for safety. Uncomment the following line to enable it.
-# sbatch "./run_script/auto_script${JOB_NAME_FILE}.slurm"
+sbatch "./run_script/auto_script${JOB_NAME_FILE}.slurm"
