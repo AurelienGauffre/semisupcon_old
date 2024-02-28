@@ -1,30 +1,30 @@
 #!/bin/bash
 
-# Check if at least one argument is provided
+# Usage check
 if [ "$#" -lt 1 ]; then
-    echo "Usage: $0 JOB_NAME [walltime=VALUE]"
+    echo "Usage: $0 JOB_NAMES [walltime=VALUE]"
     exit 1
 fi
 
-# Extract job name from the first argument
-JOB_NAME=$1
+# Extract job names from the first argument and split by '_'
+IFS='_' read -ra JOB_NAMES <<< "$1"
 
 # Default walltime value
 WALLTIME="99"
 
-# If a second argument is provided, extract walltime from it
+# Extract walltime from the second argument if provided
 if [ ! -z "$2" ]; then
-    WALLTIME_ARG=$2
+    WALLTIME=$2
 fi
 
 # Create the directory for the script if it does not exist
 mkdir -p ./run_script
 
-# Create the SLURM script
-cat <<EOF >./run_script/auto_script${JOB_NAME}.slurm
+# Create the SLURM script with dynamic job names
+cat <<EOF >./run_script/auto_script${JOB_NAMES[*]}.slurm
 #!/bin/bash
 #SBATCH --account=cgs@v100
-#SBATCH --job-name=$JOB_NAME
+#SBATCH --job-name=${JOB_NAMES[*]}
 ##SBATCH -C v100-16g                 # uncomment to target only 16GB V100 GPU
 ##SBATCH -C v100-32g                 # uncomment to target only 32GB V100 GPU
 #SBATCH --partition=gpu_p2          # uncomment for gpu_p2 partition (32GB V100 GPU)
@@ -45,11 +45,18 @@ module load pytorch-gpu/py3/1.13.0
 
 cd /gpfsscratch/rech/cgs/ued97kp/semisupcon
 
-python3 train.py --c ./config/config${JOB_NAME}.yaml
 EOF
+
+# Append the nohup commands for each job to the SLURM script
+for JOB_NAME in "${JOB_NAMES[@]}"; do
+    echo "nohup python3 train.py --c ./config/config${JOB_NAME}.yaml &" >> ./run_script/auto_script${JOB_NAMES[*]}.slurm
+done
+
+# Add a wait command to ensure all background jobs complete before the script ends
+echo "wait" >> ./run_script/auto_script${JOB_NAMES[*]}.slurm
 
 # Perform git pull to update the repository
 git pull
 
 # Submit the SLURM job
-sbatch ./run_script/auto_script${JOB_NAME}.slurm
+sbatch ./run_script/auto_script${JOB_NAMES[*]}.slurm
