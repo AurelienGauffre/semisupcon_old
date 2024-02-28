@@ -6,8 +6,12 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
-# Extract job name from the first argument
-JOB_NAME=$1
+# Extract job names from the first argument and split by '_'
+IFS='_' read -ra JOB_NAMES <<< "$1"
+JOB_NAME_STRING="${JOB_NAMES[*]}"
+
+# Replace spaces with underscores to create the filename
+JOB_NAME_FILE="${JOB_NAME_STRING// /_}"
 
 # Default walltime value
 WALLTIME="99"
@@ -19,11 +23,11 @@ fi
 
 # Create the directory for the script if it does not exist
 mkdir -p ./run_script_OAR
-touch ./run_script_OAR/auto_runoar${JOB_NAME}.sh
-chmod +x ./run_script_OAR/auto_runoar${JOB_NAME}.sh
+touch ./run_script_OAR/auto_runoar${JOB_NAME_FILE}.sh
+chmod +x ./run_script_OAR/auto_runoar${JOB_NAME_FILE}.sh
 git pull
 # Create the SLURM script
-cat <<EOF >./run_script_OAR/auto_runoar${JOB_NAME}.sh
+cat <<EOF >./run_script_OAR/auto_runoar${JOB_NAME_FILE}.sh
 cd ~/semisupcon
 . envsemisupcon/bin/activate
 git pull
@@ -34,6 +38,9 @@ export DSDIR_CUSTOM
 python3 train.py --c ./config/config${JOB_NAME}.yaml
 EOF
 
+# Append the nohup commands for each job to the SLURM script
+for JOB_NAME in "${JOB_NAMES[@]}"; do
+    echo "python3 train.py --c ./config/config${JOB_NAME}.yaml" >> "./run_script/auto_script${JOB_NAME_FILE}.slurm"
+done
 
-
-oarsub -l /host=1/gpu=1,walltime=${WALLTIME}:0:0 /home/aptikal/gauffrea/semisupcon/run_script_OAR/auto_runoar${JOB_NAME}.sh
+oarsub -l /host=1/gpu=1,walltime=${WALLTIME}:0:0 /home/aptikal/gauffrea/semisupcon/run_script_OAR/auto_runoar${JOB_NAME_FILE}.sh
