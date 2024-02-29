@@ -17,7 +17,7 @@ JOB_NAME_STRING="${JOB_NAMES[*]}"
 JOB_NAME_FILE="${JOB_NAME_STRING// /_}"
 
 # Default walltime value
-WALLTIME="20"
+WALLTIME="99"
 
 # If a second argument is provided, it is assumed to be the walltime
 if [ ! -z "$2" ]; then
@@ -43,7 +43,7 @@ cat <<EOF > "./run_script/auto_script${JOB_NAME_FILE}.slurm"
 #SBATCH --cpus-per-task=10           # number of cores per task (1/4 of the 4-GPUs node)
 
 #SBATCH --hint=nomultithread         # hyperthreading is deactivated
-##SBATCH --qos=qos_gpu-t4 #for jobs > 100h
+#SBATCH --qos=qos_gpu-t4 #for jobs > 100h
 #SBATCH --time=${WALLTIME}:00:00     # maximum execution time requested (HH:MM:SS)
 #SBATCH --output=OAR.%j.out    # name of output file
 
