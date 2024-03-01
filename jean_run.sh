@@ -1,7 +1,7 @@
 #!/bin/bash
 # usage :
-# . jean_run.sh E1 50 to tun the job E1 with 50 hours of walltime
-# . jean_run.sh E1_E2 50 to tun the job E1 and E2 on same GPU with 50 hours of walltime
+# . jean_run.sh E1 50 to run the job E1 with 50 hours of walltime
+# . jean_run.sh E1_E2 50 to run the job E1 and E2 on same GPU with 50 hours of walltime
 
 # Check if at least one argument is provided
 if [ "$#" -lt 1 ]; then
@@ -27,7 +27,7 @@ fi
 # Create the directory for the script if it does not exist
 mkdir -p ./run_script
 
-# Create the SLURM script with a concatenated job name
+# Start creating the SLURM script with a concatenated job name
 cat <<EOF > "./run_script/auto_script${JOB_NAME_FILE}.slurm"
 #!/bin/bash
 #SBATCH --account=cgs@v100
@@ -43,7 +43,19 @@ cat <<EOF > "./run_script/auto_script${JOB_NAME_FILE}.slurm"
 #SBATCH --cpus-per-task=10           # number of cores per task (1/4 of the 4-GPUs node)
 
 #SBATCH --hint=nomultithread         # hyperthreading is deactivated
-##SBATCH --qos=qos_gpu-t4 #for jobs > 100h
+
+EOF
+
+# Set QoS based on WALLTIME
+if [ "$WALLTIME" -le 2 ]; then
+    echo "#SBATCH --qos=qos_gpu-dev #for jobs <= 2h" >> "./run_script/auto_script${JOB_NAME_FILE}.slurm"
+elif [ "$WALLTIME" -le 20 ]; then
+    echo "#SBATCH --qos=qos_gpu-t3" >> "./run_script/auto_script${JOB_NAME_FILE}.slurm"
+elif [ "$WALLTIME" -le 100 ]; then
+    echo "#SBATCH --qos=qos_gpu-t4 #for jobs <= 100h" >> "./run_script/auto_script${JOB_NAME_FILE}.slurm"
+fi
+
+cat <<EOF >> "./run_script/auto_script${JOB_NAME_FILE}.slurm"
 #SBATCH --time=${WALLTIME}:00:00     # maximum execution time requested (HH:MM:SS)
 #SBATCH --output=OAR.%j.out    # name of output file
 
