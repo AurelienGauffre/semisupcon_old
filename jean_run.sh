@@ -57,7 +57,7 @@ fi
 
 cat <<EOF >> "./run_script/auto_script${JOB_NAME_FILE}.slurm"
 #SBATCH --time=${WALLTIME}:00:00     # maximum execution time requested (HH:MM:SS)
-#SBATCH --output=OAR.%j.out    # name of output file
+#SBATCH --output=OAR.%j.${JOB_NAME_FILE}.out    # name of output file
 
 module purge
 module load pytorch-gpu/py3/1.13.0

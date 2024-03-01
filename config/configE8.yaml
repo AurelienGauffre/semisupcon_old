@@ -1,6 +1,6 @@
 # Ablation
 # semisupcon classique mais on mets un lambda sur les unconfident
-wandb_project: semisupcon_ablation
+wandb_project: E
 save_name: E8_AMP_long_temp=.040
 algorithm: semisupconproto
 dataset: cifar100

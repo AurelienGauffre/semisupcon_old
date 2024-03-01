@@ -1,6 +1,6 @@
 # E=Ablation
 # fixmatch classique
-wandb_project: semisupcon_ablation
+wandb_project: E
 save_name: "Ablation E0 AMP"
 algorithm: fixmatch
 dataset: cifar100

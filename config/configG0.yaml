@@ -1,7 +1,7 @@
 # G pretrained backbone A resnet50: attention ca demande au moins 12go de ram !
 # G0 : fixmatch baseline avec resnet50 unpretrained
 # fixmatch classique
-wandb_project: semisupcon_ablation
+wandb_project: G
 save_name: "G0: fixmatch resnet50 unpretrained+resset50cifar"
 use_pretrain: False
 pretrain_path:

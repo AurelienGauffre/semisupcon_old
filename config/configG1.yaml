@@ -1,7 +1,7 @@
 # G pretrained backbone A resnet50
 # G0 : fixmatch baseline avec resnet50 unpretrained
 # fixmatch classique
-wandb_project: semisupcon_ablation
+wandb_project: G
 save_name: "G1: fixmatch resnet50 pretrained +resset50cifar!"
 use_pretrain: True
 pretrain_path: moco_v2_800ep_pretrain.pth

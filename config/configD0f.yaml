@@ -44,7 +44,7 @@ dist_url: tcp://127.0.0.1:10008
 dist_backend: nccl
 gpu: None
 
-wandb_project: semisupcon_datasets
+wandb_project: D
 save_name: D0f
 
 

@@ -1,6 +1,6 @@
 # Ablation
 # semisupcon classique
-wandb_project: semisupcon_ablation
+wandb_project: E
 save_name: E6
 algorithm: semisupconproto
 dataset: cifar100

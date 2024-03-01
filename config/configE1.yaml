@@ -1,6 +1,6 @@
 # Ablation
 # fixmatch classique mais em utilisant semisupcon (on doit retomber exactement sur E0)
-wandb_project: semisupcon_ablation
+wandb_project: E
 save_name: "Ablation E1"
 algorithm: semisupconproto
 dataset: cifar100
