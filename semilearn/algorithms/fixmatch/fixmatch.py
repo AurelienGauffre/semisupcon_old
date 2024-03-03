@@ -504,7 +504,6 @@ class SemiSupConProto(AlgorithmBase):
                                                        weights=weights)
                 unsup_loss = torch.zeros(1).cuda()
                 total_loss = supcon_loss
-                print(total_loss)
             elif self.args.loss == "SemiSupConLoss":  # E9 Des poids differents pour les unconfident label
 
                 # Concatenate features for contrastive learning
@@ -550,7 +549,6 @@ class SemiSupConProto(AlgorithmBase):
 
                 # Final total loss is just the supervised contrastive loss in this case
                 total_loss = supcon_loss
-                print(total_loss)
 
             elif self.args.loss == "AblationSupcon-DoubleAugm":  # E7 Supcon-
 

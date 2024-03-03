@@ -479,7 +479,7 @@ if __name__ == "__main__":
 
     # load the weight from torchvision
 
-    print(model)
+    #print(model)
 
 
 def load_checkpoint_resnet(model,pretrained_path):
@@ -488,7 +488,6 @@ def load_checkpoint_resnet(model,pretrained_path):
     state_dict_moco = torch.load(pretrained_path, map_location='cpu')['state_dict']
     new_state_dict = {}
     for key, item in state_dict_moco.items():
-        print(key)
         if key.startswith('module'):
             key = '.'.join(key.split('.')[1:])
         if key.startswith('encoder_q'):  # to clean moco keys
