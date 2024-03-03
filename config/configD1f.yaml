@@ -1,7 +1,7 @@
 # D cifar10 40 labels semisupcon
 
 algorithm: fixmatch # fixmatch
-save_dir: ./saved_models/classic_cv
+save_dir: ./saved_models/
 resume: True
 load_path: auto
 overwrite: True

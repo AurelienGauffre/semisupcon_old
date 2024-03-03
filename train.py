@@ -168,16 +168,16 @@ def main(args):
     print("### Python Version:", sys.version)
 
     # Check if CUDA is available in the current PyTorch installation
-    if torch.cuda.is_available():
-        # Print CUDA version as reported by PyTorch
-        print("######## Torch Version:", torch.__version__)
-        print("CUDA Version:", torch.version.cuda)
-        # Additionally, print the number of CUDA devices detected
-        print("Number of CUDA Devices:", torch.cuda.device_count())
-        # Print the name of the first CUDA device, if available
-        print("CUDA Device Name:", torch.cuda.get_device_name(0))
-    else:
-        print("CUDA is not available. Check your PyTorch installation and GPU drivers.")
+    # if torch.cuda.is_available():
+    #     # Print CUDA version as reported by PyTorch
+    #     print("######## Torch Version:", torch.__version__)
+    #     print("CUDA Version:", torch.version.cuda)
+    #     # Additionally, print the number of CUDA devices detected
+    #     print("Number of CUDA Devices:", torch.cuda.device_count())
+    #     # Print the name of the first CUDA device, if available
+    #     print("CUDA Device Name:", torch.cuda.get_device_name(0))
+    # else:
+    #     print("CUDA is not available. Check your PyTorch installation and GPU drivers.")
 
     '''
     For (Distributed)DataParallelism,

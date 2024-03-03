@@ -120,5 +120,5 @@ if __name__ == "__main__":
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
     # Load CIFAR-10 dataset
-    trainset = torchvision.datasets.STL10(root='./data', train=True, download=False, transform=transform)
+    trainset = torchvision.datasets.STL10(root='./data', split='train', download=False, transform=transform)
     # Load CIFAR-100 dataset
