@@ -37,7 +37,7 @@ lr: 0.03
 momentum: 0.9
 weight_decay: 0.001
 layer_decay: 1.0
-amp: False
+amp: True
 clip: 0.0
 net: wrn_28_2_proto
 net_from_name: False # If True, net_builder takes models in torch.vision models (False de base)
