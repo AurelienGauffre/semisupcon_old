@@ -100,8 +100,9 @@ class YAMLSAVE_Hook(Hook):
             data = OmegaConf.load(self.file_path)
             self.logged_metrics = data['logged_metrics']
             # compare data['params'] and params dictionaries except on one key that is id which is different each time
-            d1 = {k: v for k, v in data['params'].items() if k not in ['resume', 'id', 'dist_url','wandb_name']}
-            d2 = {k: v for k, v in params.items() if k not in ['resume', 'id', 'dist_url','wandb_name']}
+            d1 = {k: v for k, v in data['params'].items() if
+                  k not in ['load_path', 'resume', 'id', 'dist_url', 'wandb_name']}
+            d2 = {k: v for k, v in params.items() if k not in ['load_path', 'resume', 'id', 'dist_url', 'wandb_name']}
             if d1 != d2:
                 raise ValueError(f"File {self.file_path} already exists, but the parameters are different :"
                                  f" {d1} "

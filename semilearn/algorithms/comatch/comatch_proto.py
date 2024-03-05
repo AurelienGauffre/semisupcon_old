@@ -30,7 +30,7 @@ class CoMatch_Net(nn.Module):
     
     def forward(self, x, **kwargs):
         feat = self.backbone(x, only_feat=True)
-        logits = self.backbone(feat, only_fc=True)
+        logits = self.backbone(feat['contrastive_feats'], only_fc=True)
         feat_proj = self.l2norm(self.mlp_proj(feat))
         return {'logits':logits, 'feat':feat_proj}
 
@@ -139,14 +139,14 @@ class CoMatchProto(AlgorithmBase):
         self.queue_ptr = (self.queue_ptr + length) % self.queue_size
 
 
-    def train_step(self, x_lb, y_lb, x_ulb_w, x_ulb_s_0, x_ulb_s_1):
+    def train_step(self, x_lb, y_lb, x_ulb_w, x_ulb_s_0, x_ulb_s_1, y_ulb):
         num_lb = y_lb.shape[0] 
 
         # inference and calculate sup/unsup losses
         with self.amp_cm():
             if self.use_cat:
                 inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s_0, x_ulb_s_1))
-                outputs = self.model(inputs)
+                # outputs = self.model(inputs)
                 # logits, feats = outputs['logits'], outputs['feat']
                 # logits_x_lb, feats_x_lb = logits[:num_lb], feats[:num_lb]
                 # logits_x_ulb_w, logits_x_ulb_s_0, _ = logits[num_lb:].chunk(3)
@@ -160,40 +160,52 @@ class CoMatchProto(AlgorithmBase):
             else:
                 raise ValueError("SemiSupConProto does not support non-cat mode currently")
 
-            feat_dict = {'x_lb': feats_x_lb, 'x_ulb_w': feats_x_ulb_w, 'x_ulb_s':[feats_x_ulb_s_0, feats_x_ulb_s_1]}
-
+            # feat_dict = {'x_lb': feats_x_lb, 'x_ulb_w': feats_x_ulb_w, 'x_ulb_s':[feats_x_ulb_s_0, feats_x_ulb_s_1]}
+            feat_dict = {'x_lb': contrastive_x_lb, 'x_ulb_w': contrastive_x_ulb_w,
+                         'x_ulb_s': [contrastive_x_ulb_s_0, contrastive_x_ulb_s_1]}
+            similarity_to_proto = contrastive_x_ulb_w @ proto_proj.t()
+            pseudo_label = torch.argmax(similarity_to_proto, dim=1)
+            probs = torch.softmax((similarity_to_proto + 1) / 2 / self.args.pl_temp, dim=1)
             # supervised loss
-            sup_loss = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
+            mask2 = self.call_hook("masking", "MaskingHook", logits_x_ulb=probs, softmax_x_ulb=False)
+            maskbool = mask2.bool()
+            # maskbool = torch.max(similarity_to_proto, dim=1)[0] > self.p_cutoff
+            mask_sum = maskbool.sum()  # number of samples with high confidence
+            #sup_loss = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
 
             
             with torch.no_grad():
-                logits_x_ulb_w = logits_x_ulb_w.detach()
-                feats_x_lb = feats_x_lb.detach()
-                feats_x_ulb_w = feats_x_ulb_w.detach()
+                # logits_x_ulb_w = logits_x_ulb_w.detach()
+                # feats_x_lb = feats_x_lb.detach()
+                # feats_x_ulb_w = feats_x_ulb_w.detach()
 
-                # probs = torch.softmax(logits_x_ulb_w, dim=1)            
-                probs = self.compute_prob(logits_x_ulb_w)
+                # probs = torch.softmax(logits_x_ulb_w, dim=1)
+                # probs = self.compute_prob(logits_x_ulb_w)
                 # distribution alignment
                 probs = self.call_hook("dist_align", "DistAlignHook", probs_x_ulb=probs.detach())
 
                 probs_orig = probs.clone()
-                # memory-smoothing 
-                if self.epoch >0 and self.it > self.queue_batch: 
-                    A = torch.exp(torch.mm(feats_x_ulb_w, self.queue_feats.t()) / self.T)       
+                # memory-smoothing
+
+                if self.epoch > 0 and self.it > self.queue_batch:
+                    # contrastive_x_ulb_w replace feats_x_ulb_w
+                    A = torch.exp(torch.mm(contrastive_x_ulb_w, self.queue_feats.t()) / self.T)
                     A = A / A.sum(1,keepdim=True)                    
                     probs = self.smoothing_alpha * probs + (1 - self.smoothing_alpha) * torch.mm(A, self.queue_probs)    
                 
-                mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=probs, softmax_x_ulb=False)    
-                
-                feats_w = torch.cat([feats_x_ulb_w, feats_x_lb],dim=0)   
+                mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=probs, softmax_x_ulb=False)
+
+                # contrastive_x_ulb_w replace feats_x_ulb_w
+                feats_w = torch.cat([contrastive_x_ulb_w, contrastive_x_lb],dim=0)
                 probs_w = torch.cat([probs_orig, F.one_hot(y_lb, num_classes=self.num_classes)],dim=0)
 
                 self.update_bank(feats_w, probs_w)
 
-            unsup_loss = self.consistency_loss(logits_x_ulb_s_0,
-                                          probs,
-                                          'ce',
-                                          mask=mask)
+            # unsup_loss = self.consistency_loss(logits_x_ulb_s_0,
+            #                               probs,
+            #                               'ce',
+            #                               mask=mask)
+            unsup_loss = torch.zeros(1).cuda()
 
             # pseudo-label graph with self-loop
             Q = torch.mm(probs, probs.t())       
@@ -202,16 +214,54 @@ class CoMatchProto(AlgorithmBase):
             Q = Q * pos_mask
             Q = Q / Q.sum(1, keepdim=True)
 
-            contrast_loss = comatch_contrastive_loss(feats_x_ulb_s_0, feats_x_ulb_s_1, Q, T=self.T)
+            contrast_loss = comatch_contrastive_loss(contrastive_x_ulb_s_0, contrastive_x_ulb_s_1, Q, T=self.T)
 
-            total_loss = sup_loss + self.lambda_u * unsup_loss + self.lambda_c * contrast_loss
+            contrastive_x_all = torch.cat([
+                proto_proj,
+                contrastive_x_lb,
+                contrastive_x_ulb_s_0[maskbool],
+                contrastive_x_ulb_s_1[maskbool],
+                contrastive_x_ulb_s_0[~maskbool],
+                contrastive_x_ulb_s_1[~maskbool]
+            ], dim=0)
+
+            # Concatenate labels and pseudo labels accordingly
+            y_all = torch.cat([
+                torch.arange(self.args.num_classes).cuda(),  # Prototype labels
+                y_lb,  # Labeled data labels
+                pseudo_label[maskbool],  # Pseudo labels for confident unlabeled data
+                pseudo_label[maskbool],  # Duplicate for second set of confident unlabeled data
+                (torch.arange((~maskbool).sum()) + self.args.num_classes).repeat(2).cuda()
+                # Incremented labels for unconfident unlabeled data
+            ], dim=0)
+
+            # Initialize weights for all data points
+            weights = torch.ones(y_all.shape[0]).cuda()
+            P = (~maskbool).sum().item()  # Number of unconfident unlabeled data points
+
+            # Apply different weights based on the data type
+            weights[-2 * P:] *= self.args.lambda_ydown  # Apply down-weighting for unconfident unlabeled data
+            weights[:self.args.num_classes] *= self.args.lambda_proto  # Apply weighting for prototypes
+
+            # Apply lambda_yup for confident unlabeled data points
+            proto_lb_len = proto_proj.size(0) + contrastive_x_lb.size(0)
+            mask_true_len = maskbool.sum().item()
+            start_index = proto_lb_len
+            end_index = start_index + 2 * mask_true_len
+            weights[start_index:end_index] *= self.args.lambda_yup
+
+            supcon_loss = self.supcon_loss_weights(embeddings=contrastive_x_all, labels=y_all, weights=weights)
+            total_loss = supcon_loss + self.lambda_c * contrast_loss
 
         out_dict = self.process_out_dict(loss=total_loss, feat=feat_dict)
-        log_dict = self.process_log_dict(sup_loss=sup_loss.item(), 
+        log_dict = self.process_log_dict(supcon_loss=supcon_loss.item(),
                                          unsup_loss=unsup_loss.item(), 
                                          contrast_loss=contrast_loss.item(),
-                                         total_loss=total_loss.item(), 
-                                         util_ratio=mask.float().mean().item())
+                                         total_loss=total_loss.item(),
+                                         util_ratio=maskbool.float().mean().item(),
+                                         pseudolabel_accuracy=((
+                                                                       pseudo_label == y_ulb).float() * maskbool.float()).sum() / mask_sum.item() if mask_sum > 0 else 0)
+
         return out_dict, log_dict
 
     def get_save_dict(self):
