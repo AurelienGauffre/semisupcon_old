@@ -14,7 +14,7 @@ JOB_NAME_STRING="${JOB_NAMES[*]}"
 JOB_NAME_FILE="${JOB_NAME_STRING// /_}"
 
 # Default walltime value
-WALLTIME="99"
+WALLTIME="50"
 
 # If a second argument is provided, extract walltime from it
 if [ ! -z "$2" ]; then
@@ -31,10 +31,6 @@ cat <<EOF >./run_script_OAR/auto_runoar${JOB_NAME_FILE}.sh
 cd ~/semisupcon
 . envsemisupcon/bin/activate
 git pull
-DSDIR="/home/aptikal/gauffrea/datasets"
-DSDIR_CUSTOM="/home/aptikal/gauffrea/datasets"
-export DSDIR
-export DSDIR_CUSTOM
 EOF
 
 # Append the nohup commands for each job to the SLURM script

@@ -1,10 +1,10 @@
 # Ablation
-# fixmatch + double augm + simclr sur les uncondifent
+# fixmatch + double aug
 wandb_project: E
-save_name: E3
+save_name: E2
 algorithm: semisupconproto
 dataset: cifar100
-loss: AblationFixMatchDoubleAug+Simclr # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
+loss: AblationFixMatchDoubleAug # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
 lambda_proto: 0 #only for Weighted supcon loss
 pl: softmax # softmax
 pl_temp: .040 # USeless here

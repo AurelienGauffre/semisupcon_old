@@ -1,13 +1,13 @@
 # Ablation
-# semisupcon classique
+# semisupcon classique mais on mets un lambda sur les unconfident
 wandb_project: E
 save_name: E6
 algorithm: semisupconproto
 dataset: cifar100
-loss: OnlySupconWeights # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
-lambda_proto: 0 #only for Weighted supcon loss
+loss: OnlySupconWeightsOnUnconfident # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
+lambda_proto: 0.2 #only for Weighted supcon loss
 pl: softmax # softmax
-pl_temp: .040 # USeless here
+pl_temp: .04
 use_cat: True # if false allows to detach
 save_dir: ./saved_models/classic_cv
 resume: True
@@ -19,8 +19,8 @@ use_tensorboard: True
 use_wandb: True
 epoch: 256 #1024
 num_train_iter: 262144 # 1048576
-num_eval_iter: 5120
-num_log_iter: 256
+num_eval_iter: 5120 #5120
+num_log_iter: 512 #256
 num_labels: 2500 # 100 2500cifar100
 batch_size: 64 # 64
 eval_batch_size: 256
@@ -37,7 +37,7 @@ lr: 0.03
 momentum: 0.9
 weight_decay: 0.001
 layer_decay: 1.0
-amp: False
+amp: True
 clip: 0.0
 net: wrn_28_2_proto
 net_from_name: False # If True, net_builder takes models in torch.vision models (False de base)
