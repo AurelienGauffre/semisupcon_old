@@ -5,11 +5,11 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from semilearn.core import AlgorithmBase
+from semilearn.core import AlgorithmBase, SupConLossWeights
 from semilearn.core.utils import ALGORITHMS
 from semilearn.algorithms.hooks import DistAlignQueueHook, FixedThresholdingHook
 from semilearn.algorithms.utils import SSL_Argument, str2bool, concat_all_gather
-
+from pytorch_metric_learning import losses
 
 class CoMatch_Net(nn.Module):
     def __init__(self, base, proj_size=128):
@@ -50,8 +50,8 @@ def comatch_contrastive_loss(feats_x_ulb_s_0, feats_x_ulb_s_1, Q, T=0.2):
     return loss
 
 
-@ALGORITHMS.register('comatch')
-class CoMatch(AlgorithmBase):
+@ALGORITHMS.register('comatch_proto')
+class CoMatchProto(AlgorithmBase):
     """
         CoMatch algorithm (https://arxiv.org/abs/2011.11183).
         Reference implementation (https://github.com/salesforce/CoMatch/).
@@ -89,6 +89,8 @@ class CoMatch(AlgorithmBase):
                   contrast_p_cutoff=args.contrast_p_cutoff, hard_label=args.hard_label, 
                   queue_batch=args.queue_batch, smoothing_alpha=args.smoothing_alpha, da_len=args.da_len)
         self.lambda_c = args.contrast_loss_ratio
+        self.supcon_loss = losses.SupConLoss()
+        self.supcon_loss_weights = SupConLossWeights()
 
     def init(self, T, p_cutoff, contrast_p_cutoff, hard_label=True, queue_batch=128, smoothing_alpha=0.999, da_len=256):
         self.T = T 
@@ -145,20 +147,19 @@ class CoMatch(AlgorithmBase):
             if self.use_cat:
                 inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s_0, x_ulb_s_1))
                 outputs = self.model(inputs)
-                logits, feats = outputs['logits'], outputs['feat']
-                logits_x_lb, feats_x_lb = logits[:num_lb], feats[:num_lb]
-                logits_x_ulb_w, logits_x_ulb_s_0, _ = logits[num_lb:].chunk(3)
-                feats_x_ulb_w, feats_x_ulb_s_0, feats_x_ulb_s_1 = feats[num_lb:].chunk(3)
-            else:       
-                outs_x_lb = self.model(x_lb)     
-                logits_x_lb, feats_x_lb = outs_x_lb['logits'], outs_x_lb['feat']
-                outs_x_ulb_s_0 = self.model(x_ulb_s_0)
-                logits_x_ulb_s_0, feats_x_ulb_s_0 = outs_x_ulb_s_0['logits'], outs_x_ulb_s_0['feat']
-                outs_x_ulb_s_1 = self.model(x_ulb_s_1)
-                feats_x_ulb_s_1 = outs_x_ulb_s_1['feat']
-                with torch.no_grad():
-                    outs_x_ulb_w = self.model(x_ulb_w)
-                    logits_x_ulb_w, feats_x_ulb_w = outs_x_ulb_w['logits'], outs_x_ulb_w['feat']
+                # logits, feats = outputs['logits'], outputs['feat']
+                # logits_x_lb, feats_x_lb = logits[:num_lb], feats[:num_lb]
+                # logits_x_ulb_w, logits_x_ulb_s_0, _ = logits[num_lb:].chunk(3)
+                # feats_x_ulb_w, feats_x_ulb_s_0, feats_x_ulb_s_1 = feats[num_lb:].chunk(3)
+
+                outputs = self.model(inputs, contrastive=True)
+                contrastive_x = outputs['contrastive_feats']
+                contrastive_x_lb = contrastive_x[:num_lb]
+                contrastive_x_ulb_w, contrastive_x_ulb_s_0, contrastive_x_ulb_s_1 = contrastive_x[num_lb:].chunk(3)
+                proto_proj = outputs['proto_proj']
+            else:
+                raise ValueError("SemiSupConProto does not support non-cat mode currently")
+
             feat_dict = {'x_lb': feats_x_lb, 'x_ulb_w': feats_x_ulb_w, 'x_ulb_s':[feats_x_ulb_s_0, feats_x_ulb_s_1]}
 
             # supervised loss
@@ -177,7 +178,7 @@ class CoMatch(AlgorithmBase):
 
                 probs_orig = probs.clone()
                 # memory-smoothing 
-                if self.epoch > 0 and self.it > self.queue_batch:
+                if self.epoch >0 and self.it > self.queue_batch: 
                     A = torch.exp(torch.mm(feats_x_ulb_w, self.queue_feats.t()) / self.T)       
                     A = A / A.sum(1,keepdim=True)                    
                     probs = self.smoothing_alpha * probs + (1 - self.smoothing_alpha) * torch.mm(A, self.queue_probs)    
