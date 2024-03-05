@@ -35,7 +35,8 @@ EOF
 
 # Append the nohup commands for each job to the SLURM script
 for JOB_NAME in "${JOB_NAMES[@]}"; do
-    echo "python3 train.py --c ./config/config${JOB_NAME}.yaml" >> "./run_script_OAR/auto_runoar${JOB_NAME_FILE}.sh"
+    echo "nohup python3 train.py --c ./config/config${JOB_NAME}.yaml &" >> "./run_script_OAR/auto_runoar${JOB_NAME_FILE}.slurm"
 done
+echo "wait" >> "./run_script_OAR/auto_runoar${JOB_NAME_FILE}.slurm"
 
 oarsub -l /host=1/gpu=1,walltime=${WALLTIME}:0:0 /home/aptikal/gauffrea/semisupcon/run_script_OAR/auto_runoar${JOB_NAME_FILE}.sh
