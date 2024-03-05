@@ -14,7 +14,7 @@ JOB_NAME_STRING="${JOB_NAMES[*]}"
 JOB_NAME_FILE="${JOB_NAME_STRING// /_}"
 
 # Default walltime value
-WALLTIME="99"
+WALLTIME="48"
 
 # If a second argument is provided, extract walltime from it
 if [ ! -z "$2" ]; then
@@ -23,24 +23,21 @@ fi
 
 # Create the directory for the script if it does not exist
 mkdir -p ./run_script_OAR
-touch ./run_script_OAR/auto_runoar${JOB_NAME_FILE}.sh
-chmod +x ./run_script_OAR/auto_runoar${JOB_NAME_FILE}.sh
+touch ./run_script_OAR/auto_runoar_bigfoot_${JOB_NAME_FILE}.sh
+chmod +x ./run_script_OAR/auto_runoar_bigfoot_${JOB_NAME_FILE}.sh
 git pull
 # Create the SLURM script
-cat <<EOF >./run_script_OAR/auto_runoar${JOB_NAME_FILE}.sh
+cat <<EOF >./run_script_OAR/auto_runoar_bigfoot_${JOB_NAME_FILE}.sh
+source /applis/environments/conda.sh
+conda activate pytorch_stable
 cd ~/semisupcon
-. envsemisupcon/bin/activate
 git pull
-DSDIR="/home/aptikal/gauffrea/datasets"
-DSDIR_CUSTOM="/home/aptikal/gauffrea/datasets"
-export DSDIR
-export DSDIR_CUSTOM
 EOF
 
 # Append the nohup commands for each job to the SLURM script
 for JOB_NAME in "${JOB_NAMES[@]}"; do
-    echo "python3 train.py --c ./config/config${JOB_NAME}.yaml" >> "./run_script_OAR/auto_runoar${JOB_NAME_FILE}.sh"
+    echo "python3 train.py --c ./config/config${JOB_NAME}.yaml" >> "./run_script_OAR/auto_runoar_bigfoot_${JOB_NAME_FILE}.sh"
 done
 
-oarsub -l /host=1/gpu=1,walltime=${WALLTIME}:0:0 /home/aptikal/gauffrea/semisupcon/run_script_OAR/auto_runoar${JOB_NAME_FILE}.sh
-
+#oarsub -l /host=1/gpu=1,walltime=${WALLTIME}:0:0 /home/aptikal/gauffrea/semisupcon/run_script_OAR/auto_runoar_bigfoot_${JOB_NAME_FILE}.sh
+oarsub -l /nodes=1/gpu=1,walltime=${WALLTIME}:0:0 --project pr-lawbot -p "gpumodel='V100'" "nvidia-smi -L" -S /home/gauffrea/semisupcon/run_script_OAR/auto_runoar_bigfoot_${JOB_NAME_FILE}.sh
