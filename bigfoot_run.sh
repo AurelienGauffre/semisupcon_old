@@ -39,5 +39,4 @@ for JOB_NAME in "${JOB_NAMES[@]}"; do
     echo "python3 train.py --c ./config/config${JOB_NAME}.yaml" >> "./run_script_OAR/auto_runoar_bigfoot_${JOB_NAME_FILE}.sh"
 done
 
-#oarsub -l /host=1/gpu=1,walltime=${WALLTIME}:0:0 /home/aptikal/gauffrea/semisupcon/run_script_OAR/auto_runoar_bigfoot_${JOB_NAME_FILE}.sh
-oarsub -l /nodes=1/gpu=1,walltime=${WALLTIME}:0:0 --project pr-lawbot -p "gpumodel='V100'" "nvidia-smi -L" -S /home/gauffrea/semisupcon/run_script_OAR/auto_runoar_bigfoot_${JOB_NAME_FILE}.sh
+oarsub -l /nodes=1/gpu=1,walltime==${WALLTIME}:0:0 --project pr-lawbot -p "gpumodel='V100'" /home/gauffrea/semisupcon/run_script_OAR/auto_runoar_bigfoot_${JOB_NAME_FILE}.sh
