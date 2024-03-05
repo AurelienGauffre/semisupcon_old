@@ -79,3 +79,6 @@ git pull
 
 echo "SLURM script created: ./run_script/auto_script${JOB_NAME_FILE}.slurm"
 sbatch "./run_script/auto_script${JOB_NAME_FILE}.slurm"
+
+
+
