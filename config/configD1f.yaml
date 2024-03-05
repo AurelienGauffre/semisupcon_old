@@ -36,7 +36,7 @@ data_dir: ./data
 dataset: cifar10
 train_sampler: RandomSampler
 num_workers: 1
-seed: 1
+seed: 0
 world_size: 1
 rank: 0
 multiprocessing_distributed: True
@@ -45,6 +45,6 @@ dist_backend: nccl
 gpu: None
 
 wandb_project: D
-save_name: D1fseed1
+save_name: D1
 
 

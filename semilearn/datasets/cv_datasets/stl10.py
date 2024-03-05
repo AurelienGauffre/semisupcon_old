@@ -66,8 +66,8 @@ def get_stl10(args, alg, name, num_labels, num_classes, data_dir='./data', inclu
 
     data_dir = os.path.join(data_dir, name.lower())
     dset = getattr(torchvision.datasets, name.upper())
-    dset_lb = dset(data_dir, split='train', download=False)
-    dset_ulb = dset(data_dir, split='unlabeled', download=False)
+    dset_lb = dset(data_dir, split='train', download=True)
+    dset_ulb = dset(data_dir, split='unlabeled', download=True)
     lb_data, lb_targets = dset_lb.data.transpose([0, 2, 3, 1]), dset_lb.labels.astype(np.int64)
     ulb_data = dset_ulb.data.transpose([0, 2, 3, 1])
 
@@ -106,7 +106,7 @@ def get_stl10(args, alg, name, num_labels, num_classes, data_dir='./data', inclu
     ulb_dset = BasicDataset(alg, ulb_data, ulb_targets, num_classes, transform_weak, True, transform_strong, False)
 
     dset = getattr(torchvision.datasets, name.upper())
-    dset_lb = dset(data_dir, split='test', download=False)
+    dset_lb = dset(data_dir, split='test', download=True)
     data, targets = dset_lb.data.transpose([0, 2, 3, 1]), dset_lb.labels.astype(np.int64)
     eval_dset = BasicDataset(alg, data, targets, num_classes, transform_val, False, None, False)
 
@@ -120,5 +120,5 @@ if __name__ == "__main__":
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
     # Load CIFAR-10 dataset
-    trainset = torchvision.datasets.STL10(root='./data', split='train', download=False, transform=transform)
+    trainset = torchvision.datasets.STL10(root='./data', split='train', download=True, transform=transform)
     # Load CIFAR-100 dataset

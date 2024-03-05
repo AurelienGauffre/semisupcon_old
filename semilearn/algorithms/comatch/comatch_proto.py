@@ -29,10 +29,10 @@ class CoMatch_Net(nn.Module):
         return out
     
     def forward(self, x, **kwargs):
-        feat = self.backbone(x, only_feat=True)
-        logits = self.backbone(feat['contrastive_feats'], only_fc=True)
-        feat_proj = self.l2norm(self.mlp_proj(feat))
-        return {'logits':logits, 'feat':feat_proj}
+        dic = self.backbone(x)
+        # logits = self.backbone(feat, only_fc=True)
+        # feat_proj = self.l2norm(self.mlp_proj(feat))
+        return dic
 
     def group_matcher(self, coarse=False):
         matcher = self.backbone.group_matcher(coarse, prefix='backbone.')
