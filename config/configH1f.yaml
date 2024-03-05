@@ -1,4 +1,4 @@
-# D cifar100 2500 labels
+# H BS experiment
 
 algorithm: fixmatch # fixmatch
 save_dir: ./saved_models/
