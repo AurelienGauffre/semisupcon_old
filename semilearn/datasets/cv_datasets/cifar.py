@@ -29,7 +29,7 @@ def get_cifar(args, alg, name, num_labels, num_classes, data_dir='./data', inclu
     dset = getattr(torchvision.datasets, name.upper())
     print(f"dset: {dset}")
     print("data_dir: ", data_dir)
-    dset = dset(data_dir, train=True, download=False) #PERSO mis a false ici pour JZ
+    dset = dset(data_dir, train=True, download=True) #PERSO mis a false ici pour JZ
     data, targets = dset.data, dset.targets
     
     crop_size = args.img_size
@@ -127,7 +127,9 @@ def get_cifar(args, alg, name, num_labels, num_classes, data_dir='./data', inclu
     return lb_dset, ulb_dset, eval_dset
 
 if __name__ == "__main__":
-    # Define transformations for the train and test set
+# import torchvision
+# from torchvision import transforms
+# Define transformations for the train and test set
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
