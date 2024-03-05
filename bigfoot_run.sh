@@ -36,7 +36,7 @@ EOF
 
 # Append the nohup commands for each job to the SLURM script
 for JOB_NAME in "${JOB_NAMES[@]}"; do
-    echo "nohup python3 train.py --c ./config/config${JOB_NAME}.yaml &" >> "./run_script_OAR/auto_runoar_bigfoot_${JOB_NAME_FILE}.slurm"
+    echo "nohup python3 train.py --c ./config/config${JOB_NAME}.yaml &" >> "./run_script_OAR/auto_runoar_bigfoot_${JOB_NAME_FILE}.sh"
 done
-echo "wait" >> "./run_script_OAR/auto_runoar_bigfoot_${JOB_NAME_FILE}.slurm"
+echo "wait" >> "./run_script_OAR/auto_runoar_bigfoot_${JOB_NAME_FILE}.sh"
 oarsub -l /nodes=1/gpu=1,walltime=${WALLTIME}:0:0 --project pr-lawbot -p "gpumodel='V100'" /home/gauffrea/semisupcon/run_script_OAR/auto_runoar_bigfoot_${JOB_NAME_FILE}.sh
