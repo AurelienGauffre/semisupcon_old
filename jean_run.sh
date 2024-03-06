@@ -2,6 +2,7 @@
 # usage :
 # . jean_run.sh E1 50 to run the job E1 with 50 hours of walltime
 # . jean_run.sh E1_E2 50 to run the job E1 and E2 on same GPU with 50 hours of walltime
+# interactive sess : srun --account=cgs@v100 --partition=gpu_p2 --nodes=1 --gres=gpu:1 --qos=qos_gpu-dev bash
 
 # Check if at least one argument is provided
 if [ "$#" -lt 1 ]; then
