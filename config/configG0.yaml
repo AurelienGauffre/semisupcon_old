@@ -2,7 +2,7 @@
 # G0 : fixmatch baseline avec resnet50 unpretrained
 # fixmatch classique
 wandb_project: G
-save_name: "G0: fixmatch resnet50 unpretrained+resset50cifar"
+save_name: "G0"
 use_pretrain: False
 pretrain_path:
 algorithm: fixmatch

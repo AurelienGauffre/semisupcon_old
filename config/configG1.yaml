@@ -1,5 +1,5 @@
 # G pretrained backbone A resnet50
-# G0 : fixmatch baseline avec resnet50 unpretrained
+# G1 fixmatch resnet50 pretrained +resset50cifar!
 # fixmatch classique
 wandb_project: G
 save_name: "G1: fixmatch resnet50 pretrained +resset50cifar!"

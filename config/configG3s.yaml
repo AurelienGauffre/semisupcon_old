@@ -1,6 +1,6 @@
 # G3: semisupcon resnet50 pretrained
 wandb_project: G
-save_name: G3
+save_name: G3s
 use_pretrain: True
 pretrain_path: moco_v2_800ep_pretrain.pth
 algorithm: semisupconproto
@@ -18,8 +18,8 @@ load_path: auto #latest_model.pth epoch124
 overwrite: True
 use_tensorboard: True
 use_wandb: True
-epoch: 256 #256 #1024
-num_train_iter: 262144 #262144 # 1048576
+epoch: 64 #1024 # 256
+num_train_iter: 65536 # 1048576 # 262144
 num_eval_iter: 5120 #5120
 num_log_iter: 512 #256
 num_labels: 2500 # 100 2500cifar100

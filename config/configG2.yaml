@@ -1,10 +1,7 @@
 # G pretrained backbone A resnet50
-# G0 : fixmatch baseline avec resnet50 unpretrained
-# fixmatch classique
-# Ablation
-# semisupcon classique mais on mets un lambda sur les unconfident
+# G2 semisupcon resnet50 unpretrained
 wandb_project: G
-save_name: "G2: semisupcon resnet50 unpretrained"
+save_name: "G2"
 use_pretrain: False
 pretrain_path:
 algorithm: semisupconproto
