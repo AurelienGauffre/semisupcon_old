@@ -1,7 +1,7 @@
 # G pretrained backbone A resnet50
 # G2 semisupcon resnet50 unpretrained
 wandb_project: G
-save_name: G2-500k_1
+save_name: G2-500k-s2
 use_pretrain: False
 pretrain_path:
 algorithm: semisupconproto
@@ -46,7 +46,7 @@ net_from_name: False # If True, net_builder takes models in torch.vision models 
 data_dir: ./data
 train_sampler: RandomSampler
 num_workers: 1
-seed: 1
+seed: 2
 world_size: 1
 rank: 0
 multiprocessing_distributed: False

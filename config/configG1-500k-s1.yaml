@@ -2,7 +2,7 @@
 # G1 fixmatch resnet50 pretrained +resset50cifar!
 # fixmatch classique
 wandb_project: G
-save_name: G1-500k_2
+save_name: G1-500k-s1
 use_pretrain: True
 pretrain_path: moco_v2_800ep_pretrain.pth
 algorithm: fixmatch
@@ -42,7 +42,7 @@ net_from_name: False # If True, net_builder takes models in torch.vision models 
 data_dir: ./data
 train_sampler: RandomSampler
 num_workers: 1
-seed: 2
+seed: 1
 world_size: 1
 rank: 0
 multiprocessing_distributed: False
