@@ -45,6 +45,6 @@ dist_backend: nccl
 gpu: None
 
 wandb_project: D
-save_name: D0f
+save_name: D0f-s1
 
 

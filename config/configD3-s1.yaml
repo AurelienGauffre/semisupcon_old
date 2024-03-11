@@ -45,7 +45,7 @@ dist_backend: nccl
 gpu: None
 
 wandb_project: D
-save_name: D3
+save_name: D3-s1
 loss: OnlySupconWeightsOnUnconfident # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
 lambda_proto: 0.2 #only for Weighted supcon loss
 pl: softmax # softmax
