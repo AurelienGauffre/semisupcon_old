@@ -229,23 +229,21 @@ class FlexMatchContrastive(AlgorithmBase):
             similarity_to_proto = contrastive_x_ulb_w @ proto_proj.t()
             pseudo_label = torch.argmax(similarity_to_proto, dim=1)
 
-            if self.args.pl == "softmax":
-                similarity_to_proto = torch.softmax((similarity_to_proto + 1) / 2 / self.args.pl_temp, dim=1)
             # print(
             #     f"before soft{similarity_to_proto.max(dim=1)[0].max(dim=0)[0].item()} {similarity_to_proto.max(dim=1)[0].mean(dim=0).item()}")
             prob = torch.softmax((similarity_to_proto + 1) / 2 / self.args.pl_temp, dim=1)
 
-            mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=similarity_to_proto, softmax_x_ulb=False,
+            mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=prob, softmax_x_ulb=False,
                                   idx_ulb=idx_ulb)
             # convert binarty float mask of 0 and 1 to boolean mask
             mask = mask.bool()
 
             mask_sum = mask.sum()
 
-            if self.registered_hook("DistAlignHook"):
-                prob = self.call_hook("dist_align", "DistAlignHook", probs_x_ulb=prob.detach())
+            # if self.registered_hook("DistAlignHook"):
+            #     prob = self.call_hook("dist_align", "DistAlignHook", probs_x_ulb=prob.detach())
 
-            pseudo_label = torch.argmax(similarity_to_proto, dim=1)
+
 
             # Your favorite loss here, E7 here (onlysupcon avec meme poids partout)
             contrastive_x_all = torch.cat(
@@ -263,13 +261,6 @@ class FlexMatchContrastive(AlgorithmBase):
             supcon_loss = self.supcon_loss_weights(embeddings=contrastive_x_all, labels=y_all,
                                                    weights=weights)
             unsup_loss = torch.zeros(1).cuda()
-            total_loss = supcon_loss
-
-            #
-            #
-            # unsup_loss = torch.zeros(1).cuda()
-            # supcon_loss = self.supcon_loss(embeddings=contrastive_x_all, labels=y_all)
-
 
 
 
