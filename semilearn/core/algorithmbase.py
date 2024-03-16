@@ -416,14 +416,19 @@ class AlgorithmBase:
         """
         load model and specified parameters for resume
         """
+        print(f"################# Load model from {load_path} #################")
         checkpoint = torch.load(load_path, map_location='cpu')
+        print(f"################# 1 #################")
         self.model.load_state_dict(checkpoint['model'])
+        print(f"################# 2 #################")
         self.ema_model.load_state_dict(checkpoint['ema_model'])
+        print(f"################# 3 #################")
         if not self.args.resume_only_weight:
             self.loss_scaler.load_state_dict(checkpoint['loss_scaler'])
             self.it = checkpoint['it']
             self.start_epoch = checkpoint['epoch']
             self.epoch = self.start_epoch
+            print(f"################# 4 #################")
             self.best_it = checkpoint['best_it']
             self.best_eval_acc = checkpoint['best_eval_acc']
             self.optimizer.load_state_dict(checkpoint['optimizer'])

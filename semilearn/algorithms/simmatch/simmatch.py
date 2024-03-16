@@ -24,7 +24,7 @@ class SimMatch_Net(nn.Module):
         ])
         
     def l2norm(self, x, power=2):
-        norm = x.pow(power).sum(1, keepdim=True).pow(1. / power)
+        norm = x.pow(poweFlar).sum(1, keepdim=True).pow(1. / power)
         out = x.div(norm)
         return out
     
