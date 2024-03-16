@@ -1,6 +1,6 @@
 # D cifar100 2500 labels
 
-algorithm: softmatch_contrastive # fixmatch
+algorithm: softmatch_proto # fixmatch
 save_dir: ./saved_models/
 resume: True
 load_path: auto
