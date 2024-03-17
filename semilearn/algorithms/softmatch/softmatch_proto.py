@@ -186,14 +186,13 @@ class SoftMatchProto(AlgorithmBase):
                 # contrastive_x_all = torch.cat((contrastive_x_lb, contrastive_x_ulb_s_0[maskbool],
                 #                                contrastive_x_ulb_s_1[maskbool], proto_proj), dim=0)
 
-                out = self.model(x, contrastive=self.is_contrastive)
+                out = self.model(x)
                 contrastive_feats = out[out_key]
                 proto_proj = out['proto_proj']
-                if self.is_contrastive:
-                    similarity_to_proto = contrastive_feats @ proto_proj.t()  # (N, K) = (N, D) @ (D, K) equivalent des softmax
-                    pred = torch.argmax(similarity_to_proto, dim=1)
-                else:
-                    pred = torch.argmax(contrastive_feats, dim=1)
+
+                similarity_to_proto = contrastive_feats @ proto_proj.t()  # (N, K) = (N, D) @ (D, K) equivalent des softmax
+                pred = torch.argmax(similarity_to_proto, dim=1)
+
 
                 # loss = F.cross_entropy(logits, y, reduction='mean', ignore_index=-1)
                 y_true.extend(y.cpu().tolist())
