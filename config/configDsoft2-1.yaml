@@ -45,9 +45,11 @@ dist_backend: nccl
 gpu: None
 
 wandb_project: D
-save_name: Dsoft2-1
-pl_temp: .035
+save_name: Dsoft2-1-bis
+loss: OnlySupconWeightsOnUnconfident # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
+pl_temp: .038
 lambda_proto: 1 #only for Weighted supcon loss
 lambda_yup: 1 #only for Weighted supcon loss
-lambda_ydown: .2 #only for Weighted supcon loss
+lambda_ydown: .2 #only for Weighted supcon lossal
+
 
