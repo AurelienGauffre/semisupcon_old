@@ -2,7 +2,7 @@
 
 algorithm: softmatch_proto # fixmatch
 save_dir: ./saved_models/
-resume: True
+resume: False
 load_path: auto
 overwrite: True
 use_tensorboard: True
