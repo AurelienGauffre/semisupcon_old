@@ -51,12 +51,45 @@ def get_cifar(args, alg, name, num_labels, num_classes, data_dir='./data', inclu
             transforms.ToTensor(),
             transforms.Normalize(mean[name], std[name])
         ])
-    elif args.augment == 'simaugment1':
+
+    elif args.augment == 'aug1':
         transform_strong = transforms.Compose([
-            SimCLRTransformAndCutout(input_size=args.img_size, gaussian_blur=0.0),
+            transforms.Resize(crop_size),
+            transforms.RandomCrop(crop_size, padding=int(crop_size * (1 - crop_ratio)), padding_mode='reflect'),
+            transforms.RandomHorizontalFlip(),
+            RandAugment(1, 3),
             transforms.ToTensor(),
             transforms.Normalize(mean[name], std[name])
         ])
+    elif args.augment == 'aug2':
+        transform_strong = transforms.Compose([
+            transforms.Resize(crop_size),
+            transforms.RandomCrop(crop_size, padding=int(crop_size * (1 - crop_ratio)), padding_mode='reflect'),
+            transforms.RandomHorizontalFlip(),
+            RandAugment(4, 7),
+            transforms.ToTensor(),
+            transforms.Normalize(mean[name], std[name])
+        ])
+    elif args.augment == 'aug3':
+        transform_strong = transforms.Compose([
+            transforms.Resize(crop_size),
+            transforms.RandomCrop(crop_size, padding=int(crop_size * (1 - crop_ratio)), padding_mode='reflect'),
+            transforms.RandomHorizontalFlip(),
+            RandAugment(4, 10),
+            transforms.ToTensor(),
+            transforms.Normalize(mean[name], std[name])
+        ])
+    elif args.augment == 'aug4':
+        transform_strong = transforms.Compose([
+            transforms.Resize(crop_size),
+            transforms.RandomCrop(crop_size, padding=int(crop_size * (1 - crop_ratio)), padding_mode='reflect'),
+            transforms.RandomHorizontalFlip(),
+            RandAugment(5, 12),
+            transforms.ToTensor(),
+            transforms.Normalize(mean[name], std[name])
+        ])
+
+
     elif args.augment == 'simaugment2':
         transform_strong = transforms.Compose([
             SimCLRTransformAndCutout(input_size=args.img_size,min_scale=.4,cj_strength=1.3,gaussian_blur=0.0),

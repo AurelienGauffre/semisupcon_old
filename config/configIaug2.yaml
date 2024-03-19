@@ -1,6 +1,6 @@
-# H BS experiment
+# I stability anayaliss
 
-algorithm: fixmatch # fixmatch
+algorithm: semisupconproto # fixmatch
 save_dir: ./saved_models/
 resume: True
 load_path: auto
@@ -30,7 +30,7 @@ layer_decay: 1.0
 amp: True
 clip: 0.0
 use_cat: True
-net: wrn_28_2
+net: wrn_28_2_proto
 net_from_name: False
 data_dir: ./data
 dataset: cifar100
@@ -44,12 +44,13 @@ dist_url: tcp://127.0.0.1:10008
 dist_backend: nccl
 gpu: None
 
-
-augment: aug1
+augment: aug2
 wandb_project: I
 group: all
-save_name: Iaug1f
-
-
+save_name: Iaug2
+loss: OnlySupconWeightsOnUnconfident # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
+lambda_proto: 0.2 #only for Weighted supcon loss
+pl: softmax # softmax
+pl_temp: .04
 
 

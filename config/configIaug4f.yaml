@@ -45,10 +45,10 @@ dist_backend: nccl
 gpu: None
 
 
-augment: aug1
+augment: aug4
 wandb_project: I
 group: all
-save_name: Iaug1f
+save_name: Iaug4f
 
 
 
