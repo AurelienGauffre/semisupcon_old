@@ -1,21 +1,25 @@
-algorithm: softmatch # fixmatch
+algorithm: softmatch
 save_dir: ./saved_models/
-resume: False
+resume: True
 load_path: auto
 overwrite: True
 use_tensorboard: True
 use_wandb: True
-epoch: 256  #256 #512 #1024
-num_train_iter: 262144 # 262144 # 524288 # 1048576
+epoch: 256
+num_train_iter: 262144
 num_eval_iter: 5120
-num_log_iter: 5120 #256
+num_log_iter: 5120
 num_labels: 2500
 batch_size: 64
 eval_batch_size: 256
 hard_label: True
 T: 0.5
-p_cutoff: 0.95
+dist_align: True
+dist_uniform: True
+per_class: False
+ema_p: 0.999
 ulb_loss_ratio: 1.0
+n_sigma: 2
 uratio: 7
 ema_m: 0.999
 crop_ratio: 0.875
@@ -23,7 +27,7 @@ img_size: 32
 optim: SGD
 lr: 0.03
 momentum: 0.9
-weight_decay: 0.001 #0.001 pour cifar100
+weight_decay: 0.001
 layer_decay: 1.0
 amp: True
 clip: 0.0
@@ -38,13 +42,9 @@ seed: 0
 world_size: 1
 rank: 0
 multiprocessing_distributed: True
-dist_url: tcp://127.0.0.1:10008
+dist_url: tcp://127.0.0.1:10069
 dist_backend: nccl
 gpu: None
 
 wandb_project: D
-save_name: Dsoft2f-bis
-
-
-
-
+save_name: Dsm2f

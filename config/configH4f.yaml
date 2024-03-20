@@ -45,7 +45,7 @@ dist_backend: nccl
 gpu: None
 
 wandb_project: H
-save_name: H3f
+save_name: H4f
 
 
 

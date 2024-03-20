@@ -1,6 +1,6 @@
-algorithm: softmatch # fixmatch
+algorithm: softmatch_proto # fixmatch
 save_dir: ./saved_models/
-resume: False
+resume: True
 load_path: auto
 overwrite: True
 use_tensorboard: True
@@ -14,8 +14,12 @@ batch_size: 64
 eval_batch_size: 256
 hard_label: True
 T: 0.5
-p_cutoff: 0.95
-ulb_loss_ratio: 1.0
+dist_align: True
+dist_uniform: True
+per_class: False
+ema_p: 0.999
+ulb_loss_ratio: 1
+n_sigma: 2
 uratio: 7
 ema_m: 0.999
 crop_ratio: 0.875
@@ -28,7 +32,7 @@ layer_decay: 1.0
 amp: True
 clip: 0.0
 use_cat: True
-net: wrn_28_2
+net: wrn_28_2_proto
 net_from_name: False
 data_dir: ./data
 dataset: cifar100
@@ -43,8 +47,11 @@ dist_backend: nccl
 gpu: None
 
 wandb_project: D
-save_name: Dsoft2f-bis
-
-
+save_name: Dsm2
+loss: OnlySupconWeightsOnUnconfident # Supcon&Simclr #OnlySupcon                        #all_withoutsimclr #all_withoutsimclr_withoutunsupce # all #only_unsup (for pretraining, and resume = True)
+pl_temp: .038
+lambda_proto: 1 #only for Weighted supcon loss
+lambda_yup: 1 #only for Weighted supcon loss
+lambda_ydown: .2 #only for Weighted supcon lossal
 
 
