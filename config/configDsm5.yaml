@@ -51,5 +51,5 @@ save_name: Dsm5
 lambda_proto: 1 #only for Weighted supcon loss
 lambda_yup: 1 #only for Weighted supcon loss
 lambda_ydown: .2 #only for Weighted supcon lossal
-
+pl_temp: .038
 
